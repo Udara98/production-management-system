@@ -1,0 +1,357 @@
+@font-face {
+  font-family: "Roboto";
+  src: url("../fonts/Roboto/Roboto-Thin.ttf") format("truetype");
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("../fonts/Roboto/Roboto-ThinItalic.ttf") format("truetype");
+  font-weight: 100;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("../fonts/Roboto/Roboto-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("../fonts/Roboto/Roboto-LightItalic.ttf") format("truetype");
+  font-weight: 300;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("../fonts/Roboto/Roboto-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("../fonts/Roboto/Roboto-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("../fonts/Roboto/Roboto-MediumItalic.ttf") format("truetype");
+  font-weight: 500;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("../fonts/Roboto/Roboto-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("../fonts/Roboto/Roboto-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("../fonts/Roboto/Roboto-Black.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("../fonts/Roboto/Roboto-BlackItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("../fonts/Roboto/Roboto-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+:root {
+  --color-black: #d4d4d4 !important;
+  --bg-color: #bbbbbb !important;
+}
+body {
+  font-family: Roboto;
+}
+
+
+.nav-tabs {
+  display: flex;
+  flex-direction: row;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: rgba(141, 136, 165, 0.1);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  color: rgb(10, 10, 122);
+  border-bottom: 2px solid rgba(12, 8, 32, 0.4);
+}
+
+.nav-tabs .nav-link {
+  color: rgb(99, 98, 98);
+  font-weight: 500;
+  /* border: var(--bs-nav-tabs-border-width) solid var(--bs-nav-tabs-border-color); */
+  border: none;
+}
+
+.form-control,.form-check-input,.form-select{
+  background-color:#ececec;
+}
+
+.cusbutton{
+  color: #f1f1f1;
+  background-color:#2e326d;
+}
+
+.btn-update{
+  background-color: #FD6A4D;
+}
+
+.btn-submit{
+  background-color:#2e326d;
+  width: 101px ;
+
+}
+
+.text-cus-red{
+  color: #E11D48;
+}
+
+.modal-title{
+  color: rgb(10, 10, 122);
+}
+
+.btn-primary{
+  background-color: #4d7fca;
+
+}
+
+.btn-primary:hover{
+  background-color: #3772ca;
+
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.greenLabel {
+  background-color: #b4ebbb;
+  text-align: center;
+  color: #487746;
+  width: 70px;
+  /* padding: 0.2rem; */
+  border-radius: 0.5rem;
+  padding: 0.3rem;
+  margin: 0;
+
+}
+
+.yellowLabel {
+  background-color: #ebd781;
+  text-align: center;
+  color: #5b5f24;
+  width: 70px;
+  /* padding: 0.2rem; */
+  border-radius: 0.5rem;
+  padding: 0.3rem;
+  margin: 0;
+
+}
+
+.redLabel{
+  background-color: #d78383;
+  text-align: center;
+  color: #790000;
+  width: 70px;
+  /* padding: 0.2rem; */
+  border-radius: 0.5rem;
+  margin: 0;
+  padding: 0.3rem;
+
+}
+
+.GrayLabel{
+  background-color: #4B4B4B;
+  text-align: center;
+  color: #151515;
+  width: 70px;
+  /* padding: 0.2rem; */
+  border-radius: 0.5rem;
+  margin: 0;
+  padding: 0.3rem;
+
+}
+div.dt-container .dt-input {
+    margin-right: 0.5rem;
+}
+
+.cusTable_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableProduct_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableSupplier_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableCustomer_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableCusOrder_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableCusPayments_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableIngredient_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableQRequests_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableQuotations_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableSP_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tablePOs_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableGRN_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tablePB_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tablePIs_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableFlavour_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+#tableRecipe_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableCR_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableSR_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableSPR_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableUser_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tableEmployee_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tablePrivilege_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+#tablePTs_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}

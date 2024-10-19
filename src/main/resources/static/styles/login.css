@@ -1,0 +1,32 @@
+
+.divider:after,
+.divider:before {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #eee;
+}
+
+
+.bg-custom{
+    background-color: #ebf0f1;
+}
+
+#logo {
+    width: 80px; /* Default size */
+    height: 80px;
+}
+@media (max-width: 30px) { /* Tablet and mobile sizes */
+    .logo {
+        width: 30px; /* Adjust size for tablets and mobiles */
+    }
+}
+@media (max-width: 40px) { /* Mobile sizes */
+    .logo {
+        width: 40px; /* Adjust size for smaller mobiles */
+    }
+}
+
+#loginBtn{
+    padding: 0.4rem 11rem;
+}

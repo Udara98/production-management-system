@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{fragments/head.html:: headProduct}"></head>
+<body>
+<div class="d-flex">
+<div th:replace="~{fragments/sidebar.html}"></div>
+<div class="flex-grow-1 container-fluid settingsTabContent px-4">
+            <div class="hstack mt-3 mb-3">
+                <h2 class="settingsHeader">Products</h2>
+                <button
+                        class="btn ms-auto me-4 addPrimaryBtn"
+                        data-bs-target="#modalAddProduct"
+                        data-bs-toggle="modal"
+                        type="button"
+                >
+                    <i class="fa-solid fa-plus me-2"></i>
+                    Add Product
+                </button>
+            </div>
+            <table
+                    class="table table-boarderd table-hover table-bordered cusTable mt-2 bg-light"
+                    id="tableProduct"
+            >
+                <thead class="cusTableHead">
+                <th>#</th>
+                <th>Product</th>
+                <th>Product Code</th>
+                <th>Product Name</th>
+                <th>Batch No</th>
+                <th>Sale Price</th>
+                <th>Unit Amount</th>
+                <th>QTY</th>
+                <th>Status</th>
+                <th>Modify</th>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div
+                    class="modal fade"
+                    data-bs-backdrop="static"
+                    data-bs-keyboard="false"
+                    id="modalAddProduct"
+            >
+                <div th:replace="~{fragments/Product/ProductAddForm.html}"  ></div>
+            </div>
+            <div
+                    class="modal fade"
+                    data-bs-backdrop="static"
+                    data-bs-keyboard="false"
+                    id="modalEditProduct"
+            >
+                <div th:replace="~{fragments/Product/ProductEditForm.html}"  ></div>
+            </div>
+    </div>
+</div>
+</body>
+<script src="/script/sidebar.js"></script>
+</html>

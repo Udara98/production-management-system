@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Supplier</title>
+    <!-- Link CSS -->
+    <link
+      href="/Views/bootstrap-5.3.2/css/bootstrap.min.css"
+      rel="stylesheet"
+      />
+      <!-- Link Gobal CSS -->
+      <link rel="stylesheet" href="/css/global.css" />
+    <link rel="stylesheet" href="../../css/supplier/supplierReg.css" />
+  </head>
+
+  <body>
+    <!-- Button trigger modal -->
+    <div class="d-flex justify-content-end">
+      <button
+        class="btn btn-primary mt-5 me-5 rounded"
+        data-bs-toggle="modal"
+        data-bs-target="#registrationForm"
+        type="button"
+      >
+        Add Supplier
+      </button>
+      <!-- Modal -->
+      <div
+        class="modal fade"
+        id="registrationForm"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        tabindex="-1"
+        aria-labelledby="staticBackdropLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title " id="staticBackdropLabel">
+                Supplier Registration
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <ul class="nav nav-tabs d-flex" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button
+                    class="nav-link active"
+                    id="home-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#home-tab-pane"
+                    type="button"
+                    role="tab"
+                    aria-controls="home-tab-pane"
+                    aria-selected="true"
+                  >
+                    Company Details
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button
+                    class="nav-link"
+                    id="profile-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#profile-tab-pane"
+                    type="button"
+                    role="tab"
+                    aria-controls="profile-tab-pane"
+                    aria-selected="false"
+                  >
+                    Ingredients Details
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button
+                    class="nav-link"
+                    id="contact-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#contact-tab-pane"
+                    type="button"
+                    role="tab"
+                    aria-controls="contact-tab-pane"
+                    aria-selected="false"
+                  >
+                    Payment Details
+                  </button>
+                </li>
+              </ul>
+              <div class="tab-content" id="myTabContent">
+                <div
+                  class="tab-pane fade show active"
+                  id="home-tab-pane"
+                  role="tabpanel"
+                  aria-labelledby="home-tab"
+                  tabindex="0"
+                >
+                  <div class="container">
+                    <form action="">
+                      <div class="row firstRow">
+                        <div class="col">
+                          <h6>Company Information</h6>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          <label for="companyName" class="form-label"
+                            >Company Name<span class="text-danger">* </span>
+                          </label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="companyName"
+                            required
+                          />
+                        </div>
+                        <div class="col-md-4">
+                          <label for="registrationNumber" class="form-label"
+                            >Company Registration Number<span
+                              class="text-danger"
+                              >*
+                            </span>
+                          </label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="registrationNumber"
+                            required
+                          />
+                        </div>
+                        <div class="col-md-4">
+                          <label for="address" class="form-label"
+                            >Address<span class="text-danger">* </span>
+                          </label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="address"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div class="row mt-2 contactPerson">
+                        <h6>Contact Person's Information</h6>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          <label for="contactPersonName" class="form-label"
+                            >Name<span class="text-danger">* </span>
+                          </label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="contactPersonName"
+                            required
+                          />
+                        </div>
+                        <div class="col-md-4">
+                          <label for="mobileNumber" class="form-label"
+                            >Mobile Number<span class="text-danger">* </span>
+                          </label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="mobileNumber"
+                            required
+                          />
+                        </div>
+                        <div class="col-md-4">
+                          <label for="email" class="form-label">Email</label>
+                          <input
+                            type="email"
+                            class="form-control"
+                            id="email"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div class="row mt-2">
+                        <div class="col-md-6">
+                          <label for="nic" class="form-label"
+                            >NIC<span class="text-danger">* </span>
+                          </label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="nic"
+                            required
+                          />
+                        </div>
+                        <div class="col-md-6">
+                          <label for="nic" class="form-label"
+                            >Position/ Title</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="nic"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+                <div
+                  class="tab-pane fade"
+                  id="profile-tab-pane"
+                  role="tabpanel"
+                  aria-labelledby="profile-tab"
+                  tabindex="0"
+                >
+                  <div class="container">
+                    <form action="">
+                      <div class="row firstRow">
+                        <div class="col-6">
+                          <label for="ingredientName" class="form-label"
+                            >Ingredient Name<span class="text-danger">* </span>
+                          </label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="ingredientName"
+                            required
+                          />
+                        </div>
+                        <div class="col-6">
+                          <label for="unit" class="form-label"
+                            >Unit<span class="text-danger">* </span>
+                          </label>
+                          <select class="form-select">
+                            <option selected>Select the unit</option>
+                            <option value="kg">Kg</option>
+                            <option value="l">L</option>
+                          </select>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+                <div
+                  class="tab-pane fade"
+                  id="contact-tab-pane"
+                  role="tabpanel"
+                  aria-labelledby="contact-tab"
+                  tabindex="0"
+                >
+                  <div class="container">
+                    <form action="">
+                      <div class="row firstRow">
+                        <div class="col-6">
+                          <label for="accountName" class="form-label"
+                            >Account Name<span class="text-danger">* </span>
+                          </label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="accountName"
+                            required
+                          />
+                        </div>
+                        <div class="col-6">
+                          <label for="accountNum" class="form-label"
+                            >Account Number<span class="text-danger">* </span>
+                          </label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="accountNum"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div class="row mt-3">
+                        <div class="col-6">
+                          <label for="accountName" class="form-label"
+                            >Bank Name<span class="text-danger">* </span>
+                          </label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="bankName"
+                            required
+                          />
+                        </div>
+                        <div class="col-6">
+                          <label for="accountNum" class="form-label"
+                            >Branch<span class="text-danger">* </span>
+                          </label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="branch"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+              <button type="button" class="btn btn-primary">Submit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Link Bootstrap JS -->
+    <script src="/Views/bootstrap-5.3.2/js/bootstrap.min.js"></script>
+  </body>
+</html>

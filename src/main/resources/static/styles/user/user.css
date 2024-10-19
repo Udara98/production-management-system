@@ -1,0 +1,33 @@
+.userActive {
+    background-color: #b4ebbb;
+    text-align: center;
+    color: #487746;
+    width: 70px;
+    /* padding: 0.2rem; */
+    border-radius: 0.5rem;
+    padding: 0.3rem;
+    margin: 0;
+
+}
+
+.userInActive {
+    background-color: #ebd781;
+    text-align: center;
+    color: #5b5f24;
+    width: 70px;
+    /* padding: 0.2rem; */
+    border-radius: 0.5rem;
+    padding: 0.3rem;
+    margin: 0;
+
+}
+
+#btn-user-update{
+    background-color: #FD6A4D;
+}
+
+#btn-user-submit{
+    background-color:#2e326d;
+    width: 101px ;
+
+}

@@ -1,0 +1,129 @@
+<div th:fragment="sidebar" id="sidebarContainer">
+    <div
+            aria-labelledby="offcanvasScrollingLabel"
+            class="offcanvas offcanvas-start show"
+            data-bs-backdrop="false"
+            data-bs-scroll="true"
+            id="offcanvasScrolling"
+            tabindex="-1"
+    >
+        <div class="offcanvas-body">
+            <div class="sidenav d-flex flex-column">
+                <div class="d-flex flex-column align-items-center mb-4" >
+                    <i class="fa-solid fa-circle-user" style="font-size: 80px; color: white"></i>
+                    <div id="user-name" class="mt-2" style="color: white; text-align: center;" >Udara Deshan</div>
+                    <div id="user-role" style="color: white;font-weight: bold;" >Manager</div>
+                </div>
+
+                <div class="row sideItem" onclick="toggleHoverLock(this)">
+                    <a href="/dashboard" style="text-decoration: none; display: flex;">
+                        <div class="col-2 sideIcon">
+                            <i class="fa-solid fa-grip fa-sm"></i>
+                        </div>
+                        <div class="col-10">Dashboard</div>
+                    </a>
+                </div>
+
+                <div class="row sideItem" onclick="toggleHoverLock(this)">
+                    <a href="/product" style="text-decoration: none; display: flex;">
+                        <div class="col-2 sideIcon">
+                            <i class="fa-solid fa-ice-cream"></i>
+                        </div>
+                        <div class="col-10">Products</div>
+                    </a>
+                </div>
+
+                <div class="row sideItem" onclick="toggleHoverLock(this)">
+                    <a href="/customerOrder" style="text-decoration: none; display: flex;">
+                        <div class="col-2 sideIcon">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                        <div class="col-10">Sales</div>
+                    </a>
+                </div>
+
+                <div class="row sideItem" onclick="toggleHoverLock(this)">
+                    <a href="/ingredient" style="text-decoration: none; display: flex;">
+                        <div class="col-2 sideIcon">
+                            <i class="fa-solid fa-cubes-stacked"></i>
+                        </div>
+                        <div class="col-10">Ingredients</div>
+                    </a>
+                </div>
+
+                <div class="row sideItem" onclick="toggleHoverLock(this)">
+                    <a href="/supplier" style="text-decoration: none; display: flex;">
+                        <div class="col-2 sideIcon">
+                            <i class="fa-solid fa-people-group"></i>
+                        </div>
+                        <div class="col-10">Suppliers</div>
+                    </a>
+                </div>
+
+                <div class="row sideItem" onclick="toggleHoverLock(this)">
+                    <a href="/quotation-request" style="text-decoration: none; display: flex;">
+                        <div class="col-2 sideIcon">
+                            <i class="fa-solid fa-file-circle-plus"></i>
+                        </div>
+                        <div class="col-10">Quotation Reqs</div>
+                    </a>
+                </div>
+
+                <div class="row sideItem" onclick="toggleHoverLock(this)">
+                    <a href="/quotation" style="text-decoration: none; display: flex;">
+                        <div class="col-2 sideIcon">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                        </div>
+                        <div class="col-10">Quotations</div>
+                    </a>
+                </div>
+
+                <div class="row sideItem" onclick="toggleHoverLock(this)">
+                    <a href="/purchaseOrder" style="text-decoration: none; display: flex;">
+                        <div class="col-2 sideIcon">
+                            <i class="fa-solid fa-truck-field fa-sm"></i>
+                        </div>
+                        <div class="col-10">Ing Orders</div>
+                    </a>
+                </div>
+
+                <div class="row sideItem" onclick="toggleHoverLock(this)">
+                    <a href="/productionItem" style="text-decoration: none; display: flex;">
+                        <div class="col-2 sideIcon">
+                            <i class="fa-solid fa-city"></i>
+                        </div>
+                        <div class="col-10">Production</div>
+                    </a>
+                </div>
+
+                <div class="row sideItem" onclick="toggleHoverLock(this)">
+                    <a href="/report" style="text-decoration: none; display: flex;">
+                        <div class="col-2 sideIcon">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <div class="col-10">Reports</div>
+                    </a>
+                </div>
+
+                <div class="row sideItem mt-auto" onclick="toggleHoverLock(this)">
+                    <a href="/settings" style="text-decoration: none; display: flex;">
+                        <div class="col-2 sideIcon">
+                            <i class="fa-solid fa-gear"></i>
+                        </div>
+                        <div class="col-10">Settings</div>
+                    </a>
+                </div>
+
+                <div class="row sideItem" onclick="toggleHoverLock(this)">
+                    <a href="/logout" style="text-decoration: none; display: flex;">
+                        <div class="col-2 sideIcon">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </div>
+                        <div class="col-10">Logout</div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

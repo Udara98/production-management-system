@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{fragments/head.html:: headQuotation}"></head>
+<body>
+<div class="d-flex">
+<div th:replace="~{fragments/sidebar.html}"></div>
+<div class="flex-grow-1 container-fluid settingsTabContent px-4">
+    <div class="hstack mt-3 mb-3">
+                <h2 class="settingsHeader">Quotations</h2>
+                <button
+                        class="btn ms-auto me-4 addPrimaryBtn"
+                        data-bs-target="#modalQuotationAdd"
+                        data-bs-toggle="modal"
+                        type="button"
+                >
+                    <i class="fa-solid fa-plus me-2"></i>
+                    Add Quotation
+                </button>
+            </div>
+            <table
+                    class="table table-boarderd table-hover table-bordered bg-light cusTable mt-2"
+                    id="tableQuotations"
+            >
+                <thead class="cusTableHead">
+                <th>#</th>
+                <th>Quotation No</th>
+                <th>Request No</th>
+                <th>Ingredient Code</th>
+                <th>Supplier Reg No</th>
+                <th>Price Per Unit</th>
+                <th>Received Date</th>
+                <th>Deadline</th>
+                <th>Status</th>
+                <th>Modify</th>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div
+                    class="modal fade"
+                    data-bs-backdrop="static"
+                    data-bs-keyboard="false"
+                    id="modalQuotationAdd"
+            >
+                <div th:replace="~{fragments/Quotation/QuotationAddForm.html}"  ></div>
+            </div>
+
+            <div
+                    class="modal fade"
+                    data-bs-backdrop="static"
+                    data-bs-keyboard="false"
+                    id="modalQuotationEdit"
+            >
+                <div th:replace="~{fragments/Quotation/QuotationEditForm.html}"  ></div>
+            </div>
+
+            <div
+                    class="modal fade"
+                    data-bs-backdrop="static"
+                    data-bs-keyboard="false"
+                    id="modalSendPurchaseOrder"
+            >
+                <div th:replace="~{fragments/Quotation/SendPurchaseOrder.html}"  ></div>
+            </div>
+
+        </div>
+</div>
+<script src="/script/quotation.js" ></script>
+</body>
+</html>

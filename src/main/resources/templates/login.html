@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/bootstrap-5.3.2/css/bootstrap.min.css" >
+    <script src="/bootstrap-5.3.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/styles/global.css">
+    <link rel="stylesheet" href="/styles/login.css">
+    <link href="/fontawesome-free-6.4.2-web/css/all.css" rel="stylesheet"/>
+    <title>Log in</title>
+</head>
+<body class="login_body">
+<section class="vh-100">
+    <div class="container-fluid h-100">
+        <div class="row d-flex justify-content-center h-100">
+            <div class="d-flex col-md-9 col-lg-6 col-xl-7 bg-custom align-items-center p-5">
+                <img src="/image/login/login.jpg" class="img-fluid shadow rounded-3" alt="Sample image">
+            </div>
+            <div class="d-flex justify-content-center align-items-center col-lg-6 col-xl-5">
+                <form  action="/login" method="post" class="needs-validation" novalidate>
+                    <div></div>
+
+                    <img src="/image/login/logo.png" class="img-fluid mb-3" id="logo" alt="...">
+                    <div class="d-flex flex-row align-items-center ">
+                        <h4 class="mb-0 fw-bold ">Hey, hello</h4>
+                        <img src="/image/login/highfive.png" class="img-fluid " alt="">
+                    </div>
+                    <p>Enter the information you received while registering. </p>
+                    <div class="divider d-flex align-items-center my-4">
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="login_username" name="username" placeholder="Username ddd" required>
+                        <label for="login_username">Username</label>
+                        <div class="invalid-feedback">Please Enter Username.</div>
+                    </div>
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="login_password" name="password" placeholder="Password" required>
+                        <label for="login_password">Password</label>
+                        <div class="invalid-feedback">Please Enter Password.</div>
+                    </div>
+                    <div class="text-danger fw-medium mb-2 " th:if="${param.error}">
+                        The username or password you entered is incorrect.<i class="fa-solid fa-circle-xmark"></i>
+                    </div>
+                    <button class="btn btn-primary mt-3 fw-medium font-monospace" type="submit" id="loginBtn">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+<script src="/Sweetalert/package/dist/sweetalert2.all.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const forms = document.querySelectorAll('.needs-validation');
+
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    });
+</script>
+</body>
+</html>

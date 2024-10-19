@@ -1,0 +1,32 @@
+.tab-pane {
+  height: 350px;
+}
+
+.firstRow {
+  padding-top: 30px;
+}
+
+.contactPerson {
+  padding-top: 20px;
+}
+
+
+
+.modal-header {
+  border-bottom: none;
+}
+
+.nav-tabs {
+  display: flex;
+  flex-direction: row;
+}
+
+.modal-header {
+  padding: 20px 16px 10px 16px;
+}
+
+#tableSupplier_wrapper{
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}

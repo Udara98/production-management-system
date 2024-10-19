@@ -1,0 +1,120 @@
+body {
+  background-color: rgb(248, 248, 248);
+}
+
+.cusTableHead th{
+  background-color: #d4e2e7 !important;
+}
+
+.settingsTabContent {
+  margin-top: 1rem;
+  margin-left: 225px;
+
+}
+
+.addPrimaryBtn {
+  background-color: #2d1991;
+  color: #f1f1f1;
+  border-radius: 1rem;
+}
+
+.addPrimaryBtn:hover {
+  background-color: #1d0586;
+  color: #f1f1f1;
+}
+
+.editDeleteAll {
+  color: rgb(163, 163, 163);
+  padding-left: 0;
+}
+
+.roleBtn {
+  background-color: rgb(233, 231, 231);
+  color: rgb(12, 11, 11);
+  border: none;
+}
+
+.employeActive {
+  background-color: #b4ebbb;
+  text-align: center;
+  color: #487746;
+  width: 70px;
+  /* padding: 0.2rem; */
+  border-radius: 0.5rem;
+  padding: 0.3rem;
+
+}
+
+.employeInActive {
+  background-color: #ebd781;
+  text-align: center;
+  color: #5b5f24;
+  width: 70px;
+  /* padding: 0.2rem; */
+  border-radius: 0.5rem;
+  padding: 0.3rem;
+
+}
+
+.settingsTableHead {
+  background-color: #1cb631;
+}
+
+#rolesTable td {
+  text-align: center;
+}
+
+.rolesTableUses {
+  text-align: start !important;
+}
+
+#roleUsesCol {
+  width: 12rem;
+}
+.roleCol {
+  width: 11rem;
+}
+
+#searchEmp {
+  border: none;
+  width: 8rem;
+  margin-right: 0.5rem;
+}
+
+#roleSerachinputGroup {
+  width: 2rem;
+}
+
+.roleCatego td {
+  background-color: #d4e2e7;
+}
+
+.roleCatego th {
+  background-color: #d4e2e7;
+}
+
+.roleTable-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+#roleDropDown{
+  margin-bottom:6px ;
+}
+
+
+.roletableRoleName{
+  color: #8e8f85;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+#dropdownMenu{
+  border: none;
+
+}
+
+#dropdownMenu::after{
+  content: none;
+  display: none;
+}

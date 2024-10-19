@@ -1,0 +1,170 @@
+<div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Supplier Registration</h5>
+            <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
+        </div>
+        <div class="modal-body">
+            <form id="supplierEditForm" class="needs-validation">
+                <!--        required mark start-->
+                <div class="row">
+                    <div class="col-12 text-start">
+                        <span class="text-cus-red fw-medium">* required</span>
+                    </div>
+                </div>
+                <!--        required mark start-->
+
+                <!--    Supplier name start-->
+                <div class="row mt-2">
+                    <div class="col">
+                        <label class="form-label fw-medium" for="edit-regNo"
+                        >Supplier Reg No<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="edit-regNo"
+                                type="text"
+                                placeholder="Enter Supplier Reg No"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <label class="form-label fw-medium" for="edit-supplierName">
+                            Supplier name<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="edit-supplierName"
+                                onkeyup="validation(this,'\\b[A-Z][a-zA-Z]*\\s[A-Z][a-zA-Z]*\\s[A-Z][a-zA-Z]*\\b','employee','fullname'); genarateCallingNames();"
+                                type="text"
+                                placeholder="Enter Supplier Name"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="edit-supplierStatus"
+                        >Supplier Status<span class="text-danger"> * </span></label
+                        >
+                        <select
+                                class="form-select"
+                                id="edit-supplierStatus"
+                                onchange="selectDynamicFieldValidator(selectStatus,'','employee','employeestatus_id')"
+                                required
+                        >
+                            <option disabled value="">select status</option>
+                            <option selected value="Active">Active</option>
+                            <option value="InActive">InActive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col">
+                        <label class="form-label fw-medium" for="edit-contactPersonName"
+                        >Contact Person Name<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="edit-contactPersonName"
+                                type="text"
+                                placeholder="Enter Contact Person Name"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="edit-contactNo"
+                        >Contact No<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="edit-contactNo"
+                                type="text"
+                                placeholder="Enter Contact No"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col">
+                        <label class="form-label fw-medium" for="edit-email"
+                        >Email<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="edit-email"
+                                type="email"
+                                placeholder="Enter email"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="edit-joinDate"
+                        >Join Date<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="edit-joinDate"
+                                type="date"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <label class="form-label fw-medium" for="edit-address"
+                    >Address<span class="text-danger"> * </span>
+                    </label>
+                    <input
+                            class="form-control"
+                            id="edit-address"
+                            type="text"
+                            placeholder="Enter address"
+
+                    />
+                    <div class="valid-feedback"></div>
+                    <div class="invalid-feedback">
+                        Please Enter Full name ex: Udara Deshan Udawatte
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <label class="form-label fw-medium" for="edit-note"
+                    >Note<span class="text-danger"> * </span>
+                    </label>
+                    <textarea type="text" class="form-control" id="edit-note" placeholder="Enter a note"
+                              required rows="3"></textarea>
+                    <div class="valid-feedback"></div>
+                    <div class="invalid-feedback">
+                        Please Enter Full name ex: Udara Deshan Udawatte
+                    </div>
+                </div>
+
+                <div th:replace="~{fragments/Supplier/IngredientTransferList.html::edit}"></div>
+                <div class="d-flex justify-content-end mx-4" >
+                    <div>
+                        <button type="reset" class="btn btn-primary mx-2">Reset</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

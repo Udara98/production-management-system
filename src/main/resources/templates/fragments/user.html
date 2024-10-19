@@ -1,0 +1,234 @@
+<div
+        aria-labelledby="users-tab"
+        class="tab-pane fade show active mt-4"
+        id="users-tab-pane"
+        role="tabpanel"
+        tabindex="0"
+>
+    <div class="flex-grow-1 container-fluid ">
+        <div class="hstack mt-3 mb-3">
+            <h4>Users</h4>
+            <button
+                    class="btn ms-auto me-4 addPrimaryBtn"
+                    type="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalUser"
+            >
+                Add User
+            </button>
+        </div>
+        <div class="mt-2">
+            <!-- Start User Table-->
+            <table
+                    class="table table-bordered  table-hover table-bordered cusTable"
+                    id="tableUser" style="width: 100%"
+            >
+                <thead class="cusTableHead">
+                <tr>
+                    <th>#</th>
+                    <th>Employee Name</th>
+                    <th>User Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div  th:fragment="userModal"
+      class="modal modal-lg fade"
+      id="modalUser"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">User Registration</h4>
+                <button
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        type="button"
+                ></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6 vectorImgUser">
+                        <img src="/images/vectors/loginvectoruser.svg" class="h-100 w-100" alt="registrationVector" id="vectorImgUser">
+                    </div>
+                    <div class="col-6">
+                        <form id="userForm" onsubmit="return false" novalidate>
+                            <!-- * select Employee -->
+                            <div class="row mt-1">
+                                <div class="col-4">
+                                    <label class="form-label" for="selectEmployee">Employee</label>
+                                </div>
+                                <div class="col-7 ">
+                                    <select
+                                            class="form-select"
+                                            id="selectEmployee"
+                                            onchange="selectDynamicFieldValidator(selectEmployee,'','user','employee_id')"
+                                            required
+                                    >
+                                        <option selected disabled value="Select Employee">Select Employee</option>
+                                    </select>
+                                    <div class="valid-feedback"></div>
+                                    <div class="invalid-feedback">
+                                        Please Select the Employee
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- * text User Name  -->
+                            <div class="row mt-4">
+                                <div class="col-4">
+                                    <label class="form-label" for="UserName">User Name</label>
+                                </div>
+                                <div class="col-7">
+                                    <input
+                                            class="form-control"
+                                            type="text"
+                                            id="UserName"
+                                            placeholder="Enter User Name"
+                                            onkeyup="validation(this,'\\b[A-Z][a-zA-Z]','user','username')"
+                                            required
+                                    />
+                                    <div class="valid-feedback"></div>
+                                    <div class="invalid-feedback">
+                                        Please Enter User name ex: Udara
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- * text Password  -->
+                            <div class="row mt-4">
+                                <div class="col-4">
+                                    <label class="form-label" for="userPassword">Password</label>
+                                </div>
+                                <div class="col-7 ">
+                                    <input
+                                            class="form-control"
+                                            type="password"
+                                            id="userPassword"
+                                            placeholder="Enter Password"
+                                            onkeyup="validation(this,'^[a-zA-Z0-9]{5,16}$','user','password')"
+                                            required
+                                    />
+                                    <div class="valid-feedback"></div>
+                                    <div class="invalid-feedback">
+                                        Password must be at least 6 characters long.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- * text RePassword -->
+                            <div class="row mt-4">
+                                <div class="col-4">
+                                    <label class="form-label" for="inputRePassword">Re-Password</label>
+                                </div>
+                                <div class="col-7 position-relative">
+                                    <input
+                                            class="form-control"
+                                            type="password"
+                                            placeholder="Enter Re-Password"
+                                            id="inputRePassword"
+                                            onkeyup="passwordRTValidator(this,'userPassword');"
+                                            required
+                                    />
+                                    <div class="valid-feedback"></div>
+                                    <div class="invalid-feedback">
+                                        Passwords do not match
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- * text Email -->
+                            <div class="row mt-4">
+                                <div class="col-4">
+                                    <label class="form-label" for="inputEmail">Email</label>
+                                </div>
+                                <div class="col-7 position-relative">
+                                    <input
+                                            class="form-control"
+                                            type="text"
+                                            id="inputEmail"
+                                            onkeyup="validation(this,'^[a-zA-Z0-9]{5,16}[@][a-z]{3,10}[.][a-z]{2,3}$','user','email')"
+                                            placeholder="Enter Email Address"
+                                            required
+                                    />
+                                    <div class="valid-feedback"></div>
+                                    <div class="invalid-feedback">
+                                        Please Enter Valid Email Address
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- * radio Role -->
+                            <div class="row mt-4">
+                                <div class="col-4">
+                                    <label class="form-label" for="">Role</label>
+                                </div>
+                                <div class="col-7" id="divRoles"></div>
+                            </div>
+
+                            <!-- * checkbox Status -->
+                            <div class="row mt-4">
+                                <div class="col-4">
+                                    <label class="form-label" for="">Status</label>
+                                </div>
+                                <div class="col-7">
+                                    <div class="form-check form-check-inline position-relative">
+                                        <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                id="checkStatus"
+                                                onchange="checkBoxValidator(this, '', 'user', 'status', true, false, document.getElementById('labelStatus'), ' Account is Active', ' Account is Not-Active')"
+                                        />
+                                        <label
+                                                id="labelStatus"
+                                                class="form-check-label"
+                                                for="checkStatus"
+                                        >Account is Active</label>
+                                        <div class="valid-feedback"></div>
+                                        <div class="invalid-feedback">
+                                            Please Check the Status
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr />
+                            <!-- * Button -->
+                            <div class="row mt-3 mb-2">
+                                <div class="col-4">
+                                    <button type="reset" class="btn btn-outline-danger">Clear</button>
+                                </div>
+                                <div class="col-8">
+                                    <button
+                                            class="btn cusbutton"
+                                            id="btn-user-update"
+                                            onclick="buttonUserUpdate()"
+                                    >
+                                        <i class="fa-solid fa-edit me-2"></i>Update
+                                    </button>
+                                    <button
+                                            class="btn cusbutton ms-3"
+                                            id="btn-user-submit"
+                                            onclick="UserSubmit()"
+                                            type="submit"
+                                    >
+                                        <i class="fa-solid fa-plus "></i>Add
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

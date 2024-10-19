@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace = "~{fragments/head.html:: headSettings}"></head>
+<body>
+<div th:replace = "~{fragments/sidebar.html}"></div>
+<div class="d-flex">
+    <div th:replace="~{fragments/sidebar.html}"></div>
+    <div class="flex-grow-1 container-fluid settingsTabContent px-4">
+            <div>
+                <ul class="nav nav-tabs d-flex" id="" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button
+                                aria-controls="po-tab-pane"
+                                aria-selected="true"
+                                class="nav-link active"
+                                data-bs-target="#po-tab-pane"
+                                data-bs-toggle="tab"
+                                id="po-tab"
+                                role="tab"
+                                type="button"
+                        >
+                            Purchase Orders
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button
+                                aria-controls="grn-tab-pane"
+                                aria-selected="false"
+                                class="nav-link"
+                                data-bs-target="#grn-tab-pane"
+                                data-bs-toggle="tab"
+                                id="grn-tab"
+                                role="tab"
+                                type="button"
+                        >
+                            Good Receive Notes(GRN)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button
+                                aria-controls="sp-tab-pane"
+                                aria-selected="false"
+                                class="nav-link"
+                                data-bs-target="#sp-tab-pane"
+                                data-bs-toggle="tab"
+                                id="sp-tab"
+                                role="tab"
+                                type="button"
+                        >
+                            Supplier Payments
+                        </button>
+                    </li>
+
+                </ul>
+            </div>
+            <div class="tab-content" id="myTabContent">
+                <div th:replace = "~{fragments/IngOrders/purchaseOrder.html}"></div>
+                <div th:replace = "~{fragments/IngOrders/grn.html}"></div>
+                <div th:replace = "~{fragments/IngOrders/supplierPayment.html}"></div>
+
+            </div>
+        </div>
+</div>
+<script src="/script/purchaseOrder.js" ></script>
+<script src="/script/supplierPayment.js" ></script>
+<script src="/script/grn.js" ></script>
+</body>
+</html>

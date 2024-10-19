@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{fragments/head.html:: headQRequest}"></head>
+<body>
+<div class="d-flex">
+    <div th:replace="~{fragments/sidebar.html}"></div>
+    <div class="flex-grow-1 container-fluid settingsTabContent px-4">
+        <div class="hstack mt-3 mb-3">
+                <h2 class="settingsHeader ">Quotation Requests</h2>
+    </div>
+            <table
+                    class="table table-boarderd table-hover table-bordered bg-light cusTable mt-2"
+                    id="tableQRequests"
+            >
+                <thead class="cusTableHead">
+                <th>#</th>
+                <th>Request No</th>
+                <th>Ingredient Code</th>
+                <th>Requested Date</th>
+                <th>Suppliers</th>
+                <th>Status</th>
+                <th>Modify</th>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{fragments/head.html:: headPrivilege}"></head>
+<body>
+<div th:replace="~{fragments/sidebar.html}"></div>
+<div class="container-fluid settingsTabContent">
+    <div class="row">
+        <div class="col-2"></div>
+        <div class="col-10">
+            <div class="hstack mt-3 mb-3">
+                <h2 class="settingsHeader me-auto text-start">Privilege</h2>
+                <button
+                        class="btn ms-auto me-4 addUserBtn"
+                        data-bs-target="#modalPrivilegeAdd"
+                        data-bs-toggle="modal"
+                        type="button"
+                >
+                    Add Privilege
+                </button>
+            </div>
+            <table
+                    class="table table-boarderd table-hover table-bordered bg-light cusTable mt-2"
+                    id="tablePrivilege"
+            >
+                <thead class="cusTableHead">
+                <th>#</th>
+                <th>Role</th>
+                <th>Module</th>
+                <th>Select</th>
+                <th>Insert</th>
+                <th>Update</th>
+                <th>Delete</th>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div
+                    class="modal fade"
+                    data-bs-backdrop="static"
+                    data-bs-keyboard="false"
+                    id="modalPrivilegeAdd"
+            >
+                <div th:replace="~{/fragments/privilege/privilegeeditform.html}"  ></div>
+            </div>
+
+            <div
+                    class="modal fade"
+                    data-bs-backdrop="static"
+                    data-bs-keyboard="false"
+                    id="modalPrivilegeEdit"
+            >
+                <div th:replace="~{/fragments/privilege/privilegeeditform.html}"  ></div>
+            </div>
+
+<!--            <div-->
+<!--                    class="modal fade"-->
+<!--                    data-bs-backdrop="static"-->
+<!--                    data-bs-keyboard="false"-->
+<!--                    id="modalSendPurchaseOrder"-->
+<!--            >-->
+<!--                <div th:replace="~{fragments/Quotation/SendPurchaseOrder.html}"  ></div>-->
+<!--            </div>-->
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

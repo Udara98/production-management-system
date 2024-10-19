@@ -1,0 +1,154 @@
+<div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Add New Product</h5>
+            <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
+        </div>
+        <div class="modal-body">
+            <form id="productAddForm" class="needs-validation">
+                <div class="mb-3">
+                    <div style="background-color:#E9EAEC;width: 20vh;height: 20vh;border: 1px solid #C7C9CE; ">
+                        <input
+                                class="form-control"
+                                id="add-product-photo"
+                                type="file"
+                                accept="image/*" style="display: none "
+                        />
+                        <div id="img-container"></div>
+                        <label id="photo-label" class="form-label fw-medium" for="add-product-photo" style="width: 100%;height: 100%;display: flex; flex-direction: column; justify-content: center;align-items: center;cursor: pointer">
+                            <i class="fa-solid fa-camera mb-3" style="font-size: 20px"></i>
+                            <span>Product Image</span>
+                        </label>
+
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add_product_batch"
+                        >Batch No<span class="text-danger"> * </span></label
+                        >
+                        <select id="add_product_batch" class="form-select">
+                            <option selected>Select Batch</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add-product-name"
+                        >Product Name<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="add-product-name"
+                                type="text"
+                                placeholder="Enter Product Name"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add-product-unitSize"
+                        >Unit Size<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="add-product-unitSize"
+                                type="number"
+                                placeholder="Enter Product Name"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add-product-unitType">Unit Type<span
+                                class="text-danger"> * </span></label>
+                        <select id="add-product-unitType" class="form-select">
+                            <option selected value="ML">ML</option>
+                            <option value="L">L</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add-product-qty"
+                        >Quantity<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="add-product-qty"
+                                type="number"
+                                placeholder="Enter Quantity"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add-product-rop"
+                        >ROP<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="add-product-rop"
+                                type="number"
+                                placeholder="Enter Re-Order Point"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add-product-roq"
+                        >ROQ<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="add-product-roq"
+                                type="number"
+                                placeholder="Enter Re-Order Quantity"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add-product-price"
+                        >Sale Price<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="add-product-price"
+                                type="number"
+                                placeholder="Enter Sale Price"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label for="add-product-note" class="form-label">Note</label>
+                    <textarea type="text" class="form-control" id="add-product-note" placeholder="Enter a note"
+                              required rows="3"></textarea>
+                </div>
+                <div class="d-flex justify-content-end mt-5">
+                    <div>
+                        <button class="btn btn-secondary mx-2 "
+                                data-bs-dismiss="modal"
+                                type="button">Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

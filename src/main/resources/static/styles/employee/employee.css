@@ -1,0 +1,34 @@
+.status-working{
+    background-color: #b4ebbb;
+    text-align: center;
+    color: #487746;
+    width: 70px;
+    border-radius: 0.5rem;
+    margin: 0;
+    padding: 0.3rem;
+
+}
+
+.status-resign{
+    background-color: #ebd781;
+    text-align: center;
+    color: #5b5f24;
+    width: 70px;
+    border-radius: 0.5rem;
+    margin: 0;
+    padding: 0.3rem;
+
+}
+
+.status-delete{
+    background-color: #d78383;
+    text-align: center;
+    color: #790000;
+    width: 70px;
+    /* padding: 0.2rem; */
+    border-radius: 0.5rem;
+    margin: 0;
+    padding: 0.3rem;
+
+}
+

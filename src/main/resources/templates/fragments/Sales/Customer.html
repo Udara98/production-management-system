@@ -1,0 +1,55 @@
+<div
+        aria-labelledby="cus-tab"
+        class="tab-pane fade"
+        id="cus-tab-pane"
+        role="tabpanel"
+        tabindex="2"
+>
+    <div class="flex-grow-1 container-fluid ">
+        <div class="hstack mt-3 mb-3 ">
+            <h2 class="settingsHeader">Customer</h2>
+            <button
+                    class="btn ms-auto me-4 addPrimaryBtn"
+                    data-bs-target="#modalAddCustomer"
+                    data-bs-toggle="modal"
+                    type="button"
+            >
+                <i class="fa-solid fa-plus me-2"></i>
+                Add New Customer
+            </button>
+        </div>
+    </div>
+    <table
+            class="table table-boarderd table-hover table-bordered bg-light cusTable mt-2"
+            id="tableCustomer"
+    >
+        <thead class="cusTableHead">
+        <th>#</th>
+        <th>Reg No</th>
+        <th>Customer Name</th>
+        <th>NIC</th>
+        <th>Mobile No</th>
+        <th>Address</th>
+        <th>Company Name</th>
+        <th>Customer State</th>
+        <th>Modify</th>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <div
+            class="modal fade"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+            id="modalAddCustomer"
+    >
+        <div th:replace="~{fragments/Sales/Customer/CustomerAddForm.html}"  ></div>
+    </div>
+    <div
+            class="modal fade"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+            id="modalEditCustomer"
+    >
+        <div th:replace="~{fragments/Sales/Customer/CustomerEditForm.html}"  ></div>
+    </div>
+</div>

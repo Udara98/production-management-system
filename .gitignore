@@ -1,0 +1,12 @@
+New.sql
+adwinscom.mwb
+adwinscomOverall.mwb
+.gradle
+build
+.idea
+/src/main/resources/static/productImages/
+.idea/gradle.xml
+.gradle/buildOutputCleanup/buildOutputCleanup.lock
+.gradle/8.5/fileHashes/fileHashes.lock
+.gradle/8.5/executionHistory/executionHistory.lock
+src/main/resources/application.properties

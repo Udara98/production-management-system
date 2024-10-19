@@ -1,0 +1,39 @@
+<div
+        aria-labelledby="pb-tab"
+        class="tab-pane fade"
+        id="pb-tab-pane"
+        role="tabpanel"
+        tabindex="2"
+>
+    <div class="flex-grow-1 container-fluid ">
+        <div class="hstack mt-3 mb-3 ">
+            <h2 class="settingsHeader ">Production Batch</h2>
+        </div>
+    </div>
+    <table
+            class="table table-boarderd table-hover table-bordered bg-light cusTable mt-2"
+            id="tablePB"
+    >
+        <thead class="cusTableHead">
+        <th>#</th>
+        <th>Batch No</th>
+        <th>Production Item No</th>
+        <th>Manufacture Date</th>
+        <th>Expire Date</th>
+        <th>Available QTY</th>
+        <th>Damaged QTY</th>
+        <th>Status</th>
+        <th>Modify</th>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <div
+            class="modal fade"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+            id="modalEditPB"
+    >
+        <div th:replace="~{fragments/Production/Batch/EditBatchForm.html}"  ></div>
+    </div>
+</div>

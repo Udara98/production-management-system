@@ -1,0 +1,88 @@
+<div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Edit Recipe</h5>
+            <button
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    type="button"
+            ></button>
+        </div>
+        <div class="modal-body ">
+            <form id="recipeEditForm" class="needs-validation">
+                <div class="row mt-3">
+                    <div class="col">
+                        <div class="col">
+                            <label class="form-label fw-medium" for="edit-recipe-name"
+                            >Recipe Name<span class="text-danger"> * </span>
+                            </label>
+                            <input
+                                    class="form-control"
+                                    id="edit-recipe-name"
+                                    type="text"
+                            />
+                            <div class="valid-feedback"></div>
+                            <div class="invalid-feedback">
+                                Please Enter Full name ex: Udara Deshan Udawatte
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="edit-recipe-status">Status<span class="text-danger"> * </span></label>
+                        <select id="edit-recipe-status" class="form-select">
+                            <option selected value="Active">Active</option>
+                            <option value="InActive">In Active</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex-lg-row row mt-4 mb-3 align-items-center justify-content-center">
+                    <div class="col">
+                        <label class="form-label fw-medium" for="edit-recipe-ing-code">Ingredient Code</label>
+                        <select id="edit-recipe-ing-code" class="form-select">
+                            <option selected>Select Ingredient</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="edit-recipe-ing-name">
+                            Ingredient Name
+                        </label>
+                        <input
+                                class="form-control"
+                                id="edit-recipe-ing-name"
+                                type="text"
+                                placeholder="Ingredient Name"
+                                disabled
+                        />
+                    </div>
+                    <div class="col">
+                        <label for="edit-recipe-quantity" class="form-label">Quantity</label>
+                        <input type="number" class="form-control" id="edit-recipe-quantity">
+                    </div>
+                    <div class="col">
+                        <label for="edit-recipe-unitType" class="form-label">Unit Type</label>
+                        <select class="form-select" id="edit-recipe-unitType">
+                            <option value="KG" selected>KG</option>
+                            <option value="G">G</option>
+                            <option value="L">L</option>
+                            <option value="MG">MG</option>
+                        </select>
+                    </div>
+                    <div class="col mt-4">
+                        <button type="button" id="edit-recipe-add-btn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add</button>
+
+                    </div>
+                </div>
+                <div id="edit-recipe-items" class="my-4" >
+                </div>
+                <div class="d-flex justify-content-end mx-4 mt-5" >
+                    <div>
+                        <button  class="btn btn-secondary mx-2 "
+                                 data-bs-dismiss="modal"
+                                 type="reset">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

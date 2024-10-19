@@ -1,0 +1,48 @@
+
+<div
+        aria-labelledby="po-tab"
+        class="tab-pane fade show active"
+        id="po-tab-pane"
+        role="tabpanel"
+        tabindex="0"
+>
+    <div class="flex-grow-1 container-fluid ">
+    <div class="hstack mt-3 mb-3 ">
+        <h2 class="settingsHeader">Purchase Orders</h2>
+    </div>
+    <table
+            class="table table-boarderd table-hover table-bordered bg-light cusTable mt-2"
+            id="tablePOs"
+    >
+        <thead class="cusTableHead">
+        <th>#</th>
+        <th>GRN</th>
+        <th>Quotation No</th>
+        <th>Total</th>
+        <th>Required Date</th>
+        <th>Status</th>
+        <th>Modify</th>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <div
+            class="modal fade"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+            id="modalViewPO"
+    >
+        <div th:replace="~{fragments/IngOrders/PurchaseOrder/PurchaseOrderVIew.html}"  ></div>
+    </div>
+
+    <div
+            class="modal fade"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+            id="modalPOEdit"
+    >
+        <div th:replace="~{fragments/IngOrders/PurchaseOrder/PurchaseOrderEdit.html}"  ></div>
+    </div>
+
+</div>
+</div>

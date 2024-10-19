@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <head th:fragment ="headSettings">
+        <meta charset="UTF-8"/>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+        <title th:text = "${title}"></title>
+        <!-- Link Bootstrap min -->
+        <link
+                href="/src/main/resources/static/bootstrap-5.3.2/css/bootstrap.min.css"
+                rel="stylesheet"
+        />
+        <!-- Link Global CSS -->
+        <link href="/src/main/resources/static/styles/global.css" rel="stylesheet"/>
+    
+        <!-- Link custom settingsCss file -->
+        <link href="/src/main/resources/static/styles/settings/settings.css" rel="stylesheet"/>
+    
+        <!--    link Employee CSS-->
+        <link href="/src/main/resources/static/styles/employee/employee.css" rel="stylesheet">
+    
+        <!--    link User CSS-->
+        <link href="/src/main/resources/static/styles/user/user.css" rel="stylesheet">
+        <link href="/src/main/resources/static/styles/index.css" rel="stylesheet"/>
+        <link
+                href="/src/main/resources/static/fontawesome-free-6.4.2-web/css/all.css"
+                rel="stylesheet"
+        />
+        <!--    Link JQuery-->
+        <script src="/src/main/resources/static/script/jQuery%20v3.7.1.js"></script>
+    
+        <!--    LInk Bootstrap file-->
+        <script src="/src/main/resources/static/bootstrap-5.3.2/js/bootstrap.bundle.js"></script>
+    
+        <!--    Link common js file-->
+        <script src="/src/main/resources/static/script/common.js"></script>
+    
+        <!--link table common function js file-->
+        <script src="/src/main/resources/static/script/tableCommonFunction.js"></script>
+    
+        <!--  link employee js-->
+        <script src="/src/main/resources/static/script/employee.js"></script>
+    
+        <!--  link user js-->
+        <script src="/src/main/resources/static/script/user.js"></script>
+    
+        <!-- Link Validation js-->
+        <script src="/src/main/resources/static/script/validationFunction.js"></script>
+    
+        <!--    Link Sweetalert-->
+        <script src="/src/main/resources/static/Sweetalert/package/dist/sweetalert2.all.min.js"></script>    
+</head>
+<body>
+    <div
+            aria-labelledby="employee-tab"
+            class="tab-pane fade"
+            id="employee-tab-pane"
+            role="tabpanel"
+            tabindex="3"
+    >
+        <div class="container-fluid settingsTabContent">
+            <div class="hstack mt-3 mb-3">
+                <h4> Employees</h4>
+                <button
+                        class="btn ms-auto me-4 addUserBtn"
+                        data-bs-target="#modalEmployeeAdd"
+                        data-bs-toggle="modal"
+                        type="button"
+                >
+                    Add employee
+                </button>
+            </div>
+            <!-- Employee table area start-->
+            <!-- Employee table start -->
+            <table
+                    class="table table-boarderd table-hover table-bordered cusTable mt-2"
+                    id="tableEmployee"
+            >
+                <thead class="cusTableHead">
+                <th>#</th>
+                <th>Emp Num</th>
+                <th>Full name</th>
+                <th>Nic</th>
+                <th>Email</th>
+                <th>User account</th>
+                <th>Mobile</th>
+                <th>Designation</th>
+                <th>Status</th>
+                <th>Modify</th>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <!--table end-->
+            <!--  table area end-->
+    
+            <!--  employee add modal start-->
+            <div
+                    class="modal"
+                    data-bs-backdrop="static"
+                    data-bs-keyboard="false"
+                    id="modalEmployeeAdd"
+            >
+                <!-- <div class="modal-dialog modal-lg"> -->
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Employee Registration</h5>
+                            <button
+                                    class="btn-close"
+                                    data-bs-dismiss="modal"
+                                    type="button"
+                            ></button>
+                        </div>
+                        <div class="modal-body">
+                            <!--            form start-->
+                            <form id="formEmployee" onsubmit="return false" class="needs-validation">
+                                <!--        required mark start-->
+                                <div class="row">
+                                    <div class="col-12 text-start">
+                                  <span class="text-cus-red fw-medium"
+                                  >* required</span
+                                  >
+                                    </div>
+                                </div>
+                                <!--        required mark start-->
+    
+                                <!--    full name start-->
+                                <div class="row mt-2">
+                                    <div class="col-6">
+                                        <label
+                                                class="form-label fw-medium"
+                                                for="textItemCode"
+                                        >Full name<span class="text-danger"> * </span>
+                                        </label>
+                                        <input
+                                                class="form-control"
+                                                id="textFullName"
+                                                onkeyup="validation(this,'\\b[A-Z][a-zA-Z]*\\s[A-Z][a-zA-Z]*\\s[A-Z][a-zA-Z]*\\b','employee','fullname'); genarateCallingNames();"
+                                                type="text"
+                                                placeholder="Enter Full Name"
+                                        />
+                                        <div class="valid-feedback"></div>
+                                        <div class="invalid-feedback">
+                                            Please Enter Full name ex: Udara Deshan Udawatte
+                                        </div>
+                                    </div>
+                                    <!--        full name end-->
+                                    <div class="col-6">
+                                        <label
+                                                class="form-label fw-medium"
+                                                for="txtCallingName"
+                                        >Calling Name<span class="text-danger">
+                                      *
+                                    </span></label
+                                        >
+                                        <input
+                                                class="form-control"
+                                                id="txtCallingName"
+                                                list="callingNames"
+                                                onkeyup="textCallingNameValidator(this)"
+                                                placeholder="Enter Calling Name"
+                                                type="text"
+                                        />
+                                        <div class="valid-feedback"></div>
+                                        <div class="invalid-feedback">
+                                            Please Select Calling Name
+                                        </div>
+                                        <datalist id="callingNames"> </datalist>
+                                    </div>
+                                </div>
+    
+                                <!--        calling name nic gender dob start-->
+                                <div class="row mt-3">
+                                    <div class="col-4">
+                                        <label class="form-label fw-medium" for="txtNic"
+                                        >Nic<span class="text-danger"> * </span></label
+                                        >
+                                        <input
+                                                class="form-control"
+                                                id="txtNic"
+                                                onkeyup="validation(this,'(^[0-9]{9}[VvXx]$)|(^[0-9]{12}$)','employee','nic')"
+                                                placeholder="Enter NIC"
+                                                type="text"
+                                        />
+                                        <div class="valid-feedback"></div>
+                                        <div class="invalid-feedback">
+                                            Please Enter Valid NIC
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="row">
+                                            <label
+                                                    class="form-label fw-medium"
+                                                    for="radioMale"
+                                            >
+                                                Gender<span class="text-danger"> *</span>
+                                            </label>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div class="form-check form-check-inline">
+                                                    <input
+                                                            class="form-check-input"
+                                                            id="radioMale"
+                                                            name="gender"
+                                                            onchange="radioValidator(radioMale,'','employee','gender')"
+                                                            type="radio"
+                                                            value="male"
+                                                    />
+                                                    <label
+                                                            class="form-check-label fw-medium"
+                                                            for="radioMale"
+                                                    >
+                                                        Male
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="form-check form-check-inline">
+                                                    <input
+                                                            class="form-check-input"
+                                                            id="radioFemale"
+                                                            name="gender"
+                                                            onchange="radioValidator(radioFemale,'','employee','gender')"
+                                                            type="radio"
+                                                            value="female"
+                                                    />
+    
+                                                    <label
+                                                            class="form-check-label fw-medium"
+                                                            for="radioFemale"
+                                                    >
+                                                        Female
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+    
+                                    <div class="col-4">
+                                        <label
+                                                class="form-label fw-medium"
+                                                for="dateOfBirth"
+                                        >
+                                            Date of Birth
+                                            <span class="text-danger"> *</span></label
+                                        >
+                                        <input
+                                                class="form-control"
+                                                id="dateOfBirth"
+                                                onchange="dateFeildValidator(dateOfBirth,'','employee','dob')"
+                                                type="date"
+                                        />
+                                        <div class="valid-feedback"></div>
+                                        <div class="invalid-feedback">
+                                            Please Select Date of Birth
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--        calling name nic gender dob end-->
+    
+                                <!--        email mobile land start-->
+                                <div class="row mt-3">
+                                    <div class="col-4">
+                                        <label
+                                                class="form-label fw-medium"
+                                                for="textEmail"
+                                        >
+                                            Email <span class="text-danger"> *</span>
+                                        </label>
+                                        <div class="input-group">
+                                    <span class="input-group-text">
+                                      <i class="fa-solid fa-at"></i
+                                      ></span>
+                                            <input
+                                                    class="form-control"
+                                                    id="textEmail"
+                                                    onkeyup="validation(this,'^[A-Za-z0-9\\-\\_]{6,20}[@][a-z]{3,10}[.][a-z]{2,3}$','employee','email')"
+                                                    placeholder="Enter Email"
+                                                    type="email"
+                                            />
+                                            <div class="valid-feedback"></div>
+                                            <div class="invalid-feedback">
+                                                Please Enter Valid Email Address
+                                            </div>
+                                        </div>
+                                    </div>
+    
+                                    <div class="col-4">
+                                        <label
+                                                class="form-label fw-medium"
+                                                for="textMobile"
+                                        >
+                                            Mobile Number
+                                            <span class="text-danger"> * </span></label
+                                        >
+                                        <div class="input-group">
+                                    <span class="input-group-text">
+                                      <i class="fa-solid fa-mobile"></i>
+                                    </span>
+                                            <input
+                                                    class="form-control"
+                                                    id="textMobile"
+                                                    onkeyup="validation(this,'^[0][7][01245678][0-9]{7}$','employee','mobile')"
+                                                    placeholder="Enter Mobile Number"
+                                                    required
+                                                    type="text"
+                                            />
+                                            <div class="valid-feedback"></div>
+                                            <div class="invalid-feedback">
+                                                Please Enter Valid Mobile Number
+                                            </div>
+                                        </div>
+                                    </div>
+    
+                                    <div class="col-4">
+                                        <label class="form-label fw-medium"
+                                        >Land Number
+                                            <span class="text-cus-red"
+                                            >(optional)</span
+                                            ></label
+                                        >
+                                        <div class="input-group">
+                                    <span class="input-group-text">
+                                      <i class="fa-solid fa-phone-volume"></i>
+                                    </span>
+                                            <input
+                                                    class="form-control"
+                                                    id="textLand"
+                                                    onkeyup="validation(this,'^[0][1][01245678][0-9]{7}$','employee', 'landno')"
+                                                    placeholder="Enter Land Number"
+                                                    type="text"
+                                            />
+                                            <div class="valid-feedback"></div>
+                                            <div class="invalid-feedback">
+                                                Please Enter Valid Land Number
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--        email mobile land end-->
+    
+                                <!--        address note start-->
+                                <div class="row mt-3">
+                                    <div class="col-6 form-floating">
+                                  <textarea
+                                          class="form-control"
+                                          id="textAddress"
+                                          onkeyup="validation(this,'^.*','employee','address')"
+                                          placeholder="Enter address"
+                                  ></textarea>
+                                        <div class="valid-feedback"></div>
+                                        <div class="invalid-feedback">
+                                            Please Enter Valid Address
+                                        </div>
+                                        <label
+                                                class="form-label fw-medium"
+                                                for="textAddress"
+                                        >
+                                            Address <span class="text-danger">* </span>
+                                        </label>
+                                    </div>
+    
+                                    <div class="col-6">
+                                        <div class="form-floating">
+                                    <textarea
+                                            class="form-control"
+                                            id="textNote"
+                                            onkeyup="validation(this,'^.*','employee','note')"
+                                            placeholder="Enter note"
+                                    ></textarea>
+                                            <div class="valid-feedback"></div>
+                                            <div class="invalid-feedback">
+                                                Please Select Calling Name
+                                            </div>
+                                            <label
+                                                    class="form-label fw-medium"
+                                                    for="textNote"
+                                            >
+                                                Note
+                                                <span class="text-cus-red">(optional)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--        address note end-->
+    
+                                <!--        status designation civil status start-->
+                                <div class="row mt-3">
+                                    <div class="col-4">
+                                        <label
+                                                class="form-label fw-medium"
+                                                for="checkStatus"
+                                                id="checkStatusLabel"
+                                        >
+                                            Status
+                                            <span class="text-danger">* </span>
+                                        </label>
+                                        <select
+                                                class="form-select"
+                                                id="selectStatus"
+                                                onchange="selectDynamicFieldValidator(selectStatus,'','employee','employeestatus_id')"
+                                                required
+                                        >
+                                            <option disabled value="">select status</option>
+                                            <option selected value="working">
+                                                Working
+                                            </option>
+                                            <option value="resign">Resign</option>
+                                        </select>
+                                        <div class="valid-feedback"></div>
+                                        <div class="invalid-feedback">
+                                            Please Select Status
+                                        </div>
+                                    </div>
+    
+                                    <div class="col-4">
+                                        <label
+                                                class="form-label fw-medium"
+                                                for="selectDesignation"
+                                        >
+                                            Designation<span class="text-danger">* </span>
+                                        </label>
+                                        <select
+                                                class="form-select"
+                                                id="selectDesignation"
+                                                onchange="selectDynamicFieldValidator(selectDesignation,'','employee','designation_id')"
+                                                required
+                                        ></select>
+                                        <div class="valid-feedback"></div>
+                                        <div class="invalid-feedback">
+                                            Please Select Designation
+                                        </div>
+                                    </div>
+    
+                                    <div class="col-4">
+                                        <label
+                                                class="form-label fw-medium"
+                                                for="selectCivilStatus"
+                                        >
+                                            Civil status
+                                            <span class="text-danger">* </span>
+                                        </label>
+                                        <select
+                                                class="form-select"
+                                                id="selectCivilStatus"
+                                                onchange="selectFieldValidator(selectCivilStatus, '','employee','civilstatus')"
+                                                required
+                                        >
+                                            <option disabled selected value="">
+                                                Select Civil Status
+                                            </option>
+                                            <option value="single">Single</option>
+                                            <option value="married">Married</option>
+                                        </select>
+                                        <div class="valid-feedback"></div>
+                                        <div class="invalid-feedback">
+                                            Please Select Civill Status
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--        status designation civil status end-->
+    
+                                <!--        buttons start-->
+                                <div class="row mt-3 mb-2">
+                                    <div class="col-1">
+                                        <button
+                                                type="reset"
+                                                class="btn btn-outline-danger"
+                                        >
+                                            Clear
+                                        </button>
+                                    </div>
+                                    <div class="col-7"></div>
+                                    <div class="col-4">
+                                        <button
+                                                class="btn cusbutton"
+                                                id="btn-emp-update"
+                                                onclick="buttonEmployeeUpdate()"
+                                                type="submit"
+                                        >
+                                            <i class="fa-solid fa-edit me-2"></i>Update
+                                        </button>
+                                        <button
+                                                class="btn cusbutton ms-4"
+                                                id="btn-emp-submit"
+                                                onclick="employeeSubmit()"
+                                                type="submit"
+                                        >
+                                            <i class="fa-solid fa-plus me-2"></i>Add
+                                        </button>
+                                    </div>
+                                </div>
+                                <!--        buttons end-->
+                            </form>
+                            <!--            form start-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div
+                aria-labelledby="billing-tab"
+                class="tab-pane fade"
+                id="billing-tab-pane"
+                role="tabpanel"
+                tabindex="0"
+        >
+            Billing
+        </div>
+        <div
+                aria-labelledby="profile-tab"
+                class="tab-pane fade"
+                id="profile-tab-pane"
+                role="tabpanel"
+                tabindex="0"
+        >
+            Profile
+        </div>
+    </div>
+    </div>
+</body>
+</html>

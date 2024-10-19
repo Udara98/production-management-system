@@ -1,0 +1,50 @@
+<div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Edit GRN</h5>
+            <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
+        </div>
+        <div class="modal-body">
+            <form id="grnEditForm" class="needs-validation">
+                <div class="row mt-2">
+                    <div class="col">
+                        <label class="form-label fw-medium" for="edit_grn_poNo"
+                        >Purchase Order No<span class="text-danger"> * </span></label
+                        >
+                        <input class="form-control" id="edit_grn_poNo" type="text" disabled/>
+
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="edit-grn-tot">Total Amount</label>
+                        <input class="form-control" id="edit-grn-tot" type="text" disabled/>
+                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col">
+                        <label class="form-label fw-medium" for="edit-grn-recDate">Received Date<span class="text-danger"> * </span></label>
+                        <input class="form-control" id="edit-grn-recDate" type="date" />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="edit-grn-status">GRN Status<span class="text-danger"> * </span></label>
+                        <select id="edit-grn-status" class="form-select">
+                            <option selected value="Pending">Pending</option>
+                            <option  value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-4" >
+                    <div>
+                        <button  class="btn btn-secondary mx-2"
+                                 data-bs-dismiss="modal"
+                                 type="button">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,87 @@
+<div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Make a New Batch</h5>
+            <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
+        </div>
+        <div class="modal-body">
+            <form id="makeNewBatchForm" class="needs-validation">
+                <div class="d-flex row mt-2 align-items-center ">
+                    <div class="col-9">
+                        <label class="form-label fw-medium" for="add-batchSize">Batch Size(L)<span class="text-danger"> * </span></label>
+                        <input class="form-control" id="add-batchSize" type="number" placeholder="Enter Batch Size" />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                    </div>
+                    <div class="col">
+                        <button id="check-btn" class="btn btn-primary mt-4 mx-2 " type="button">Check Ingredients</button>
+                    </div>
+                </div>
+                <div id="check-result"></div>
+                <div style="display:none" id="batch-add-form">
+                    <div class="row mt-4">
+                        <div class="col">
+                            <label class="form-label fw-medium" for="add-bt-mnf">Manufacture Date<span class="text-danger"> * </span></label>
+                            <input class="form-control" id="add-bt-mnf" type="date" />
+                            <div class="valid-feedback"></div>
+                            <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        </div>
+                        <div class="col">
+                            <label class="form-label fw-medium" for="add-bt-exp">Expire Date<span class="text-danger"> * </span></label>
+                            <input class="form-control" id="add-bt-exp" type="date" />
+                            <div class="valid-feedback"></div>
+                            <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        </div>
+                        <div class="col">
+                            <label class="form-label fw-medium" for="add-bt-status">Batch Status<span class="text-danger"> * </span></label>
+                            <select id="add-bt-status" class="form-select">
+                                <option selected value="InProduction">In Production</option>
+                                <option value="ProductionDone">Production Done</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col">
+                            <label class="form-label fw-medium" for="add-bt-ingCost">Ing Cost<span class="text-danger"> * </span></label>
+                            <input class="form-control" id="add-bt-ingCost" type="text" placeholder="Enter Ingredient Cost" disabled />
+                            <div class="valid-feedback"></div>
+                            <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        </div>
+                        <div class="col">
+                            <label class="form-label fw-medium" for="add-bt-labourCost">Labour Cost<span class="text-danger"> * </span></label>
+                            <input class="form-control" id="add-bt-labourCost" type="number" placeholder="Enter Labour Cost" />
+                            <div class="valid-feedback"></div>
+                            <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        </div>
+                        <div class="col">
+                            <label class="form-label fw-medium" for="add-bt-utilCost">Utility and Other Costs<span class="text-danger"> * </span></label>
+                            <input class="form-control" id="add-bt-utilCost" type="number" placeholder="Enter Utility Costs" />
+                            <div class="valid-feedback"></div>
+                            <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        </div>
+                        <div class="col">
+                            <label class="form-label fw-medium" for="add-bt-total">Total Cost<span class="text-danger"> * </span></label>
+                            <input class="form-control" id="add-bt-total" type="text" placeholder="Total Cost" disabled />
+                            <div class="valid-feedback"></div>
+                            <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col">
+                            <label class="form-label fw-medium" for="add-bt-note">Note</label>
+                            <textarea class="form-control" id="add-bt-note" type="text" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end mt-3" >
+                        <div>
+                            <button  class="btn btn-secondary mx-2"
+                                     data-bs-dismiss="modal"
+                                     type="button">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

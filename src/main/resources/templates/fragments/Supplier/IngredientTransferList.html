@@ -1,0 +1,40 @@
+<div class="container" th:fragment ="add">
+    <div class="left-container">
+        <div><h5>All Ingredients</h5></div>
+        <div class="list-container" id="add-left-list-container">
+            <ul id="add-left-list" class="list"></ul>
+        </div>
+    </div>
+    <div class="button-container">
+        <button id="add-move-all-right" class="move-button" disabled>≫</button>
+        <button id="add-move-selected-right" class="move-button" disabled>&gt;</button>
+        <button id="add-move-selected-left" class="move-button" disabled>&lt;</button>
+        <button id="add-move-all-left" class="move-button" disabled>≪</button>
+    </div>
+    <div class="right-container">
+        <div><h5>Selected Supplier Ingredients</h5></div>
+        <div class="list-container" id="add-right-list-container">
+            <ul id="add-right-list" class="list"></ul>
+        </div>
+    </div>
+</div>
+<div class="container" th:fragment ="edit">
+    <div class="left-container">
+        <div><h5>All Ingredients</h5></div>
+        <div class="list-container" id="edit-left-list-container">
+            <ul id="edit-left-list" class="list"></ul>
+        </div>
+    </div>
+    <div class="button-container">
+        <button id="edit-move-all-right" class="move-button" disabled>≫</button>
+        <button id="edit-move-selected-right" class="move-button" disabled>&gt;</button>
+        <button id="edit-move-selected-left" class="move-button" disabled>&lt;</button>
+        <button id="edit-move-all-left" class="move-button" disabled>≪</button>
+    </div>
+    <div class="right-container">
+        <div><h5>Selected Supplier Ingredients</h5></div>
+        <div class="list-container" id="edit-right-list-container">
+            <ul id="edit-right-list" class="list"></ul>
+        </div>
+    </div>
+</div>

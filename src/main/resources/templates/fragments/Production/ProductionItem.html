@@ -1,0 +1,63 @@
+<div
+        aria-labelledby="pi-tab"
+        class="tab-pane fade show active"
+        id="pi-tab-pane"
+        role="tabpanel"
+        tabindex="0"
+>
+    <div class="flex-grow-1 container-fluid ">
+        <div class="hstack mt-3 mb-3">
+            <h2 class="settingsHeader ">Production Item</h2>
+            <button
+                    class="btn ms-auto me-4 addPrimaryBtn"
+                    data-bs-target="#modalAddPI"
+                    data-bs-toggle="modal"
+                    type="button"
+            >
+                Add Production Item
+            </button>
+        </div>
+    </div>
+    <table
+            class="table table-boarderd table-hover table-bordered bg-light cusTable mt-2"
+            id="tablePIs"
+    >
+        <thead class="cusTableHead">
+        <th>#</th>
+        <th>Production Item No</th>
+        <th>Production Item Name</th>
+        <th>Flavour ID</th>
+        <th>Package Type ID</th>
+        <th>Recipe Code</th>
+        <th>Status</th>
+        <th>Action</th>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <div
+            class="modal fade"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+            id="modalAddPI"
+    >
+        <div th:replace="~{fragments/Production/ProductionItem/ProductionItemAddForm.html}"  ></div>
+    </div>
+    <div
+            class="modal fade"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+            id="modalEditPI"
+    >
+        <div th:replace="~{fragments/Production/ProductionItem/ProductionItemEditForm.html}"  ></div>
+    </div>
+
+    <div
+            class="modal fade"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+            id="modalMakeNewBatch"
+    >
+        <div th:replace="~{fragments/Production/ProductionItem/MakeNewBatchForm.html}"  ></div>
+    </div>
+</div>

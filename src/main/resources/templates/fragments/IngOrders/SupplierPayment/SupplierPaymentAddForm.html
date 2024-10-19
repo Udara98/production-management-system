@@ -1,0 +1,128 @@
+<div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Make Supplier Payment</h5>
+            <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
+        </div>
+        <div class="modal-body">
+            <form id="spAddForm" class="needs-validation">
+                <div class="row mt-2">
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add_sp_grn"
+                        >GRN<span class="text-danger"> * </span></label
+                        >
+                        <select id="add_sp_grn" class="form-select">
+                            <option selected>Select GRN</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add_sp_spId">
+                            Supplier ID
+                        </label>
+                        <input
+                                class="form-control"
+                                id="add_sp_spId"
+                                type="text"
+                                placeholder="Supplier ID"
+                                disabled
+                        />
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add_sp_ingId">
+                            Ingredient ID
+                        </label>
+                        <input
+                                class="form-control"
+                                id="add_sp_ingId"
+                                type="text"
+                                placeholder="Ingredient ID"
+                                disabled
+                        />
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add-sp-paymentMethod"
+                        >Payment Method<span class="text-danger"> * </span></label
+                        >
+                        <select id="add-sp-paymentMethod" class="form-select">
+                            <option selected value="VISA_CARD">VISA CARD</option>
+                            <option value="MASTER_CARD">MASTER CARD</option>
+                            <option value="BANK_TRANSFER">BANK TRANSFER</option>
+                            <option value="CASH">CASH</option>
+                            <option value="CHEQUE">CHEQUE</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add-sp-payDate"
+                        >Payment Date<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="add-sp-payDate"
+                                type="date"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add-sp-total"
+                        >Total Amount(LKR)<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="add-sp-total"
+                                type="text"
+                                disabled
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add-sp-paidAmount"
+                        >Total Paid Amount(LKR)<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="add-sp-paidAmount"
+                                type="number"
+                                placeholder="Enter Total Paid Amount"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add-sp-balanceAmount"
+                        >Total Balance Amount(LKR)<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="add-sp-balanceAmount"
+                                type="text"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">
+                            Please Enter Full name ex: Udara Deshan Udawatte
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mx-4 mt-5" >
+                    <div>
+                        <button  class="btn btn-secondary mx-2"
+                                 data-bs-dismiss="modal"
+                                 type="button">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

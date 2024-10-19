@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{fragments/head.html::headSettings}"></head>
+<body>
+<div class="d-flex">
+  <div th:replace="~{fragments/sidebar.html}"></div>
+  <div class="flex-grow-1 container-fluid settingsTabContent px-4">
+    <div class="hstack mt-3 mb-3">
+      <h2 class="settingsHeader">Settings</h2>
+    </div>
+      <div>
+        <ul class="nav nav-tabs d-flex" id="myTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+                    aria-controls="users-tab-pane"
+                    aria-selected="true"
+                    class="nav-link active"
+                    data-bs-target="#users-tab-pane"
+                    data-bs-toggle="tab"
+                    id="users-tab"
+                    role="tab"
+                    type="button"
+            >
+              Users
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+                    aria-controls="privileges-tab-pane"
+                    aria-selected="false"
+                    class="nav-link"
+                    data-bs-target="#privileges-tab-pane"
+                    data-bs-toggle="tab"
+                    id="privileges-tab"
+                    role="tab"
+                    type="button"
+            >
+              Privileges
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+                    aria-controls="employee-tab-pane"
+                    aria-selected="false"
+                    class="nav-link"
+                    data-bs-target="#employee-tab-pane"
+                    data-bs-toggle="tab"
+                    id="employee-tab"
+                    role="tab"
+                    type="button"
+            >
+              Employees
+            </button>
+          </li>
+        </ul>
+      </div>
+      <div class="tab-content" id="myTabContent">
+        <div th:replace="~{fragments/user.html}"></div>
+        <div th:replace="~{fragments/privilege.html}"></div>
+        <div th:replace="~{fragments/employee.html}"></div>
+      </div>
+  </div>
+</div>
+
+<!-- link sidebar js file -->
+<script src="/script/sidebar.js"></script>
+</body>
+</html>
