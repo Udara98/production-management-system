@@ -19,7 +19,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "username")
+    @Column(name = "username", unique = true)
     @NotNull
     private String username;
 
@@ -27,12 +27,9 @@ public class User {
     @NotNull
     private String password;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     @NotNull
     private String email;
-
-    @Column(name = "photopath")
-    private String photopath;
 
     @Column(name = "status")
     @NotNull
@@ -44,6 +41,28 @@ public class User {
 
     @Column(name = "note")
     private String note;
+
+    @Column(name = "lastmodifieddatetime")
+    private LocalDateTime lastmodifieddatetime;
+
+    @Column(name = "deleteddatetime")
+    private LocalDateTime deleteddatetime;
+
+    @Column(name = "createduser")
+    @NotNull
+    private Integer createduser;
+
+    @Column(name = "modifieduser")
+    private Integer modifieduser;
+
+    @Column(name = "deleteduser")
+    private Integer deleteduser;
+
+    private byte[] photo;
+
+    private String photoname;
+
+
 
     @ManyToOne
     @JoinColumn(name = "employee_id" ,referencedColumnName = "id")

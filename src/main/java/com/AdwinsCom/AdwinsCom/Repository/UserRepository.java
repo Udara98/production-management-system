@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface UserDao extends JpaRepository<User,Integer> {
+public interface UserRepository extends JpaRepository<User,Integer> {
 
     @Query(value = "select u from User  u where u.email=?1")
     User getByEmail(String email);

@@ -158,3 +158,25 @@ const inputCheckBoxValidation = (checkBoxID,object,property,trueValue,falseValue
       labelId.innerHTML = labelFalseValue;
   }
 }
+
+const fileValidation = function (fileElement, object, imgProperty, imgNameProperty, privId) {
+
+    if (fileElement.files != null) {
+        // console.log(fileElement.files);
+        // console.log(fileElement.files[0].name);
+        // console.log(fileElement.files[0].type);
+
+        let file = fileElement.files[0];
+        window[object][imgNameProperty] = file.name;
+
+        let fileReader = new FileReader();
+
+        fileReader.onload = function (e) {
+
+            privId.src = e.target.result;
+            window[object][imgProperty] = btoa(e.target.result);
+        }
+
+        fileReader.readAsDataURL(file);
+    }
+}

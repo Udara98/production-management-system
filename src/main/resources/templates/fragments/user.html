@@ -58,8 +58,18 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-6 vectorImgUser">
-                        <img src="/images/vectors/loginvectoruser.svg" class="h-100 w-100" alt="registrationVector" id="vectorImgUser">
+                    <div class="col-6 d-flex flex-column align-items-center mt-5">
+                        <h4 class="mb-3">Profile photo</h4>
+                        <!-- Display current or default user profile photo -->
+                        <div><img  id="profilePhoto" src="/image/userprofilephotos/userprofilephotodummy.png" class="rounded  d-block img-thumbnail" alt="..." width="300px" height="300px"></div>
+                            <!-- File input for uploading photo -->
+<!--                            <input type="file" id="uploadPhotoInput" class="form-control mt-3" accept="image/*" style="display:none;" onchange="previewPhoto(event)">-->
+                            <input type="file" class="d-none" id="filePhoto"
+                               onchange="fileValidation(filePhoto, 'user', 'photo', 'photoname', profilePhoto);">
+                            <div class="d-flex flex-row gap-3 mt-3">
+                                <button type="button" class="btn btn-outline-primary" onclick="filePhoto.click();">Add/Change</button>
+                                <button type="button" class="btn btn-outline-danger" onclick="clearPhoto()">Clear</button>
+                            </div>
                     </div>
                     <div class="col-6">
                         <form id="userForm" onsubmit="return false" novalidate>

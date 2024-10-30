@@ -8,6 +8,15 @@ window.addEventListener('DOMContentLoaded', ()=>{
     //Call form refresh function
     refreshUserForm();
 
+    refillUserForm();
+
+    // Declare variable for employee list
+     employeeListWithoutUserAccount = [];
+
+     //Employee List without user account
+     employeeListWithoutUserAccount = ajaxGetRequest('/employee/listwithoutuseraccount');
+
+
 })
 
 //Define function for refresh user table
@@ -54,7 +63,21 @@ const refreshUserTable = () => {
 
 }
 
+// Function to preview the uploaded photo
+    function previewPhoto(event) {
+        const reader = new FileReader();
+        reader.onload = function(){
+            const output = document.getElementById('profilePhoto');
+            output.src = reader.result;  // Change the image src to the uploaded file
+        };
+        reader.readAsDataURL(event.target.files[0]);  // Convert the file to a data URL
+    }
 
+    // Function to reset the photo back to the default
+    function clearPhoto() {
+        document.getElementById('profilePhoto').src = "/image/userprofilephotos/userprofilephotodummy.png";
+        document.getElementById('filePhoto').value = "";  // Clear the file input value
+    }
 
 
 //Get Role
@@ -107,6 +130,13 @@ const refillUserForm = (ob, rowIndex)=>{
         labelStatus.innerText = 'Account is Not Active';
     }
 
+        // Declare variable for employee list
+         employeeListWithoutUserAccount = [];
+
+         //Employee List without user account
+         employeeListWithoutUserAccount = ajaxGetRequest('/employee/listwithoutuseraccount');
+
+    console.log(employeeListWithoutUserAccount);
     employeeListWithoutUserAccount.push(user.employee_id);
     fillDataIntoSelect(selectEmployee, 'select Employee', employeeListWithoutUserAccount, 'fullname',user.employee_id.fullname);
 
@@ -153,6 +183,14 @@ const refillUserForm = (ob, rowIndex)=>{
         divRoles.appendChild(div);
 
     });
+
+        if (user.photo == null) {
+                profilePhoto.src = '/image/userprofilephotos/userprofilephotodummy.png';
+                console.log("NO Photot")
+            } else {
+                console.log("Photo set")
+                profilePhoto.src = atob(user.photo);
+            }
 
 }
 // create funtion for delete User
@@ -373,6 +411,14 @@ const refreshUserForm = ()=>{
         divRoles.appendChild(div);
     })
 
+    if (user.photo == null) {
+            profilePhoto.src = '/image/userprofilephotos/userprofilephotodummy.png';
+            console.log("NO Photot")
+        } else {
+            console.log("Photo set")
+            profilePhoto.src = atob(user.photo);
+        }
+
 
 
 
@@ -475,8 +521,13 @@ const checkUserUpdate = () =>{
         updates = updates + "User Name" + oldUser.callingname + " into " + user.callingname +"<br>";
     }
 
+     if(user.photo !== oldUser.photo){
+            updates = updates + "photo" + oldUser.photoname + " into " + user.photoname +"<br>";
+
+        }
+
     if(user.password !== oldUser.password){
-        updates = Password + "Password is changed" + oldUser.password + " into " + user.password + "<br>";
+        updates = updates + "Password is changed" + oldUser.password + " into " + user.password + "<br>";
     }
 
     if(user.email !== oldUser.email){
@@ -503,3 +554,6 @@ const checkUserUpdate = () =>{
 
     return updates;
 }
+
+
+

@@ -1,6 +1,6 @@
 package com.AdwinsCom.AdwinsCom.controller;
 import com.AdwinsCom.AdwinsCom.Repository.RoleDao;
-import com.AdwinsCom.AdwinsCom.Repository.UserDao;
+import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
 import com.AdwinsCom.AdwinsCom.entity.Role;
 import com.AdwinsCom.AdwinsCom.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class LoginController {
 	private RoleDao daoRole;
 
 	@Autowired
-	private UserDao userDao;
+	private UserRepository userRepository;
 
     @GetMapping(value = "/login")
     public ModelAndView loginUI() {
@@ -42,7 +42,7 @@ public class LoginController {
     @GetMapping(value = "/createadminuser")
     public String generateAdminAccount() {
 
-    User extAdminUser = userDao.getUserByUserName("Admin");
+    User extAdminUser = userRepository.getUserByUserName("Admin");
 		if (extAdminUser == null) {
 
             // System.out.println(extAdminUser.equals(null));
@@ -54,13 +54,13 @@ public class LoginController {
             adminUser.setAdded_datetime(LocalDateTime.now());
             adminUser.setStatus(true);
             adminUser.setEmployee_id(null);
-            adminUser.setPhotopath(null);
+            adminUser.setPhoto(null);
 
             Set<Role> userRoles = new HashSet<Role>();
             userRoles.add(daoRole.getReferenceById(1));
             adminUser.setRoles(userRoles);
 
-            userDao.save(adminUser);
+            userRepository.save(adminUser);
 
 
 		}

@@ -10,7 +10,7 @@
   z-index: 1;
   top: 0;
   left: 0;
-  background-color: #0c0820;
+  background: linear-gradient(to bottom right, #CED9EE, #F2F6FB);
   overflow-x: hidden;
   padding: 20px 5px 5px 5px;
 }
@@ -23,7 +23,7 @@
   font-size: 18px;
   padding: 4px 0;
   border: none;
-  color: #a8a8a8;
+  color: #111;
   background: none;
   text-align: left;
   cursor: pointer;
@@ -39,12 +39,12 @@
 
 /* On mouse-over */
 .sideItem:hover {
-  color: #c7c4c4;
-  background-color: rgba(50, 81, 165, 0.3);
+  color: #f0f0f0;
+  background-color: rgba(160, 192, 246, 0.27);
 }
 
 .sideItem:hover a {
-  color: #c7c4c4;
+  color: #15264c;
 }
 /* Main content */
 .main {
@@ -55,15 +55,21 @@
 
 /* Add an active class to the active dropdown button */
 .activeSideIcon {
-  background-color: rgba(23, 70, 199, 0.3);
+  background-color: rgba(160, 192, 246, 0.47);
   color: #f0f0f0;
 
 }
 
 .activeSideIcon a {
-  color: #ECEAEA;
+   color: #15264c;
 
 }
+
+.activeSideIcon a .sideIcon .fa-solid {
+   color: rgba(70, 117, 197, 0.83);
+
+}
+
 
 .sideItem.active a {
   color: #ECEAEA;
@@ -79,4 +85,26 @@
 
 .settingsItem{
 margin-top: 40px;
+}
+
+.image-grayscale {
+    filter: grayscale(100%);
+    margin-left: 10px
+}
+
+
+
+.icon-button {
+    font-size: 20px;
+    border: none; /* No border */
+    border-radius: 50%; /* Rounded corners */
+    padding: 10px 15px; /* Padding around the icon */
+    cursor: pointer; /* Pointer cursor on hover */
+    display: flex; /* Use flexbox for icon alignment */
+    align-items: center; /* Center icon vertically */
+    text-decoration: none; /* Remove underline from link */
+}
+
+.icon-button:hover {
+    background-color: #D9D9D9; /* Transparent background */
 }

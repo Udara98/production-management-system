@@ -1,6 +1,6 @@
 package com.AdwinsCom.AdwinsCom.security;
 
-import com.AdwinsCom.AdwinsCom.Repository.UserDao;
+import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
 import com.AdwinsCom.AdwinsCom.entity.Role;
 import com.AdwinsCom.AdwinsCom.entity.User;
 import jakarta.transaction.Transactional;
@@ -21,14 +21,14 @@ public class MyUserDetailService implements UserDetailsService {
 
     // inject dependency 
     @Autowired
-    private UserDao userDao;
+    private UserRepository userRepository;
 
     // MyUserDetailService created for ->  get User details (in User Authentication)
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         
-        User user = userDao.getUserByUserName(username);   // get user object using user dao by given username
+        User user = userRepository.getUserByUserName(username);   // get user object using user dao by given username
 
         ArrayList<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 

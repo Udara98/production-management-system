@@ -1,7 +1,8 @@
 package com.AdwinsCom.AdwinsCom.controller;
 
 import com.AdwinsCom.AdwinsCom.Repository.ProductRepository;
-import com.AdwinsCom.AdwinsCom.Repository.UserDao;
+import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
+import com.AdwinsCom.AdwinsCom.Service.IPrivilegeService;
 import com.AdwinsCom.AdwinsCom.Service.IProductService;
 import com.AdwinsCom.AdwinsCom.entity.Product;
 import com.AdwinsCom.AdwinsCom.entity.Production.ProductUnitType;
@@ -20,10 +21,10 @@ public class ProductController {
 
 
     @Autowired
-    private PrivilegeController privilegeController;
+    private IPrivilegeService privilegeService;
 
     @Autowired
-    private UserDao userDao;
+    private UserRepository userRepository;
 
     final IProductService productService;
     final ProductRepository productRepository;
@@ -39,7 +40,7 @@ public class ProductController {
     @GetMapping()
     public ModelAndView ProductUI() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        HashMap<String, Boolean> logUserPrivi = privilegeController.getPrivilegeByUserModule(auth.getName(), "product");
+        HashMap<String, Boolean> logUserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "product");
         if (!logUserPrivi.get("select")) {
             return null;
         }
