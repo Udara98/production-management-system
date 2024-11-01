@@ -29,6 +29,7 @@ const tableDataBinder = (
             const td = document.createElement("td");
             td.className = "align-middle";
             if (column.dataType === "text") {
+                td.style = "text-align: start"
                 td.innerText = element[column.propertyName];
             }
             if (column.dataType === "price") {
@@ -37,18 +38,22 @@ const tableDataBinder = (
                     currency: "LKR",
                 });
             }
-            if(column.dataType === "photo"){
-                let img = document.createElement('img');
-                img.style.width='10vh'
-                img.style.height='10vh'
 
-                img.src = `${element[column.propertyName]}`
+          if (column.dataType == 'photo') {
+             let img = document.createElement('img');
+             img.style.width = '40px';
+             img.style.height = '40px';
+             img.style.borderRadius = '50%';
+             td.style.textAlign = "center";
+             if (element[column.dataType] != null) {
+             img.src = atob(element[column.dataType]);
+    //         console.log(element[column.dataType])
+              } else {
+                        img.src = '/image/userprofilephotos/userprofilephotodummy.png';
+                    }
+                    td.appendChild(img);
+                }
 
-                td.style.display='flex'
-                td.style.justifyContent='center'
-                td.style.alignItems='start'
-                td.appendChild(img)
-            }
             if (column.dataType === "date") {
                 let leftAlignedEle  = document.createElement('span');
                 leftAlignedEle.style.textAlign = 'left';  // Align text to the left

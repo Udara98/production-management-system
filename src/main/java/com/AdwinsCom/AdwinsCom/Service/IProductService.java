@@ -8,8 +8,8 @@ import java.security.NoSuchAlgorithmException;
 
 public interface IProductService {
 
-    ResponseEntity<?> AddNewProduct(Product product, String userName, Integer batchId, MultipartFile file) throws NoSuchAlgorithmException;
-    ResponseEntity<?> UpdateProduct(Product product, String userName, Integer batchId, MultipartFile file) throws NoSuchAlgorithmException;
+    ResponseEntity<?> AddNewProduct(Product product);
+    ResponseEntity<?> UpdateProduct(Product product) ;
     ResponseEntity<?> GetAllProducts();
 
 }

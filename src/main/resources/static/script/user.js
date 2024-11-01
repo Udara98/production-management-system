@@ -28,6 +28,7 @@ const refreshUserTable = () => {
 
 
     const displayProperty = [
+        {dataType:"photo", propertyName:'imageArray'},
         {dataType:"function", propertyName:getEmployee},
         {dataType:"text", propertyName:"username"},
         {dataType:"text", propertyName:"email"},
@@ -56,7 +57,7 @@ const refreshUserTable = () => {
 
     users.forEach((element,index) =>{
         if(getPrivilege.delete && element.status === false){
-            tableUser.children[1].children[index].children[6].children[0].children[1].children[2].children[0].disabled = true;
+            tableUser.children[2].children[index].children[7].children[0].children[1].children[2].children[0].disabled = true;
 
         }
     })

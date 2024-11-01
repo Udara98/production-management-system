@@ -16,11 +16,14 @@ body {
   background-color: #2d1991;
   color: #f1f1f1;
   border-radius: 1rem;
+  padding-top: 12px
+  padding-bottom: 12px
+
 }
 
 .addPrimaryBtn:hover {
-  background-color: #1d0586;
-  color: #f1f1f1;
+  background-color: #18046e;
+  color: #ffffff;
 }
 
 .editDeleteAll {

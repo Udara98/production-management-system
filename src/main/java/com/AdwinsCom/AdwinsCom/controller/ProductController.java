@@ -53,34 +53,8 @@ public class ProductController {
 
 
     @PostMapping("/addNewProduct")
-    public ResponseEntity<?> AddNewProduct(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("batchId") int batchId,
-            @RequestParam("productName") String productName,
-            @RequestParam("reorderPoint") int reorderPoint,
-            @RequestParam("reorderQuantity") int reorderQuantity,
-            @RequestParam("quantity") int quantity,
-            @RequestParam("salePrice") double salePrice,
-            @RequestParam("unitType") ProductUnitType unitType,
-            @RequestParam("unitSize") double unitSize,
-            @RequestParam("note") String note) {
-
-        try {
-            Product product = new Product();
-            product.setProductName(productName);
-            product.setReorderPoint(reorderPoint);
-            product.setReorderQuantity(reorderQuantity);
-            product.setQuantity(quantity);
-            product.setSalePrice(salePrice);
-            product.setUnitType(unitType);
-            product.setUnitSize(unitSize);
-            product.setNote(note);
-
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            return productService.AddNewProduct(product,auth.getName(),batchId,file);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
+    public ResponseEntity<?> AddNewProduct(@RequestBody Product product){
+        return productService.AddNewProduct(product);
     }
 
     @PutMapping("/updateProduct")
@@ -109,7 +83,7 @@ public class ProductController {
             product.setNote(note);
 
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            return productService.AddNewProduct(product,auth.getName(),batchId,file);
+            return productService.AddNewProduct(product);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }

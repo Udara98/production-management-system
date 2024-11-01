@@ -6,28 +6,22 @@
         </div>
         <div class="modal-body">
             <form id="productAddForm" class="needs-validation">
-                <div class="mb-3">
-                    <div style="background-color:#E9EAEC;width: 20vh;height: 20vh;border: 1px solid #C7C9CE; ">
-                        <input
-                                class="form-control"
-                                id="add-product-photo"
-                                type="file"
-                                accept="image/*" style="display: none "
-                        />
-                        <div id="img-container"></div>
-                        <label id="photo-label" class="form-label fw-medium" for="add-product-photo" style="width: 100%;height: 100%;display: flex; flex-direction: column; justify-content: center;align-items: center;cursor: pointer">
-                            <i class="fa-solid fa-camera mb-3" style="font-size: 20px"></i>
-                            <span>Product Image</span>
-                        </label>
-
-                    </div>
+                <div class="d-flex flex-row gap-3" >
+                        <div id="img-container" style="width: 20vh;height: 20vh;border: 1px solid #C7C9CE; ">
+                            <img  id="productPhoto" src="/image/userprofilephotos/userprofilephotodummy.png" class="rounded  d-block img-thumbnail" alt="..." width="300px" height="300px">
+                        </div>
+                        <div class="d-flex flex-column align-items-center justify-content-center  ">
+                        <button type="button" class="btn addPrimaryBtn mb-2 rounded-2" onclick="filePhoto.click();"><i class="fa-regular fa-image me-2"></i>Add/Change Product Image</button>
+                        <input type="file" class="d-none" id="filePhoto" onchange="fileValidation(filePhoto, 'product', 'product_photo', 'productPhotoName', productPhoto);">
+                        <button type="button" class="btn btn-outline-danger me-auto w-100" onclick="clearPhoto()">Clear Photo</button>
+                        </div>
                 </div>
                 <div class="row mt-4">
                     <div class="col">
-                        <label class="form-label fw-medium" for="add_product_batch"
+                        <label class="form-label fw-medium" for="addProductBatch"
                         >Batch No<span class="text-danger"> * </span></label
                         >
-                        <select id="add_product_batch" class="form-select">
+                        <select id="addProductBatch" class="form-select">
                             <option selected>Select Batch</option>
                         </select>
                     </div>

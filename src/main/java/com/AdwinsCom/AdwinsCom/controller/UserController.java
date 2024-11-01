@@ -42,8 +42,8 @@ public class UserController {
 //        return userView;
 //    }
 
-        @GetMapping
-        public ResponseEntity<ModelAndView> getUserUi(){
+    @GetMapping
+    public ResponseEntity<ModelAndView> getUserUi(){
             return userService.getUserUi();
         };
 
@@ -118,6 +118,10 @@ public class UserController {
 //
 //
 //    }
+    @PostMapping
+    public ResponseEntity<String>saveUser(@RequestBody User user){
+        return userService.saveUser(user);
+    }
 
 //    @DeleteMapping
 //    public String deleteUser(@RequestBody User user){

@@ -180,3 +180,22 @@ const fileValidation = function (fileElement, object, imgProperty, imgNameProper
         fileReader.readAsDataURL(file);
     }
 }
+
+const DynamicSelectValidation = function (dropdownId, object, property) {
+
+    const selectedValue = dropdownId.value;
+
+    if (selectedValue !== '') {
+        window[object][property] = JSON.parse(selectedValue);
+        dropdownId.classList.remove('is-invalid');
+        dropdownId.classList.add('is-valid');
+    } else {
+        window[object][property] = null;
+        if (dropdownId.required) {
+            dropdownId.classList.remove('is-valid');
+            dropdownId.classList.add('is-invalid');
+        } else {
+            dropdownId.style.border = '1px solid #ced4da';
+        }
+    }
+}

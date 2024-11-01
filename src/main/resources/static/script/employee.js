@@ -54,7 +54,7 @@ const refreshEmployeeTable = () => {
 
   employees.forEach((element,index) =>{
     if(getPrivilege.delete && element.employeestatus_id.id ===3){
-      tableEmployee.children[1].children[index].children[9].children[0].children[1].children[2].children[0].disabled = true;
+      tableEmployee.children[2].children[index].children[9].children[0].children[1].children[2].children[0].disabled = true;
 
     }
   })

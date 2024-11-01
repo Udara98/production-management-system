@@ -98,8 +98,22 @@ const fillDataIntoTable6 = (
       if (column.dataType == "function") {
         td.innerHTML = column.propertyName(element);
       }
-      tr.appendChild(td);
-    });
+      if (column.dataType == 'photo') {
+         let img = document.createElement('img');
+         img.style.width = '40px';
+         img.style.height = '40px';
+         img.style.borderRadius = '50%';
+         td.style.textAlign = "center";
+         if (element[column.dataType] != null) {
+         img.src = atob(element[column.dataType]);
+//         console.log(element[column.dataType])
+          } else {
+                    img.src = '/image/userprofilephotos/userprofilephotodummy.png';
+                }
+                td.appendChild(img);
+            }
+        tr.appendChild(td);
+        });
 
     const tdButton = document.createElement("td");
     tdButton.className = "align-middle";

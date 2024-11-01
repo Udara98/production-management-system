@@ -62,21 +62,24 @@ public class Product {
     @Column(name = "unit_size")
     private Double unitSize;
 
-    @Column(name = "photo_path")
-    private String photoPath;
+    @Column(name = "product_photo")
+    private byte[] ProductPhoto;
+
+    @Column(name = "product_photo_name")
+    private String productPhotoName;
 
     @Column(name = "product_status")
     @Enumerated(EnumType.STRING)
     private ProductStatus productStatus;
 
     @Column(name = "added_user")
-    private String addedUser;
+    private Integer addedUser;
 
     @Column(name = "added_date")
     private LocalDateTime addedDate;
 
     @Column(name = "updated_user")
-    private String updatedUser;
+    private Integer updatedUser;
 
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;

@@ -27,7 +27,17 @@
 }
 
 #btn-user-submit{
-    background-color:#2e326d;
+    background-color:#353c9b;
     width: 101px ;
 
+}
+
+#btn-user-update:hover {
+  background-color: #dd5f46;
+  color: #ffffff;
+}
+
+#btn-user-submit:hover {
+  background-color: #282d73;
+  color: #ffffff;
 }
