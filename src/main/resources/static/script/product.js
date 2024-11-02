@@ -8,9 +8,13 @@ window.addEventListener('load', () => {
     //Call form refresh function
     reloadProductForm();
 
+    //Call function for validation
+    formValidation();
+
     let userPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/ITEM");
 
-        const batchList = ajaxGetRequest('/batch/getAllBatches')
+    const batchList = ajaxGetRequest('/batch/getAllBatches')
+
 
 
 
@@ -24,7 +28,7 @@ window.addEventListener('load', () => {
 //        if (file) {
 //            formData.append('file', file);
 //        }
-        const selectedBatch = batchList.filter((b) => b.id === parseInt(document.getElementById('add_product_batch').value))[0]
+        const selectedBatch = batchList.filter((b) => b.id === parseInt(document.getElementById('addProductBatch').value))[0]
 //        formData.append('batchId', selectedBatch.id);
 //        formData.append('productName', document.getElementById('add-product-name').value);
 //        formData.append('reorderPoint', document.getElementById('add-product-rop').value);
@@ -145,8 +149,45 @@ const formValidation = () =>{
 
     addProductBatch.addEventListener('change', function () {
         DynamicSelectValidation(addProductBatch, 'product', 'batch');
-        generateEmail();
     });
+
+    addProductName.addEventListener('keyup', function () {
+            validation(addProductName, '', 'product', 'productName');
+    });
+
+    addProductUnitSize.addEventListener('keyup', function () {
+                validation(addProductUnitSize, '^[1-9]$', 'product', 'unitSize');
+    });
+
+    addProductUnitType.addEventListener('change', () =>{
+    selectFieldValidator(addProductUnitType,'','product','unitType')
+    })
+
+    addProductQty.addEventListener('keyup', () =>{
+        validation(addProductQty,'^(?:[1-9][0-9]?|1[0-9]{2}|200)$','product','quantity')
+    })
+
+    addProductROP.addEventListener('keyup', () =>{
+            validation(addProductROP,'^[1-9][0-9]?$','product','reorderPoint')
+        })
+
+    addProductROQ.addEventListener('keyup', () =>{
+            validation(addProductROQ,'^(?:[1-9][0-9]?|1[0-9]{2}|200)$','product','reorderQuantity')
+        })
+
+    addProductPrice.addEventListener('keyup', () =>{
+                validation(addProductPrice,'^(?:[1-9]|[1-9][0-9]|[1-9][0-9]{3}|[1-9][0-9]{2})$','product','salePrice')
+         })
+
+    addProductNote.addEventListener('keyup', () =>{
+                 validation(addProductNote,'','product','note')
+         })
+
+    filePhoto.addEventListener('change', () =>{
+                fileValidation(filePhoto, 'product', 'product_photo', 'productPhotoName', productPhoto);
+    })
+
+
 
 
 }

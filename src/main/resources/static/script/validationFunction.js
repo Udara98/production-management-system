@@ -199,3 +199,75 @@ const DynamicSelectValidation = function (dropdownId, object, property) {
         }
     }
 }
+
+//Create Validation for full name and fill calling name parts
+const validation = (fieldId,pattern,object,property ) => {
+  const fieldValue = fieldId.value;
+  const Pattern = new RegExp(pattern);
+
+  if (fieldId.value !== "") {
+    if (Pattern.test(fieldId.value)) {
+      fieldId.classList.remove("is-invalid");
+      fieldId.classList.add("is-valid");
+      console.log("valid");
+      window[object][property] = fieldValue;
+      console.log(window[object])
+    } else {
+      fieldId.classList.remove("is-valid");
+      fieldId.classList.add("is-invalid");
+      window[object][property] = null;
+
+    }
+  } else
+  {
+    window[object][property] = null;
+    if (!fieldId.required) {
+      fieldId.classList.remove("is-valid");
+      fieldId.classList.remove("is-invalid");
+    } else {
+      fieldId.classList.remove("is-valid");
+    }
+  }
+};
+
+const selectFieldValidator= (fieldId, pattern,object,property) => {
+  const fieldValue = fieldId.value;
+
+
+  if (fieldId.value !== "") {
+    fieldId.classList.add("is-valid");
+    console.log("valid");
+    window[object][property] = fieldValue;
+  }else {
+    window[object][property] = null;
+    if (!fieldId.required) {
+      fieldId.classList.remove("is-valid");
+      fieldId.classList.remove("is-invalid");
+    } else {
+      fieldId.classList.remove("is-valid");
+    }
+  }
+};
+
+//Select Dynamic Field Validator
+const selectDynamicFieldValidator= (fieldId, pattern,object,property) => {
+  const fieldValue = fieldId.value;
+
+  console.log(fieldValue)
+
+  if (fieldId.value !== "") {
+    fieldId.classList.remove("is-invalid");
+    fieldId.classList.add("is-valid");
+    console.log("valid");
+
+    window[object][property] = JSON.parse(fieldValue);//Convert js object
+  }else {
+    window[object][property] = null;
+    if (!fieldId.required) {
+      fieldId.classList.remove("is-invalid");
+      fieldId.classList.remove("is-valid");
+    } else {
+      fieldId.classList.add("is-invalid");
+    }
+  }
+};

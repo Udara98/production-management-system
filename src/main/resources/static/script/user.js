@@ -416,7 +416,6 @@ const refreshUserForm = ()=>{
             profilePhoto.src = '/image/userprofilephotos/userprofilephotodummy.png';
             console.log("NO Photot")
         } else {
-            console.log("Photo set")
             profilePhoto.src = atob(user.photo);
         }
 
