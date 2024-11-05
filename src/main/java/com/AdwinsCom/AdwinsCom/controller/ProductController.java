@@ -52,41 +52,15 @@ public class ProductController {
     }
 
 
-    @PostMapping("/addNewProduct")
+    @PostMapping()
     public ResponseEntity<?> AddNewProduct(@RequestBody Product product){
         return productService.AddNewProduct(product);
     }
 
-    @PutMapping("/updateProduct")
-    public ResponseEntity<?> UpdateProduct(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("batchId") int batchId,
-            @RequestParam("id") int id,
-            @RequestParam("productName") String productName,
-            @RequestParam("reorderPoint") int reorderPoint,
-            @RequestParam("reorderQuantity") int reorderQuantity,
-            @RequestParam("quantity") int quantity,
-            @RequestParam("salePrice") double salePrice,
-            @RequestParam("unitType") ProductUnitType unitType,
-            @RequestParam("unitSize") double unitSize,
-            @RequestParam("note") String note) {
+    @PutMapping()
+    public ResponseEntity<?> UpdateProduct(@RequestBody Product product){
+            return productService.UpdateProduct(product);
 
-        try {
-            Product product = productRepository.findById(id).get();
-            product.setProductName(productName);
-            product.setReorderPoint(reorderPoint);
-            product.setReorderQuantity(reorderQuantity);
-            product.setQuantity(quantity);
-            product.setSalePrice(salePrice);
-            product.setUnitType(unitType);
-            product.setUnitSize(unitSize);
-            product.setNote(note);
-
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            return productService.AddNewProduct(product);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
     }
 
     @GetMapping("/getAllProducts")

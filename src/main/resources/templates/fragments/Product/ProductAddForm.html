@@ -12,7 +12,7 @@
                         </div>
                         <div class="d-flex flex-column align-items-center justify-content-center  ">
                         <button type="button" class="btn addPrimaryBtn mb-2 rounded-2" onclick="filePhoto.click();"><i class="fa-regular fa-image me-2"></i>Add/Change Product Image</button>
-                        <input type="file" class="d-none" id="filePhoto" onchange="fileValidation(filePhoto, 'product', 'product_photo', 'productPhotoName', productPhoto);">
+                        <input type="file" class="d-none" id="filePhoto" onchange="fileValidation(filePhoto, 'product', 'productPhoto', 'productPhotoName', productPhoto);">
                         <button type="button" class="btn btn-outline-danger me-auto w-100" onclick="clearPhoto()">Clear Photo</button>
                         </div>
                 </div>
@@ -21,7 +21,7 @@
                         <label class="form-label fw-medium" for="addProductBatch"
                         >Batch No<span class="text-danger"> * </span></label
                         >
-                        <select id="addProductBatch" class="form-select">
+                        <select id="addProductBatch" class="form-select" required>
                             <option selected>Select Batch</option>
                         </select>
                     </div>
@@ -34,6 +34,7 @@
                                 id="addProductName"
                                 type="text"
                                 placeholder="Enter Product Name"
+                                required
                         />
                         <div class="valid-feedback"></div>
                         <div class="invalid-feedback">
@@ -51,6 +52,7 @@
                                 id="addProductUnitSize"
                                 type="text"
                                 placeholder="Enter Unit Size"
+                                required
                         />
                         <div class="valid-feedback"></div>
                         <div class="invalid-feedback">Please enter a valid unit size: a single number (1 to 9).
@@ -59,7 +61,7 @@
                     <div class="col">
                         <label class="form-label fw-medium" for="addProductUnitType">Unit Type<span
                                 class="text-danger"> * </span></label>
-                        <select id="addProductUnitType" class="form-select">
+                        <select id="addProductUnitType" class="form-select" required>
                             <option selected value="ML">ML</option>
                             <option value="L">L</option>
                         </select>
@@ -71,8 +73,9 @@
                         <input
                                 class="form-control"
                                 id="addProductQty"
-                                type="number"
+                                type="text"
                                 placeholder="Enter Quantity"
+                                required
                         />
                         <div class="valid-feedback"></div>
                         <div class="invalid-feedback">
@@ -88,7 +91,7 @@
                         <input
                                 class="form-control"
                                 id="addProductROP"
-                                type="number"
+                                type="text"
                                 placeholder="Enter Re-Order Point"
                         />
                         <div class="valid-feedback"></div>
@@ -103,7 +106,7 @@
                         <input
                                 class="form-control"
                                 id="addProductROQ"
-                                type="number"
+                                type="text"
                                 placeholder="Enter Re-Order Quantity"
                         />
                         <div class="valid-feedback"></div>
@@ -118,8 +121,9 @@
                         <input
                                 class="form-control"
                                 id="addProductPrice"
-                                type="number"
+                                type="text"
                                 placeholder="Enter Sale Price"
+                                required
                         />
                         <div class="valid-feedback"></div>
                         <div class="invalid-feedback">
@@ -127,18 +131,64 @@
                         </div>
                     </div>
                 </div>
-                <div class="mt-4">
-                    <label for="addProductNote" class="form-label">Note</label>
-                    <textarea type="text" class="form-control" id="addProductNote" placeholder="Enter a note"
-                               rows="3"></textarea>
+<!--                <div class="mt-4">-->
+<!--                    <label for="addProductNote" class="form-label">Note</label>-->
+<!--                    <textarea type="text" class="form-control" id="addProductNote" placeholder="Enter a note"-->
+<!--                               rows="3"></textarea>-->
+<!--                </div>-->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="form-floating">
+                                <textarea
+                                        class="form-control"
+                                        id="addProductNote"
+                                        placeholder="Enter note"
+                                ></textarea>
+                            <label
+                                    class="form-label fw-medium"
+                                    for="addProductNote"
+                            >
+                                Note
+                                <span class="text-cus-red">(optional)</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
-                <div class="d-flex justify-content-end mt-5">
-                    <div>
-                        <button class="btn btn-secondary mx-2 "
-                                data-bs-dismiss="modal"
-                                type="button">Cancel
+<!--                <div class="d-flex justify-content-end mt-5">-->
+<!--                    <div>-->
+<!--                        <button class="btn btn-secondary mx-2 "-->
+<!--                                data-bs-dismiss="modal"-->
+<!--                                type="button">Cancel-->
+<!--                        </button>-->
+<!--                        <button type="submit" class="btn btn-primary" onclick="productSubmit();">Submit</button>-->
+<!--                    </div>-->
+<!--                </div>-->
+                <hr>
+                <div class="row mt-3 mb-2">
+                    <div class="col-1">
+                        <button
+                                type="reset"
+                                class="btn btn-outline-danger"
+                        >
+                            Clear
                         </button>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                    <div class="col-7"></div>
+                    <div class="col-4">
+                        <button
+                                class="btn cusbutton btn-update"
+                                onclick="productUpdate()"
+                                type="submit"
+                        >
+                            <i class="fa-solid fa-edit me-2"></i>Update
+                        </button>
+                        <button
+                                class="btn cusbutton ms-4 btn-submit"
+                                onclick="productSubmit()"
+                                type="submit"
+                        >
+                            <i class="fa-solid fa-plus me-2"></i>Add
+                        </button>
                     </div>
                 </div>
             </form>

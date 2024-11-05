@@ -77,7 +77,6 @@ public class UserController {
         return userService.findallwithoutadmin();
     }
 
-//    //Define
 //    @PostMapping
 //    public String saveUSer(@RequestBody User user) {
 //        //Authentication and authorization

@@ -56,6 +56,9 @@ window.addEventListener('load', () => {
 //            });
 //        }
 //    }
+
+
+
 //    document.getElementById('productEditForm').onsubmit = (event) => {
 //        event.preventDefault();
 //        const formData = new FormData();
@@ -98,6 +101,64 @@ window.addEventListener('load', () => {
 
 });
 
+//Declare product submit function
+        const productSubmit = () => {
+            event.preventDefault();
+            console.log("button Product Submit");
+            console.log(product);
+
+            // 1. Check form errors
+            const errors = checkProductFormError();
+
+            if (errors === "") {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "Do you want to add the product " + product.productName + "?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#E11D48",
+                    cancelButtonColor: "#3f3f44",
+                    confirmButtonText: "Yes, Add"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const postServiceRequestResponse = ajaxRequestBody("/product", "POST", product);
+
+                        // Check backend response
+                        if (postServiceRequestResponse.status === 200) {
+                            $("#modalAddProduct").modal('hide');
+                            productAddForm.reset();
+                            itemTableRefresh();
+                            reloadProductForm();
+
+                            // Reset validation classes
+                            Array.from(userForm.elements).forEach((field) => {
+                                field.classList.remove('is-valid', 'is-invalid');
+                            });
+
+                            Swal.fire({
+                                title: "Product Added Successfully!",
+                                icon: "success"
+                            });
+
+                        } else {
+                            console.error(postServiceRequestResponse);
+                            Swal.fire({
+                                title: "Error",
+                                text: postServiceRequestResponse.responseText,
+                                icon: "error"
+                            });
+                        }
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: "Product Not Added",
+                    text: errors,
+                    icon: "error"
+                });
+            }
+        };
+
 //Reload product form
 const reloadProductForm = () =>{
 
@@ -133,16 +194,65 @@ const reloadProductForm = () =>{
 }
 
 //Refill Product form fields
-const refillProductFormFields = (user) =>{
+const productFormRefill = (ob, rowIndex) => {
 
 
-    const batchList = ajaxGetRequest('/batch/getAllBatches')
+  $("#modalAddProduct").modal('show');
+  product = JSON.parse(JSON.stringify(ob));
+  oldProduct = JSON.parse(JSON.stringify(ob));
 
 
-    $('#modalAddProduct').modal('show');
+  addProductName.value = product.productName ;
+  addProductUnitSize.value = product.unitSize;
+  addProductQty.value = product.quantity;
+  addProductPrice.value = product.salePrice;
+  addProductUnitType.value = product.unitType;
 
 
-}
+  if(product.photo !=null){
+    productPhoto.src = atob(product.photo);
+
+  }else {
+     productPhoto.src = '/image/userprofilephotos/userprofilephotodummy.png';
+  }
+
+  if(product.reorderPoint !=null){
+    addProductROP.value = product.reorderPoint;
+  }else {
+    addProductROP.value = '';
+  }
+
+  if(product.reorderQuantity !=null){
+      addProductROQ.value = product.reorderQuantity;
+    }else {
+      addProductROQ.value = '';
+  }
+
+  if(product.note !=null){
+        addProductNote.value = product.note;
+      }else {
+        addProductNote.value = '';
+    }
+
+
+  //refill  Batch No
+
+  const batchList = ajaxGetRequest('/batch/getAllBatches')
+
+  const batchSelect = document.getElementById('addProductBatch')
+
+  fillDataIntoSelect(
+         batchSelect,
+         "Select Batch",
+         batchList,
+         "batchNo",
+         product.batch.batchNo
+   );
+
+
+  //Select Valid Color for element
+
+};
 
 //Call function for validation and object binding
 const formValidation = () =>{
@@ -250,7 +360,7 @@ const itemTableRefresh = () => {
     let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/PRODUCT");
 
         const displayProperty = [
-            {dataType: "photo", propertyName: "imageArray"},
+            {dataType: "photo", propertyName: "productPhoto"},
             {dataType: "text", propertyName: "productCode"},
             {dataType: "text", propertyName: "productName"},
             {dataType: "function", propertyName: getBatchNo},
@@ -291,17 +401,17 @@ const itemTableRefresh = () => {
     });
 }
 
-const generateProductDropDown = (element) => {
+const generateProductDropDown = (element,index) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
         {
             name: "Edit",
-            action:editProduct,
+            action:productFormRefill,
             icon: "fa-solid fa-edit me-2",
         },
-        {name: "Delete", action: null, icon: "fa-solid fa-trash me-2"}
+        {name: "Delete", action: deleteProduct, icon: "fa-solid fa-trash me-2"}
     ];
 
     buttonList.forEach((button) => {
@@ -309,7 +419,7 @@ const generateProductDropDown = (element) => {
         buttonElement.className = "dropdown-item btn";
         buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
         buttonElement.onclick = function () {
-            button.action(element);
+            button.action(element,index);
         };
         const liElement = document.createElement("li");
         liElement.appendChild(buttonElement);
@@ -376,8 +486,46 @@ const editProduct = (product) => {
     $("#modalEditProduct").modal("show");
 
 }
-const deleteProduct = (product) => {
+// create funtion for delete User
+const deleteProduct = (ob, rowIndex) => {
+    console.log("delete");
 
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to delete Product " +
+            "" + (ob.productName) +"?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#E11D48",
+        cancelButtonColor: "#3f3f44",
+        confirmButtonText: "Yes, Delete"
+    }).then(async (result) => {
+        if(result.isConfirmed) {
+
+            // Delete Service
+            let deleteServiceRequestResponse = await ajaxRequestBody("/product", "DELETE", ob)
+
+
+            //Check Backend Service
+            if (deleteServiceRequestResponse === "OK") {
+                swal.fire({
+                    title: "Deleted!",
+                    text: "User has been deleted.",
+                    icon: "success"
+                });
+                userForm.reset();
+                refreshUserTable();
+                refreshUserForm();
+
+            } else {
+                swal.fire({
+                    title: "Delete Not Successfully",
+                    text: deleteServiceRequestResponse,
+                    icon: "error"
+                });
+            }
+        }
+    })
 }
 
 // Function to preview the uploaded photo
@@ -394,4 +542,166 @@ const deleteProduct = (product) => {
     function clearPhoto() {
         document.getElementById('productPhoto').src = "/image/userprofilephotos/userprofilephotodummy.png";
         document.getElementById('filePhoto').value = "";  // Clear the file input value
+    }
+
+//
+
+//Check product form errors
+const checkProductFormError = () => {
+    let errors = '';
+
+    if (product.batch == null) {
+        errors = errors + "Batch No can't be null \n";
+        addProductBatch.classList.add('is-invalid')
+    }
+
+    if (product.productName == null) {
+        errors = errors + "Product name can't be null \n";
+        addProductName.classList.add('is-invalid')
+    }
+
+
+    if (product.quantity == null) {
+        errors = errors + "Please Enter Quantity \n";
+        addProductQty.classList.add('is-invalid')
+    }
+
+
+    if (product.salePrice == null) {
+        errors = errors + "Email Enter Valid Sales price \n";
+        addProductPrice.classList.add('is-invalid')
+    }
+
+
+    if (product.unitType == null) {
+        errors = errors + "Please Select the Unit Type \n";
+        addProductUnitType.classList.add('is-invalid');
+    }
+
+    if (product.unitSize == null) {
+            errors = errors + "Please Enter the Unit Size \n";
+            addProductUnitSize.classList.add('is-invalid');
+        }
+
+    return errors;
+}
+
+//Define function for Product update
+  const productUpdate = () => {
+    event.preventDefault();
+    productAddForm.classList.add('needs-validation');
+    console.log("Product update Button");
+    console.log(product);
+
+    //Check form Error
+    let errors = checkProductFormError();
+
+    if (errors === "") {
+      //Check form update
+      let updates = checkUpdates();
+      console.log(updates);
+      productAddForm.classList.remove('was-validated')
+      $('#modalAddProduct').modal("hide");
+      if (updates !== "") {
+        swal.fire({
+          title: "Do you want to Update product",
+          html:updates,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#cb421a",
+          cancelButtonColor: "#3f3f44",
+          confirmButtonText: "Yes, Update"
+        }).then((result) =>{
+          if(result.isConfirmed){
+            let updateServiceResponse = ajaxRequestBody("/product", "PUT", product);
+
+            if (updateServiceResponse.status === 200) {
+              // alert("Update successfully ...! \n");
+              Swal.fire({
+                title: "Update successfully ..! ",
+                text: "",
+                icon: "success"
+              });
+              //Need to refresh
+              productAddForm.reset();
+              itemTableRefresh();
+              reloadProductForm();
+              // Remove 'is-valid' and 'is-invalid' classes from all input fields
+              document.querySelectorAll('.needs-validation input,.needs-validation select, .needs-validation textarea ').forEach((input) => {
+                input.classList.remove('is-valid', 'is-invalid');
+              });
+              productAddForm.classList.remove('was-validated');
+              //Need hide modal
+              $('#modalAddProduct').modal("hide");
+            } else {
+              Swal.fire({
+                title: "Update Not Successfully ...!",
+                text: updateServiceResponse.responseText,
+                icon: "error"
+              });
+            }
+          }
+
+        })
+
+      } else {
+        $('#modalAddProduct').modal("hide");
+        Swal.fire({
+          title: "No updates Found..!",
+          text: '',
+          icon: "question"
+        });
+      }
+
+    } else {
+      $('#modalAddProduct').modal("hide");
+      Swal.fire({
+        title: "Form has following errors!",
+        text: errors,
+        icon: "error"
+      });
+    }
+  }
+
+  //deifine method for check updates
+    const checkUpdates = () =>{
+      let updates = "";
+
+      if(product.batch.batchNo !== oldProduct.batch.batchNo){
+        updates = updates + "Batch No is changed" + oldProduct.batchNo + " into " + product.batchNo + "<br>";
+      }
+
+      if(product.productName !== oldProduct.productName){
+        updates = updates + "Product Name is changed" + oldProduct.productName + " into " + product.productName +"<br>";
+      }
+
+      if(product.unitSize !== oldProduct.quantity){
+        updates = updates + "Quantity is changed" + oldProduct.quantity + " into " + product.quantity + "<br>";
+      }
+
+      if(product.unitSize !== oldProduct.unitSize){
+        updates = updates + "UnitSize is changed" + oldProduct.unitSize + " into " + product.unitSize + "<br>";
+      }
+
+      if(product.reorderPoint !== oldProduct.reorderPoint){
+        updates = updates + "ROP is changed" + oldProduct.reorderPoint + " into " + product.reorderPoint + "<br>";
+      }
+
+      if(product.reorderQuantity !== oldProduct.reorderQuantity){
+        updates = updates + "ROQ is changed" + oldProduct.reorderQuantity + " into " + product.reorderQuantity + "<br>";
+      }
+
+      if(product.salePrice !== oldProduct.salePrice){
+        updates = updates + "Sales Price is Change " + oldProduct.salePrice + " into "+ product.salePrice+  "<br>";
+      }
+
+      if(product.note !== oldProduct.note){
+        updates = updates + "Note is Change " + oldProduct.note + " into "+ product.note+  "<br>";
+      }
+
+      if(product.productPhoto !== oldProduct.productPhoto){
+              updates = updates + "Product is Change " + oldProduct.productPhotoName + " into "+ product.productPhotoName+  "<br>";
+            }
+
+      return updates;
     }

@@ -251,7 +251,7 @@ const employeeFormRefill = (ob, rowIndex) => {
           if(result.isConfirmed){
             let updateServiceResponse = ajaxRequestBody("/employee", "PUT", employee);
 
-            if (updateServiceResponse === "OK") {
+            if (updateServiceResponse.responseText === 200) {
               // alert("Update successfully ...! \n");
               Swal.fire({
                 title: "Update successfully ..! ",
@@ -272,7 +272,7 @@ const employeeFormRefill = (ob, rowIndex) => {
             } else {
               Swal.fire({
                 title: "Update Not Successfully ...!",
-                text: updateServiceResponse,
+                text: updateServiceResponse.responseText,
                 icon: "error"
               });
             }
@@ -312,7 +312,7 @@ const employeeFormRefill = (ob, rowIndex) => {
 const deleteEmployee = (ob, rowIndex) => {
   console.log("delete");
   // console.log(tableEmployee.children[1].children[rowIndex])
-  tableEmployee.children[1].children[rowIndex].style.backgroundColor = "pink";
+//  tableEmployee.children[1].children[rowIndex].style.backgroundColor = "pink";
 
   Swal.fire({
     title: "Are you sure?",
@@ -336,7 +336,7 @@ const deleteEmployee = (ob, rowIndex) => {
 
 
     //Check Backend Service
-    if (deleteServiceRequestResponse === "OK") {
+    if (deleteServiceRequestResponse.status === 200) {
       swal.fire({
         title: "Deleted!",
         text: "Employee has been deleted.",
@@ -349,7 +349,7 @@ const deleteEmployee = (ob, rowIndex) => {
     } else {
       swal.fire({
         title: "Delete Not Successfully",
-        text: deleteServiceRequestResponse,
+        text: deleteServiceRequestResponse.responseText,
         icon: "error"
       });
     }

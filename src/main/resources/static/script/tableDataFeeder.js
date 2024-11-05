@@ -45,14 +45,16 @@ const tableDataBinder = (
              img.style.height = '40px';
              img.style.borderRadius = '50%';
              td.style.textAlign = "center";
-             if (element[column.dataType] != null) {
-             img.src = atob(element[column.dataType]);
+
+             if (element[column.propertyName] != null) {
+             img.src = atob(element[column.propertyName]);
     //         console.log(element[column.dataType])
               } else {
                         img.src = '/image/userprofilephotos/userprofilephotodummy.png';
                     }
                     td.appendChild(img);
                 }
+
 
             if (column.dataType === "date") {
                 let leftAlignedEle  = document.createElement('span');
@@ -80,7 +82,7 @@ const tableDataBinder = (
                 btn.className="btn btn-outline-primary w-75"
                 btn.innerHTML=column.btnName
                 btn.addEventListener('click',()=>{
-                    column.propertyName(element)
+                    column.propertyName(element,index)
                 })
                 let btnDiv = document.createElement('div');
                 btnDiv.className='row justify-content-center'
@@ -105,7 +107,7 @@ const tableDataBinder = (
             iconButton.setAttribute("aria-expanded", "false");
             iconButton.innerHTML = '<i class="fa-solid fa-ellipsis-vertical"></i>';
 
-            const dropdownMenu = dropDown(element);
+            const dropdownMenu = dropDown(element,index);
 
             divDropdownContainer.appendChild(iconButton);
             divDropdownContainer.appendChild(dropdownMenu);

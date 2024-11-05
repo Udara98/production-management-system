@@ -19,28 +19,31 @@ const ajaxGetRequest = (url) =>{
 }
 
 //Define function for ajax request (POST, PUT, DELETE)
-const ajaxRequestBody = (url, method, object) =>{
-    //3. Pass data into backend
-    let serverResponse ;
-    //jquery ajax("URL, (option)")
-    $.ajax(url,{
+const ajaxRequestBody = (url, method, object) => {
+    let serverResponse;
+    $.ajax(url, {
         type: method,
         data: JSON.stringify(object),
         contentType: "application/json",
-        async:false,
-        success: function (data,status,ahr){
-            console.log(url , "\n", "Success " , status , " " , ahr);
-            console.log(data)
-            serverResponse = ahr;
+        async: false,
+        success: function(data, status, xhr) {
+            console.log(url, "\n", "Success", status, xhr);
+            console.log(data);
+            serverResponse = {
+                status: xhr.status,
+                responseText: data
+            };
         },
-        error:function (ahr,status, errormsg){
-            console.log(url , "\n", "Fail" , errormsg , " " , status , " " , ahr);
-            serverResponse = ahr;
+        error: function(xhr, status, error) {
+            console.log(url, "\n", "Fail", error, status, xhr);
+            serverResponse = {
+                status: xhr.status,
+                responseText: xhr.responseText
+            };
         }
-        ,
-    } );
+    });
     return serverResponse;
-}
+};
 
 const ajaxFormDataBody = (url, method, object)=>{
     let serverResponse ;

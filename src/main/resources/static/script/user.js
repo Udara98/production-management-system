@@ -8,8 +8,6 @@ window.addEventListener('DOMContentLoaded', ()=>{
     //Call form refresh function
     refreshUserForm();
 
-    refillUserForm();
-
     // Declare variable for employee list
      employeeListWithoutUserAccount = [];
 
@@ -198,7 +196,7 @@ const refillUserForm = (ob, rowIndex)=>{
 const deleteUser = (ob, rowIndex) => {
     console.log("delete");
     // console.log(tableEmployee.children[1].children[rowIndex])
-    tableUser.children[1].children[rowIndex].style.backgroundColor = "pink";
+//    tableUser.children[1].children[rowIndex].style.backgroundColor = "pink";
 
     Swal.fire({
         title: "Are you sure?",
@@ -217,7 +215,7 @@ const deleteUser = (ob, rowIndex) => {
 
 
             //Check Backend Service
-            if (deleteServiceRequestResponse === "OK") {
+            if (deleteServiceRequestResponse === 200) {
                 swal.fire({
                     title: "Deleted!",
                     text: "User has been deleted.",
@@ -230,7 +228,7 @@ const deleteUser = (ob, rowIndex) => {
             } else {
                 swal.fire({
                     title: "Delete Not Successfully",
-                    text: deleteServiceRequestResponse,
+                    text: deleteServiceRequestResponse.responseText,
                     icon: "error"
                 });
             }
@@ -239,6 +237,8 @@ const deleteUser = (ob, rowIndex) => {
 }
 
 const printUser = ()=>{}
+
+//Define funtion for user update
 const buttonUserUpdate = () => {
     userForm.classList.add('needs-validation');
     console.log("User update Button");
@@ -266,7 +266,7 @@ const buttonUserUpdate = () => {
                 if(result.isConfirmed){
                     let updateServiceResponse = ajaxRequestBody("/user", "PUT", user);
 
-                    if (updateServiceResponse === "OK") {
+                    if (updateServiceResponse === 200) {
                         // alert("Update successfully ...! \n");
                         Swal.fire({
                             title: "Update successfully ..! ",
@@ -287,7 +287,7 @@ const buttonUserUpdate = () => {
                     } else {
                         Swal.fire({
                             title: "Update Not Successfully ...!",
-                            text: updateServiceResponse,
+                            text: updateServiceResponse.responseText,
                             icon: "error"
                         });
                     }
