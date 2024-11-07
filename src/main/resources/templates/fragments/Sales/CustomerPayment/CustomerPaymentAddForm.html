@@ -19,18 +19,29 @@
 
                    <div class="col">
                        <label class="form-label fw-medium" for="add-cp-ord">Order<span class="text-danger"> * </span></label>
-                       <select id="add-cp-ord" class="form-select" required>
+                       <select id="add-cp-ord" class="form-select" onchange="fillDataIntoTotal();" required>
                            <option value="" selected>Select Order</option>
                        </select>
                        <div class="invalid-feedback">Please select an Order.</div>
                    </div>
 
                    <div class="col">
-                       <label class="form-label fw-medium" for="add-cp-payDate">Payment Date<span class="text-danger"> * </span></label>
-                       <input class="form-control" id="add-cp-payDate" type="date" />
-                       <div class="valid-feedback"></div>
-                       <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                       <label class="form-label fw-medium" for="add-cp-payMeth">Payment Method<span class="text-danger"> * </span></label>
+                       <select id="add-cp-payMeth" class="form-select" onchange="showPaymentOptionByMethod();">
+                           <option selected value="VISA_CARD">VISA CARD</option>
+                           <option value="MASTER_CARD">MASTER CARD</option>
+                           <option value="BANK_TRANSFER">BANK TRANSFER</option>
+                           <option value="CASH">CASH</option>
+                           <option value="CHEQUE">CHEQUE</option>
+                       </select>
                    </div>
+
+<!--                   <div class="col">-->
+<!--                       <label class="form-label fw-medium" for="add-cp-payDate">Payment Date<span class="text-danger"> * </span></label>-->
+<!--                       <input class="form-control" id="add-cp-payDate" type="date" />-->
+<!--                       <div class="valid-feedback"></div>-->
+<!--                       <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>-->
+<!--                   </div>-->
                </div>
                <div class="row mt-4">
                    <div class="col">
@@ -39,16 +50,24 @@
                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
                    </div>
                    <div class="col">
-                       <label class="form-label fw-medium" for="add-cp-payMeth">Payment Method<span class="text-danger"> * </span></label>
-                       <select id="add-cp-payMeth" class="form-select">
-                           <option selected value="VISA_CARD">VISA CARD</option>
-                           <option value="MASTER_CARD">MASTER CARD</option>
-                           <option value="BANK_TRANSFER">BANK TRANSFER</option>
-                           <option value="CASH">CASH</option>
-                           <option value="CHEQUE">CHEQUE</option>
-                       </select>
+                       <label class="form-label fw-medium" for="add-cp-tot">Paid Amount</label>
+                       <input class="form-control" id="add-cp-pa" type="text" onchange="calculateAdvancePayBalance();" />
+                       <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
                    </div>
                    <div class="col">
+                       <label class="form-label fw-medium" for="add-cp-tot">Balance</label>
+                       <input class="form-control" id="add-cp-balance" type="text" disabled/>
+                       <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                   </div>
+               </div>
+               <div class="row mt-4">
+                    <div class="col-6">
+                            <label class="form-label fw-medium" for="add-cp-payDate">Payment Date<span class="text-danger"> * </span></label>
+                            <input class="form-control" id="add-cp-payDate" type="date" />
+                             <div class="valid-feedback"></div>
+                             <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                    </div>
+                   <div class="col-6">
                        <label class="form-label fw-medium" for="add-cp-status">Payment Status<span class="text-danger"> * </span></label>
                        <select id="add-cp-status" class="form-select">
                            <option selected value="Pending">Pending</option>
@@ -58,12 +77,184 @@
                        </select>
                    </div>
                </div>
-               <div class="d-flex justify-content-end mt-4" >
-                   <div>
-                       <button  class="btn btn-secondary mx-2"
-                                data-bs-dismiss="modal"
-                                type="button">Cancel</button>
-                       <button type="submit" class="btn btn-primary">Submit</button>
+<!--               Bank Transfer Card-->
+               <div class="row mt-3 mb-4 d-none" id="bankTranferDivRow">
+                   <div class="col-12">
+                       <div class="card">
+                           <div class="card-header">
+                               <b>Bank Transfer</b>
+                           </div>
+                           <div class="card-body">
+
+                               <div class="row">
+                                   <div class="col-6">
+                                       <label class="form-label mb-0 fw-bold"
+                                              style="font-size: 12.5px;" for="inputTranferId"><span
+                                               style="color: #fa5252;">* </span>Transaction
+                                           ID:</label>
+
+                                       <div class="row">
+                                           <div class="col-12">
+                                               <input class="form-control" type="text"
+                                                      id="inputTranferId"
+                                                      style="background-color: #E6E6E6;" required>
+                                           </div>
+                                       </div>
+                                   </div>
+
+                                   <div class="col-6">
+                                       <label class="form-label mb-0 fw-bold"
+                                              style="font-size: 12.5px;"
+                                              for="inputTransferredDateTime"><span
+                                               style="color: #fa5252;">* </span>Transfer Date &
+                                           Time:</label>
+
+                                       <div class="row">
+                                           <div class="col-12">
+                                               <input class="form-control" type="datetime-local"
+                                                      id="inputTransferredDateTime"
+                                                      style="background-color: #E6E6E6;" required
+                                                      onkeydown="return false">
+                                           </div>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+
+<!--               Cheque Details card-->
+               <div class="row mt-3 mb-4 d-none" id="chequeDivRow">
+                   <div class="col-12">
+                       <div class="card">
+                           <div class="card-header">
+                               <b>Cheque</b>
+                           </div>
+                           <div class="card-body">
+
+                               <div class="row">
+                                   <!-- * text cheque no  -->
+                                   <div class="col-6">
+                                       <label class="form-label mb-0 fw-bold"
+                                              style="font-size: 12.5px;" for="inputChequeNo"><span
+                                               style="color: #fa5252;">* </span>Cheque
+                                           Number:</label>
+
+                                       <div class="row">
+                                           <div class="col-12">
+                                               <input class="form-control" type="text"
+                                                      id="inputChequeNo" style="background-color: #E6E6E6;"
+                                                      required>
+                                           </div>
+                                       </div>
+                                   </div>
+                                   <!-- * date cheque Date-->
+                                   <div class="col-6">
+                                       <label class="form-label mb-0 fw-bold"
+                                              style="font-size: 12.5px;" for="inputChequeDate"><span
+                                               style="color: #fa5252;">* </span>Cheque
+                                           Date:</label>
+                                       <div class="row">
+                                           <div class="col-12">
+                                               <input class="form-control" type="date"
+                                                      id="inputChequeDate"
+                                                      style="background-color: #E6E6E6;" required
+                                                      onkeydown="return false">
+                                           </div>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+<!--               Card details Card div-->
+               <div class="row mt-3 mb-4 d-none" id="cardDivRow">
+                   <div class="col-12">
+                       <div class="card">
+                           <div class="card-header">
+                               <b>Card Payment</b>
+                           </div>
+                           <div class="card-body">
+                               <div class="row">
+                                   <!-- * text Card  -->
+                                   <div class="col-6">
+                                       <label class="form-label mb-0 fw-bold"
+                                              style="font-size: 12.5px;" for="inputCardRefNo"><span
+                                               style="color: #fa5252;">* </span>Transaction ID</label>
+
+                                       <div class="row">
+                                           <div class="col-12">
+                                               <input class="form-control" type="text"
+                                                      id="inputCardRefNo" style="background-color: #E6E6E6;"
+                                                      required>
+                                           </div>
+                                       </div>
+                                   </div>
+                                   <!-- * date checkDate-->
+                                   <div class="col-6">
+                                       <label class="form-label mb-0 fw-bold"
+                                              style="font-size: 12.5px;" for="inputCardDate"><span
+                                               style="color: #fa5252;">* </span>Transfer Date & Time</label>
+
+                                       <div class="row">
+                                           <div class="col-12">
+                                               <input class="form-control" type="date"
+                                                      id="inputCardDate"
+                                                      style="background-color: #E6E6E6;" required
+                                                      onkeydown="return false">
+                                           </div>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+               <div class="row mt-4">
+                   <div class="col">
+                       <div class="form-floating">
+                                <textarea
+                                        class="form-control"
+                                        id="addProductNote"
+                                        placeholder="Enter note"
+                                ></textarea>
+                           <label
+                                   class="form-label fw-medium"
+                                   for="addProductNote"
+                           >
+                               Note
+                               <span class="text-cus-red">(optional)</span>
+                           </label>
+                       </div>
+                   </div>
+               </div>
+               <hr>
+               <div class="row mt-3 mb-2">
+                   <div class="col-1">
+                       <button
+                               type="reset"
+                               class="btn btn-outline-danger"
+                       >
+                           Clear
+                       </button>
+                   </div>
+                   <div class="col-7"></div>
+                   <div class="col-4">
+                       <button
+                               class="btn cusbutton btn-update"
+                               onclick="productUpdate()"
+                               type="submit"
+                       >
+                           <i class="fa-solid fa-edit me-2"></i>Update
+                       </button>
+                       <button
+                               class="btn cusbutton ms-4 btn-submit"
+                               type="submit"
+                       >
+                           <i class="fa-solid fa-plus me-2"></i>Add
+                       </button>
                    </div>
                </div>
            </form>

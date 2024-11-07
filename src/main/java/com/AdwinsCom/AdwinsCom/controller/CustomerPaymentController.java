@@ -35,4 +35,13 @@ public class CustomerPaymentController {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
+
+    @GetMapping("/gtAllUnpaidCustomerPayments")
+    public ResponseEntity<?> gtAllUnpaidCustomerPayments(){
+        try {
+            return customerPaymentService.GetAllUnpaidCustomerPayments();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
 }

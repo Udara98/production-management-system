@@ -44,5 +44,14 @@ public class CustomerOrderController {
         }
     }
 
+    @GetMapping("/unpaidCustomerOrders")
+    public ResponseEntity<?> unpaidCustomerOrders() {
+        try {
+            return customerOrderService.gtAllUnpaidCustomerOrders();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
 
 }

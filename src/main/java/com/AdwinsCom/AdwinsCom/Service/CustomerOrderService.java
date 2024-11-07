@@ -40,6 +40,12 @@ public class CustomerOrderService implements ICustomerOrderService{
     }
 
     @Override
+    public ResponseEntity<?> gtAllUnpaidCustomerOrders() {
+        List<CustomerOrder> unpaidCustomerOrders = customerOrderRepository.gtAllUnpaidCustomerOrders();
+        return ResponseEntity.ok(unpaidCustomerOrders);
+    }
+
+    @Override
     public ResponseEntity<?> DeleteCustomerOrder(Integer id) {
         return null;
     }

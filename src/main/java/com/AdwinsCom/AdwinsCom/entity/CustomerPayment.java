@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 
@@ -38,6 +39,12 @@ public class CustomerPayment {
     @Column(name = "total_amount")
     private Double totalAmount;
 
+    @Column(name = "balance")
+    private BigDecimal balance;
+
+    @Column(name = "paidamount")
+    private BigDecimal paidAmount;
+
     @Column(name = "payment_status")
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
@@ -45,6 +52,9 @@ public class CustomerPayment {
     @Column(name = "payment_method")
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
+
+    @Column(name = "transferid")
+    private String transferid;
 
     @Column(name = "added_user")
     private String addedUser;
@@ -74,6 +84,11 @@ public class CustomerPayment {
         newCustomerPayment.setTotalAmount(customerPaymentDTO.getTotalAmount());
         newCustomerPayment.setPaymentStatus(customerPaymentDTO.getPaymentStatus());
         newCustomerPayment.setPaymentMethod(customerPaymentDTO.getPaymentMethod());
+        newCustomerPayment.setTransferid(customerPaymentDTO.getTransferid());
+        newCustomerPayment.setBalance(customerPaymentDTO.getBalance());
+        newCustomerPayment.setPaidAmount(customerPaymentDTO.getPaidAmount());
+
+
 
         return newCustomerPayment;
     }

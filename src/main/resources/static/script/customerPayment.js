@@ -1,23 +1,30 @@
 let cusPaymentTableInstance;
 window.addEventListener('load', () => {
-    reloadCusPayments()
+
+    reloadCustomerPaymentTable();
+
+    reloadCustomerPaymentForm();
+
+
+
+
     let selectedOrder;
     const cusOrders = ajaxGetRequest("/customerOrder/getAllCustomerOrders")
     const orderSelect = document.getElementById('add-cp-ord')
 
-    cusOrders.forEach(ord => {
-        const option = document.createElement('option');
-        option.value = ord.id;
-        option.textContent = ord.orderNo;
-        orderSelect.appendChild(option);
-    });
-    orderSelect.addEventListener('change', (event) => {
-        selectedOrder = cusOrders.filter((o) => o.id === parseInt(event.target.value))[0]
-        document.getElementById('add-cp-tot').value = selectedOrder.totalAmount.toLocaleString("en-US", {
-            style: "currency",
-            currency: "LKR",
-        });
-    })
+//    cusOrders.forEach(ord => {
+//        const option = document.createElement('option');
+//        option.value = ord.id;
+//        option.textContent = ord.orderNo;
+//        orderSelect.appendChild(option);
+//    });
+//    orderSelect.addEventListener('change', (event) => {
+//        selectedOrder = cusOrders.filter((o) => o.id === parseInt(event.target.value))[0]
+//        document.getElementById('add-cp-tot').value = selectedOrder.totalAmount.toLocaleString("en-US", {
+//            style: "currency",
+//            currency: "LKR",
+//        });
+//    })
 
     document.getElementById('CPAddForm').onsubmit = function (event) {
         event.preventDefault();
@@ -50,7 +57,40 @@ window.addEventListener('load', () => {
     }
 })
 
-const reloadCusPayments = () => {
+const fillDataIntoTotal = () =>{
+
+        const orderId = document.getElementById("add-cp-ord").value;
+        const Orders = JSON.parse(orderId)
+        console.log(Orders.totalAmount);
+
+
+}
+
+//Reload product form
+const reloadCustomerPaymentForm = () =>{
+
+    customerPayment = new Object();
+    oldCustomerPayment = null;
+
+    //Get all products
+    const cusOrders = ajaxGetRequest("/customerOrder/unpaidCustomerOrders")
+
+    const orderSelect = document.getElementById('add-cp-ord')
+
+
+   fillDataIntoSelect(
+       orderSelect,
+       "Select Order",
+       cusOrders,
+       "orderNo",
+ );
+
+
+
+
+}
+
+const reloadCustomerPaymentTable = () => {
     const cusPayments = ajaxGetRequest('/cusPayment/getAllCusPayments')
     let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
 
@@ -118,3 +158,64 @@ const generateCPDropDown = (element) => {
     });
     return dropdownMenu;
 };
+
+
+// show payment options according to selected payment method - ex- show bank transfer option
+const showPaymentOptionByMethod =  () => {
+    inputTranferId.value = '';     // when payment changes from check to transfer , still might have a value in check
+    inputTransferredDateTime.value = '';
+    inputChequeDate.value = '';
+    inputChequeNo.value = '';
+//    customerPayment.transferid = null;
+//    customerPayment.transferreddatetime = null;
+//    customerPayment.checkno = null;
+//    customerPayment.checkdate = null;
+
+
+ const paymentMthd = document.getElementById('add-cp-payMeth').value;
+
+// Hide all payment method rows initially
+bankTranferDivRow.classList.add('d-none');
+chequeDivRow.classList.add('d-none');
+cardDivRow.classList.add('d-none');
+
+// Show the appropriate row based on payment method
+if (paymentMthd === 'BANK_TRANSFER') {
+    bankTranferDivRow.classList.remove('d-none');
+} else if (paymentMthd === 'CHEQUE') {
+    chequeDivRow.classList.remove('d-none');
+} else if (paymentMthd === 'VISA_CARD' || paymentMthd === 'MASTER_CARD') {
+    cardDivRow.classList.remove('d-none');
+}
+
+
+}
+
+
+//Declare function for fill balance fields
+const calculateAdvancePayBalance =  () => {
+    // calculate balance when paid amount enter
+
+//        if (new RegExp(/^[1-9][0-9]{0,5}([.][0-9]{2})?$/).test(add-cp-pa.value) && (parseFloat(add-cp-pa.value) < parseFloat(add-cp-tot.value))) {
+//            customerPayment.paidamount = inputPaidAmount.value;
+//            customerPayment.classList.remove('is-invalid');
+//            add-cp-pa.classList.add('is-valid');
+//
+//            add-cp-balance.value = (parseFloat(add-cp-tot.value) - parseFloat(add-cp-pa.value)).toFixed(2);
+//            customerPayment.balance = add-cp-balance.value;
+//            add-cp-balance.classList.remove('is-invalid');
+//            add-cp-balance.classList.add('is-valid');
+//        } else {
+//            customerPayment.paidamount = null;
+//            add-cp-pa.classList.remove('is-valid');
+//            add-cp-pa.classList.add('is-invalid');
+//
+//            add-cp-balance.value = '';
+//            customerPayment.balance = null;
+//            add-cp-balance.classList.remove('is-invalid');
+//            add-cp-balance.classList.remove('is-valid');
+//        }
+
+
+
+}

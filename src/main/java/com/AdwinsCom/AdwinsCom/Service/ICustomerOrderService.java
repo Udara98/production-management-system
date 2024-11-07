@@ -10,4 +10,5 @@ public interface ICustomerOrderService {
     ResponseEntity<?> UpdateCustomerOrder(CustomerOrderDTO customerOrderDTO, String userName);
     ResponseEntity<?> GetAllCustomerOrders();
     ResponseEntity<?> DeleteCustomerOrder(Integer id);
+    ResponseEntity<?>gtAllUnpaidCustomerOrders();
 }

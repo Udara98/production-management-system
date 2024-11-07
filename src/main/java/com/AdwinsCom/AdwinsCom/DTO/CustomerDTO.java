@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,4 +23,5 @@ public class CustomerDTO {
     private String brn;
     private Double point;
     private Customer.CustomerStatus customerStatus;
+
 }

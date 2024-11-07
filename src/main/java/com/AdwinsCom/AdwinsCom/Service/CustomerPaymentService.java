@@ -3,6 +3,7 @@ package com.AdwinsCom.AdwinsCom.Service;
 import com.AdwinsCom.AdwinsCom.DTO.CustomerPaymentDTO;
 import com.AdwinsCom.AdwinsCom.Repository.CustomerPaymentRepository;
 import com.AdwinsCom.AdwinsCom.entity.CustomerPayment;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,8 @@ import java.util.List;
 public class CustomerPaymentService implements ICustomerPaymentService{
 
     final CustomerPaymentRepository customerPaymentRepository;
+
+    @Autowired
     public CustomerPaymentService(CustomerPaymentRepository customerPaymentRepository) {
         this.customerPaymentRepository = customerPaymentRepository;
     }
@@ -37,5 +40,11 @@ public class CustomerPaymentService implements ICustomerPaymentService{
     public ResponseEntity<?> GetAllCustomerPayments() {
         List<CustomerPayment> customerPayments = customerPaymentRepository.findAll();
         return ResponseEntity.ok(customerPayments);
+    }
+
+    @Override
+    public ResponseEntity<?>GetAllUnpaidCustomerPayments(){
+        List<CustomerPayment> unpaidCustomerPayments = customerPaymentRepository.gtAllUnpaidCustomerPayments();
+        return ResponseEntity.ok(unpaidCustomerPayments);
     }
 }
