@@ -65,9 +65,6 @@ const refresPrivilegeTable = () => {
 
 const filterModuleList = function () {
 
-    // console.log('filtering');
-    // console.log(JSON.parse(selectRole.value).id);
-
     modulesByRole = ajaxGetRequest("/module/modulelistbyrole?roleid=" + JSON.parse(selectRole.value).id);
     fillDataIntoSelect(selectModule, 'Choose a Module', modulesByRole, 'name');
     selectModule.disabled = false;

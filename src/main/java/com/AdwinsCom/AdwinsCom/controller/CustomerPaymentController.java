@@ -17,7 +17,7 @@ public class CustomerPaymentController {
         this.customerPaymentService = customerPaymentService;
     }
 
-    @PostMapping("/addNewCusPayment")
+    @PostMapping()
     public ResponseEntity<?> AddNewCusPayment(@RequestBody CustomerPaymentDTO customerPaymentDTO){
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -43,5 +43,12 @@ public class CustomerPaymentController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
+    }
+
+    // Endpoint to get the latest completed payment by order ID
+    @GetMapping(value = "/latest-completed", produces = "application/json")
+    public ResponseEntity<?> getLatestCompletedPaymentByOrderId(@RequestParam("orderid") int orderid) {
+        return customerPaymentService.getLatestCompletedPaymentByOrderId(orderid);
+
     }
 }

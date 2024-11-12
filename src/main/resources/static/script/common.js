@@ -4,15 +4,15 @@ const ajaxGetRequest = (url) =>{
     $.ajax(url,{
         async:false,
         type:"GET",
-        contentType:"Json",
+        contentType:"application/json",
         success: function (data){
             console.log("Success",data);
             serviceResponse = data;
 
         },
-        error: function (resob){
-            console.log("Error",resob)
-            serviceResponse = [];
+        error: function (errorResponse){
+            console.log("Error",errorResponse)
+            serviceResponse = null;
         }
     });
     return serviceResponse;

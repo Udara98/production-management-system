@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -34,7 +35,7 @@ public class CustomerPayment {
     private CustomerOrder order;
 
     @Column(name = "payment_date")
-    private LocalDateTime paymentDate;
+    private LocalDate paymentDate;
 
     @Column(name = "total_amount")
     private Double totalAmount;
@@ -43,7 +44,7 @@ public class CustomerPayment {
     private BigDecimal balance;
 
     @Column(name = "paidamount")
-    private BigDecimal paidAmount;
+    private BigDecimal payAmount;
 
     @Column(name = "payment_status")
     @Enumerated(EnumType.STRING)
@@ -86,7 +87,7 @@ public class CustomerPayment {
         newCustomerPayment.setPaymentMethod(customerPaymentDTO.getPaymentMethod());
         newCustomerPayment.setTransferid(customerPaymentDTO.getTransferid());
         newCustomerPayment.setBalance(customerPaymentDTO.getBalance());
-        newCustomerPayment.setPaidAmount(customerPaymentDTO.getPaidAmount());
+        newCustomerPayment.setPayAmount(customerPaymentDTO.getPayAmount());
 
 
 

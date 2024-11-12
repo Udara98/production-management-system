@@ -10,5 +10,7 @@ public interface ICustomerPaymentService {
     ResponseEntity<?> UpdateCustomerPayment(CustomerPaymentDTO customerPaymentDTO, String userName);
     ResponseEntity<?> GetAllCustomerPayments();
     ResponseEntity<?> GetAllUnpaidCustomerPayments();
+    ResponseEntity<?>getLatestCompletedPaymentByOrderId(Integer id);
+
 
 }

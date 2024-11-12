@@ -5,7 +5,8 @@ window.addEventListener('load', () => {
 
     reloadCustomerPaymentForm();
 
-
+     //Call function for validation
+     formValidation();
 
 
     let selectedOrder;
@@ -59,12 +60,66 @@ window.addEventListener('load', () => {
 
 const fillDataIntoTotal = () =>{
 
-        const orderId = document.getElementById("add-cp-ord").value;
-        const Orders = JSON.parse(orderId)
-        console.log(Orders.totalAmount);
+        document.getElementById("add-cp-pa").value = "";
+        document.getElementById("add-cp-balance").value = "";
+
+
+        const order = document.getElementById("add-cp-ord").value;
+        const orderId = JSON.parse(order).id
+
+        latestCusPayment = ajaxGetRequest("/cusPayment/latest-completed?orderid=" + orderId);
+
+         if(latestCusPayment){
+         document.getElementById("add-cp-tot-label").textContent = "Previous Balance";
+         document.getElementById("add-cp-tot").value = latestCusPayment.balance;
+         customerPayment.totalAmount = latestCusPayment.totalAmount;
+         document.getElementById("add-cp-tot").classList.add('is-valid');
+
+
+         }else{
+         document.getElementById("add-cp-tot-label").textContent = "Total Amount";
+         document.getElementById("add-cp-tot").value = JSON.parse(order).totalAmount;
+         document.getElementById("add-cp-tot").classList.add('is-valid');
+         customerPayment.totalAmount = JSON.parse(order).totalAmount;
+
+         }
 
 
 }
+
+const calculateAdvancePayBalance = () => {
+    const addCpPa = document.getElementById("add-cp-pa");
+    const addCpTot = document.getElementById("add-cp-tot");
+    const addCpBalance = document.getElementById("add-cp-balance");
+
+    // calculate balance when pay amount entered
+    if (new RegExp(/^[1-9][0-9]{0,5}([.][0-9]{2})?$/).test(addCpPa.value) && (parseFloat(addCpPa.value) < parseFloat(addCpTot.value))) {
+
+        customerPayment.payAmount =parseFloat(addCpPa.value);
+        // Validating the input
+        addCpPa.classList.remove('is-invalid');
+        addCpPa.classList.add('is-valid');
+
+        // Calculating the balance
+        addCpBalance.value = (parseFloat(addCpTot.value) - parseFloat(addCpPa.value)).toFixed(2);
+        customerPayment.balance =addCpBalance.value;
+        // Validating the balance input
+        addCpBalance.classList.remove('is-invalid');
+        addCpBalance.classList.add('is-valid');
+    } else {
+        // Invalid input handling
+        addCpPa.classList.remove('is-valid');
+        addCpPa.classList.add('is-invalid');
+
+        // Clear balance if invalid
+        addCpBalance.value = '';
+
+        // Remove validation classes for balance input
+        addCpBalance.classList.remove('is-invalid');
+        addCpBalance.classList.remove('is-valid');
+    }
+}
+
 
 //Reload product form
 const reloadCustomerPaymentForm = () =>{
@@ -89,6 +144,90 @@ const reloadCustomerPaymentForm = () =>{
 
 
 }
+
+
+
+const formValidation = () =>{
+
+    const addCpOrd = document.getElementById('add-cp-ord')
+
+    addCpOrd.addEventListener('change', () => {
+        DynamicSelectValidation(addCpOrd, 'customerPayment', 'order');
+    });
+
+    const addCpInv = document.getElementById('add-cp-inv')
+
+    addCpInv.addEventListener('keyup',  () => {
+            validation(addCpInv, '', 'customerPayment', 'invoiceNo');
+    });
+
+    const addCpPayMeth = document.getElementById('add-cp-payMeth')
+
+    addCpPayMeth.addEventListener('change', () =>{
+        selectFieldValidator(addCpPayMeth,'','customerPayment','paymentMethod')
+        });
+
+    const addCPayDate = document.getElementById('add-cp-payDate')
+
+    addCPayDate.addEventListener('change', () =>{
+    dateFeildValidator(addCPayDate,'','customerPayment','paymentDate')
+    })
+
+    //Total value added in fillDataIntoTotal function
+    //Balance and PayAmount added in calculateAdvancePayBalance
+
+
+    const addCpStatus = document.getElementById('add-cp-status')
+
+    addCpStatus.addEventListener('change', () =>{
+            selectFieldValidator(addCpStatus,'','customerPayment','paymentStatus')
+    });
+
+    const addCusPayNote = document.getElementById('addCusPayNote')
+    addCusPayNote.addEventListener('keyup',  () => {
+                validation(addCusPayNote, '', 'customerPayment', 'note');
+    });
+
+
+
+    const inputCardRefNo = document.getElementById('inputCardRefNo')
+        inputCardRefNo.addEventListener('keyup',  () => {
+                    validation(inputCardRefNo, '', 'customerPayment', 'transferid');
+    });
+
+    const inputChequeNo = document.getElementById('inputChequeNo')
+            inputChequeNo.addEventListener('keyup',  () => {
+                        validation(inputChequeNo, '', 'customerPayment', 'transferid');
+    });
+
+    const inputTransferId = document.getElementById('inputChequeNo')
+            inputTransferId.addEventListener('keyup',  () => {
+                        validation(inputBankTranferId, '', 'customerPayment', 'transferid');
+        });
+
+
+    const inputBankTransferredDateTime = document.getElementById('inputBankTransferredDateTime')
+            inputBankTransferredDateTime.addEventListener('keyup',  () => {
+                     dateFeildValidator(inputBankTransferredDateTime,'','customerPayment','paymentDate')
+        });
+
+    const inputChequeDate = document.getElementById('inputChequeDate')
+                inputChequeDate.addEventListener('keyup',  () => {
+                         dateFeildValidator(inputChequeDate,'','customerPayment','paymentDate')
+            });
+
+    const inputCardDate = document.getElementById('inputCardDate')
+                inputBankTransferredDateTime.addEventListener('keyup',  () => {
+                         dateFeildValidator(inputCardDate,'','customerPayment','paymentDate')
+            });
+
+
+
+
+
+
+}
+
 
 const reloadCustomerPaymentTable = () => {
     const cusPayments = ajaxGetRequest('/cusPayment/getAllCusPayments')
@@ -162,10 +301,12 @@ const generateCPDropDown = (element) => {
 
 // show payment options according to selected payment method - ex- show bank transfer option
 const showPaymentOptionByMethod =  () => {
-    inputTranferId.value = '';     // when payment changes from check to transfer , still might have a value in check
-    inputTransferredDateTime.value = '';
-    inputChequeDate.value = '';
+    inputBankTranferId.value = '';     // when payment changes from check to transfer , still might have a value in check
     inputChequeNo.value = '';
+    inputCardRefNo.value = '';
+    inputBankTransferredDateTime.value = '';
+    inputChequeDate.value = '';
+    inputCardDate.value = '';
 //    customerPayment.transferid = null;
 //    customerPayment.transferreddatetime = null;
 //    customerPayment.checkno = null;
@@ -179,6 +320,17 @@ bankTranferDivRow.classList.add('d-none');
 chequeDivRow.classList.add('d-none');
 cardDivRow.classList.add('d-none');
 
+// Check if payment method is not "CASH"
+        if (paymentMthd !== 'CASH') {
+            console.log("Not Cash")
+            paymentDateCol.classList.add('d-none');
+            paymentStatusCol.classList.replace('col-6', 'col-4'); // Adjusting from col-6 to col-4 if needed
+        } else {
+            console.log("Cash")
+            paymentDateCol.classList.remove('d-none');
+            paymentStatusCol.classList.replace('col-4', 'col-6'); // Revert back to original size if needed
+        }
+
 // Show the appropriate row based on payment method
 if (paymentMthd === 'BANK_TRANSFER') {
     bankTranferDivRow.classList.remove('d-none');
@@ -191,31 +343,119 @@ if (paymentMthd === 'BANK_TRANSFER') {
 
 }
 
+//Declare product submit function
+const customerPaymentSubmit = () => {
+            event.preventDefault();
+            console.log("Customer payment Submit");
+            console.log(customerPayment);
 
-//Declare function for fill balance fields
-const calculateAdvancePayBalance =  () => {
-    // calculate balance when paid amount enter
+            // 1. Check form errors
+            const errors = checkCustomerFormError();
 
-//        if (new RegExp(/^[1-9][0-9]{0,5}([.][0-9]{2})?$/).test(add-cp-pa.value) && (parseFloat(add-cp-pa.value) < parseFloat(add-cp-tot.value))) {
-//            customerPayment.paidamount = inputPaidAmount.value;
-//            customerPayment.classList.remove('is-invalid');
-//            add-cp-pa.classList.add('is-valid');
-//
-//            add-cp-balance.value = (parseFloat(add-cp-tot.value) - parseFloat(add-cp-pa.value)).toFixed(2);
-//            customerPayment.balance = add-cp-balance.value;
-//            add-cp-balance.classList.remove('is-invalid');
-//            add-cp-balance.classList.add('is-valid');
-//        } else {
-//            customerPayment.paidamount = null;
-//            add-cp-pa.classList.remove('is-valid');
-//            add-cp-pa.classList.add('is-invalid');
-//
-//            add-cp-balance.value = '';
-//            customerPayment.balance = null;
-//            add-cp-balance.classList.remove('is-invalid');
-//            add-cp-balance.classList.remove('is-valid');
-//        }
+            if (errors === "") {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "Do you want to add the Customer Payment " + customerPayment.invoiceNo + "?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#E11D48",
+                    cancelButtonColor: "#3f3f44",
+                    confirmButtonText: "Yes, Add"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const postServiceRequestResponse = ajaxRequestBody("/cusPayment", "POST", customerPayment);
+
+                        // Check backend response
+                        if (postServiceRequestResponse.status === 200) {
+                            $("#modalAddCusPayment").modal('hide');
+                            CPAddForm.reset();
+                            reloadCustomerPaymentTable();
+                            reloadCustomerPaymentForm();
+
+                            // Reset validation classes
+                            Array.from(CPAddForm.elements).forEach((field) => {
+                                field.classList.remove('is-valid', 'is-invalid');
+                            });
+
+                            Swal.fire({
+                                title: "Payment Added Successfully!",
+                                icon: "success"
+                            });
+
+                        } else {
+                            console.error(postServiceRequestResponse);
+                            Swal.fire({
+                                title: "Error",
+                                text: postServiceRequestResponse.responseText,
+                                icon: "error"
+                            });
+                        }
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: "Payment Not Added",
+                    text: errors,
+                    icon: "error"
+                });
+            }
+        };
+
+//Check product form errors
+const checkCustomerFormError = () => {
+    let errors = '';
+
+    if (customerPayment.invoiceNo == null) {
+            errors = errors + "invoice No can't be null \n";
+            add-cp-inv.classList.add('is-invalid')
+        }
+
+    if (customerPayment.order == null) {
+        errors = errors + "Order can't be null \n";
+        addProductBatch.classList.add('is-invalid')
+    }
+
+    if (customerPayment.paymentMethod == null) {
+        errors = errors + " Payment Method can't be null \n";
+        add-cp-payMeth.classList.add('is-invalid')
+    }
 
 
+    if (customerPayment.totalAmount == null) {
+        errors = errors + "Please Enter Total Amount \n";
+        add-cp-tot.classList.add('is-invalid')
+    }
 
+
+    if (customerPayment.balance == null) {
+        errors = errors + "Balance can't be null \n";
+        add-cp-balance.classList.add('is-invalid')
+    }
+
+
+    if (customerPayment.paymentStatus == null) {
+        errors = errors + "Please Select the Payment Status \n";
+            add-cp-status.classList.add('is-invalid');
+    }
+
+    if (customerPayment.paymentMethod !== 'CASH') {
+
+
+    if (customerPayment.transferid == null) {
+                errors = errors + "Transfer ID can't be null \n";
+                inputChequeNo.classList.add('is-invalid');
+                inputCardRefNo.classList.add('is-invalid')
+                inputBankTranferId.classList.add('is-invalid')
+            }
+    }
+
+    if (customerPayment.paymentDate == null) {
+                errors = errors + "Payment Date Can't be null \n";
+                inputCardDate.classList.add('is-invalid');
+                inputChequeDate.classList.add('is-invalid');
+                inputBankTransferredDateTime.classList.add('is-invalid');
+            }
+
+
+    return errors;
 }

@@ -101,7 +101,6 @@ const dateFeildValidator = (fieldId,pattern,object,property ) => {
             fieldId.classList.add("is-valid");
             console.log("valid");
             window[object][property] = fieldValue;
-            console.log(employee)
         } else {
             fieldId.classList.add("is-invalid");
             window[object][property] = null;

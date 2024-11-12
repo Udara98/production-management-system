@@ -131,7 +131,7 @@ window.addEventListener('load', () => {
                             reloadProductForm();
 
                             // Reset validation classes
-                            Array.from(userForm.elements).forEach((field) => {
+                            Array.from(productAddForm.elements).forEach((field) => {
                                 field.classList.remove('is-valid', 'is-invalid');
                             });
 

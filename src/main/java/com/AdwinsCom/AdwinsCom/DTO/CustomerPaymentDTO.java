@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
@@ -15,12 +16,13 @@ import java.time.LocalDateTime;
 public class CustomerPaymentDTO {
     private String invoiceNo;
     private CustomerOrder order;
-    private LocalDateTime paymentDate;
+    private LocalDate paymentDate;
     private Double totalAmount;
     private CustomerPayment.PaymentStatus paymentStatus;
     private PaymentMethod paymentMethod;
-    private BigDecimal paidAmount;
+    private BigDecimal payAmount;
     private BigDecimal balance;
     private String transferid;
+    private String note;
 
 }
