@@ -1,7 +1,7 @@
 <div class="modal-dialog modal-lg">
   <div class="modal-content">
     <div class="modal-header">
-      <h5 class="modal-title">Add New Ingredient</h5>
+      <h4 class="modal-title">Add New Ingredient</h4>
       <button
               class="btn-close"
               data-bs-dismiss="modal"
@@ -14,24 +14,25 @@
         <div>
           <div class="row mb-3">
             <div class="col">
-              <label for="ingredientCode" class="form-label">Ingredient Code</label>
-              <input type="text" class="form-control" id="ingredientCode" placeholder="eg. ING1234567" required>
+              <label for="ingredientCode" class="form-label fw-medium">Ingredient Code</label><span class="text-danger"> * </span>
+              <input type="text" class="form-control" id="ingredientCode" placeholder="Ex. ING1234567" required>
             </div>
             <div class="col">
-              <label for="ingredientName" class="form-label">Ingredient Name</label>
-              <input type="text" class="form-control" id="ingredientName" required>
+              <label for="ingredientName" class="form-label fw-medium">Ingredient Name</label><span class="text-danger"> * </span>
+              <input type="text" class="form-control" id="ingredientName" placeholder="Enter Ingredient Name" required>
             </div>
           </div>
 
           <div class="row mb-3">
             <div class="col">
-              <label for="quantity" class="form-label">Quantity</label>
-              <input type="number" class="form-control" id="quantity" required>
+              <label for="quantity" class="form-label fw-medium">Quantity</label><span class="text-danger"> * </span>
+              <input type="text" class="form-control" id="quantity" required placeholder="Enter the Quantity">
             </div>
             <div class="col">
-              <label for="unitType" class="form-label">Unit Type</label>
+              <label for="unitType" class="form-label fw-medium">Unit Type</label><span class="text-danger"> * </span>
               <select class="form-select" id="unitType" required>
-                <option value="KG" selected>KG</option>
+                <option disabled selected value="">Select Unit Type</option>
+                <option value="KG" >KG</option>
                 <option value="G">G</option>
                 <option value="L">L</option>
                 <option value="MG">MG</option>
@@ -41,23 +42,43 @@
 
           <div class="row mb-3">
             <div class="col">
-              <label for="rop" class="form-label">ROP</label>
-              <input type="number" class="form-control" id="rop" placeholder="Re-Order Point" required>
+              <label for="rop" class="form-label fw-medium">ROP</label><span class="text-danger"> * </span>
+              <input type="text" class="form-control" id="rop" placeholder=" Enter Re-Order Point" required>
             </div>
             <div class="col">
-              <label for="roq" class="form-label">ROQ</label>
-              <input type="number" class="form-control" id="roq" placeholder="Re-Order Quantity" required>
+              <label for="roq" class="form-label fw-medium">ROQ</label><span class="text-danger"> * </span>
+              <input type="text" class="form-control" id="roq" placeholder="Enter Re-Order Quantity" required>
             </div>
           </div>
           <div class="mb-3">
-            <label for="note" class="form-label">Note</label>
+            <label for="note" class="form-label fw-medium">Note</label><span class="text-cus-red"> (optional)</span>
             <textarea type="text" class="form-control" id="note" placeholder="Enter a note"
-                      required rows="3"></textarea>
+                       rows="3"></textarea>
           </div>
-          <div class="row mb-3">
-            <div class="col-9" >
-              <button type="reset" class="btn btn-primary">Reset</button>
-              <button type="submit" class="btn btn-primary">Submit</button>
+          <hr>
+          <div class="row mt-3 mb-2">
+            <div class="col-1">
+              <button
+                      type="reset"
+                      class="btn btn-outline-danger"
+              >
+                Clear
+              </button>
+            </div>
+            <div class="col-7"></div>
+            <div class="col-4">
+              <button
+                      class="btn cusbutton btn-update"
+                      onclick="ingredientUpdate();"
+              >
+                <i class="fa-solid fa-edit me-2"></i>Update
+              </button>
+              <button
+                      class="btn cusbutton ms-4 btn-submit"
+                      onclick="ingredientSubmit();"
+              >
+                <i class="fa-solid fa-plus me-2"></i>Add
+              </button>
             </div>
           </div>
         </div>

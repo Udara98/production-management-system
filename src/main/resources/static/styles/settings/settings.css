@@ -26,6 +26,11 @@ body {
   color: #ffffff;
 }
 
+.addPrimaryBtn:active {
+  background-color: #15055d !important;
+  color: #ffffff !important;
+}
+
 .editDeleteAll {
   color: rgb(163, 163, 163);
   padding-left: 0;
@@ -120,4 +125,10 @@ body {
 #dropdownMenu::after{
   content: none;
   display: none;
+}
+
+.settingsHeader{
+
+margin-bottom:0px !important;
+
 }

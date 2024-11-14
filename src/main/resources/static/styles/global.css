@@ -125,9 +125,25 @@ body {
   background-color: #FD6A4D;
 }
 
+.btn-update:hover {
+    background-color: #dd5f46 !important;
+    color: #ffffff !important;
+}
+
+.btn-update:active {
+    background-color: #dd5f46 !important;
+    color: #ffffff !important;
+}
+
 .btn-submit{
   background-color:#2e326d;
   width: 101px ;
+
+}
+
+.btn-submit{
+  background-color:#2e326d !important;
+  color: #ffffff !important;
 
 }
 

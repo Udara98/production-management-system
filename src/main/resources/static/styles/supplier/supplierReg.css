@@ -12,18 +12,12 @@
 
 
 
-.modal-header {
-  border-bottom: none;
-}
-
 .nav-tabs {
   display: flex;
   flex-direction: row;
 }
 
-.modal-header {
-  padding: 20px 16px 10px 16px;
-}
+
 
 #tableSupplier_wrapper{
   background-color: #f1f1f1;

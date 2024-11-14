@@ -102,7 +102,7 @@ window.addEventListener('load', () => {
 });
 
 //Declare product submit function
-        const productSubmit = () => {
+ const productSubmit = () => {
             event.preventDefault();
             console.log("button Product Submit");
             console.log(product);
@@ -157,7 +157,7 @@ window.addEventListener('load', () => {
                     icon: "error"
                 });
             }
-        };
+};
 
 //Reload product form
 const reloadProductForm = () =>{
@@ -169,7 +169,7 @@ const reloadProductForm = () =>{
     const products = ajaxGetRequest("/product/getAllProducts")
 
 
-    //Auto refill all batches on dropdown
+    //Get all batches
     const batchList = ajaxGetRequest('/batch/getAllBatches')
 
     const batchSelect = document.getElementById('addProductBatch')
@@ -180,7 +180,7 @@ const reloadProductForm = () =>{
 //        option.textContent = batch.batchNo;
 //        batchSelect.appendChild(option);
 //    })
-
+   //Auto refill all batches on dropdown
    fillDataIntoSelect(
        batchSelect,
        "Select Batch",
@@ -401,6 +401,7 @@ const itemTableRefresh = () => {
     });
 }
 
+//Define function for Generate the dropdown
 const generateProductDropDown = (element,index) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
@@ -429,6 +430,7 @@ const generateProductDropDown = (element,index) => {
 };
 
 
+//Define Function for Edit the product
 const editProduct = (product) => {
     selectedProduct = product
     const photoLabel = document.getElementById('edit-photo-label');

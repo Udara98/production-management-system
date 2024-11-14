@@ -34,7 +34,7 @@ public class IngredientController {
         return supplierMV;
     }
 
-    @PostMapping("/addNewIngredient")
+    @PostMapping()
     public ResponseEntity<?> AddNewIngredient(@RequestBody IngredientDTO ingredientDTO) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -53,7 +53,7 @@ public class IngredientController {
         }
     }
 
-    @PutMapping("/updateIngredient")
+    @PutMapping()
     public ResponseEntity<?> UpdateIngredient(@RequestBody IngredientDTO ingredientDTO){
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();

@@ -5,10 +5,15 @@ import com.AdwinsCom.AdwinsCom.Repository.IngredientRepository;
 import com.AdwinsCom.AdwinsCom.Repository.QuotationRequestRepository;
 import com.AdwinsCom.AdwinsCom.entity.Ingredient;
 import com.AdwinsCom.AdwinsCom.entity.QuotationRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -19,6 +24,9 @@ public class IngredientService implements IIngredientService {
     final SupplierService supplierService;
     final QuotationRequestRepository quotationRequestRepository;
 
+    @Autowired
+    private IPrivilegeService privilegeService;
+
     public IngredientService(IngredientRepository ingredientRepository, SupplierService supplierService, QuotationRequestRepository quotationRequestRepository) {
         this.ingredientRepository = ingredientRepository;
         this.supplierService = supplierService;
@@ -28,11 +36,23 @@ public class IngredientService implements IIngredientService {
     @Override
     public ResponseEntity<?> AddNewIngredient(IngredientDTO ingredientDTO, String userName) {
 
+        // Authentication and authorization
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        // Get privileges for the logged-in user
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER_PAYMENT");
+
+        // If user doesn't have "insert" permission, return 403 Forbidden
+        if (!loguserPrivi.get("insert")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Payment Adds not Completed: You don't have permission!");
+        }
+
         Ingredient ingredient = ingredientRepository.getIngredientByIngredientCode(ingredientDTO.getIngredientCode());
         if (ingredient != null) {
             return ResponseEntity.badRequest().body("Duplicate entry for Ingredient Code : " + ingredientDTO.getIngredientCode());
         }
-        Ingredient newIngredient = new Ingredient().mapDTO(null, ingredientDTO, userName);
+        Ingredient newIngredient = new Ingredient().mapDTO(null, ingredientDTO, auth.getName());
         ingredientRepository.save(newIngredient);
         return ResponseEntity.ok("Ingredient Added Successfully");
     }
