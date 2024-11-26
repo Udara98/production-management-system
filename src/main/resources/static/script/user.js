@@ -1,4 +1,5 @@
 
+let UserTableInstance;
 //Browser Load Option
 window.addEventListener('DOMContentLoaded', ()=>{
 
@@ -35,7 +36,14 @@ const refreshUserTable = () => {
 
     ]
 
+
+
     let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/USER")
+
+     if (UserTableInstance) {
+             UserTableInstance.destroy();
+         }
+         $("#tableUser tbody").empty();
 
 
     fillDataIntoTable6(
@@ -50,7 +58,7 @@ const refreshUserTable = () => {
 
     );
 
-    new DataTable('#tableUser');
+
 
 
     users.forEach((element,index) =>{
@@ -59,6 +67,12 @@ const refreshUserTable = () => {
 
         }
     })
+
+        productTableInstance = $("#tableUser").DataTable({
+            responsive: true,
+            autoWidth: false,
+
+        });
 
 }
 
@@ -211,11 +225,11 @@ const deleteUser = (ob, rowIndex) => {
         if(result.isConfirmed) {
 
             // Delete Service
-            let deleteServiceRequestResponse = await ajaxRequestBody("/user", "DELETE", ob)
+            let deleteServiceRequestResponse =  ajaxRequestBody("/user", "DELETE", ob)
 
 
             //Check Backend Service
-            if (deleteServiceRequestResponse === 200) {
+            if (deleteServiceRequestResponse.status === 200) {
                 swal.fire({
                     title: "Deleted!",
                     text: "User has been deleted.",
@@ -266,7 +280,7 @@ const buttonUserUpdate = () => {
                 if(result.isConfirmed){
                     let updateServiceResponse = ajaxRequestBody("/user", "PUT", user);
 
-                    if (updateServiceResponse === 200) {
+                    if (updateServiceResponse.status === 200) {
                         // alert("Update successfully ...! \n");
                         Swal.fire({
                             title: "Update successfully ..! ",

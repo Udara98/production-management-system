@@ -1,3 +1,4 @@
+let employeeTableInstance;
 //browser on load event
 window.addEventListener("load", () => {
 
@@ -37,6 +38,10 @@ const refreshEmployeeTable = () => {
 
   let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/EMPLOYEE")
 
+  if (employeeTableInstance) {
+          employeeTableInstance.destroy();
+      }
+      $("#tableEmployee tbody").empty();
 
   fillDataIntoTable6(
     tableEmployee,
@@ -49,7 +54,12 @@ const refreshEmployeeTable = () => {
       getPrivilege
   );
 
-  $('#tableEmployee').dataTable();
+
+  employeeTableInstance = $("#tableEmployee").DataTable({
+          responsive: true,
+          autoWidth: false,
+
+      });
 
 
   employees.forEach((element,index) =>{
@@ -251,7 +261,7 @@ const employeeFormRefill = (ob, rowIndex) => {
           if(result.isConfirmed){
             let updateServiceResponse = ajaxRequestBody("/employee", "PUT", employee);
 
-            if (updateServiceResponse.responseText === 200) {
+            if (updateServiceResponse.status === 200) {
               // alert("Update successfully ...! \n");
               Swal.fire({
                 title: "Update successfully ..! ",

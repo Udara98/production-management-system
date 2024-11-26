@@ -8,14 +8,15 @@ import com.AdwinsCom.AdwinsCom.Repository.SupplierRepository;
 import com.AdwinsCom.AdwinsCom.entity.Ingredient;
 import com.AdwinsCom.AdwinsCom.entity.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 public class SupplierService implements ISupplierService {
@@ -31,6 +32,9 @@ public class SupplierService implements ISupplierService {
 
     @Autowired
     private SupplierIngredientService supplierIngredientService;
+
+    @Autowired
+    private IPrivilegeService privilegeService;
 
     @Override
     @Transactional
@@ -65,12 +69,42 @@ public class SupplierService implements ISupplierService {
     }
 
     @Override
-    public ResponseEntity<?> DeleteSupplier(Integer id) {
-        Supplier supplier = supplierRepository.findById(id).get();
-        supplier.setSupplierStatus(Supplier.SupplierStatus.Removed);
-        supplierRepository.save(supplier);
+    public ResponseEntity<String> DeleteSupplier(Supplier supplier) {
 
-        return ResponseEntity.ok("Supplier Removed Successfully");
+        // Authentication and authorization
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        // Get privileges for the logged-in user
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "USER");
+
+        // If user doesn't have "delete" permission, return 403 Forbidden
+        if (!loguserPrivi.get("delete")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Supplier delete not Completed: You don't have permission!");
+        }
+
+        try {
+            // Soft delete by setting the status to false
+
+            // Load the existing supplier from the database
+            Supplier existingSupplier = supplierRepository.findById(supplier.getId())
+                    .orElseThrow(() -> new RuntimeException("Supplier not found"));
+
+            // Update only the status
+            existingSupplier.setSupplierStatus(Supplier.SupplierStatus.Removed);
+
+            // Save without affecting relationships
+            supplierRepository.save(existingSupplier);
+
+            // Return 200 OK when deletion is successful
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body("Supplier Removed successfully.");
+        } catch (Exception e) {
+            // Handle any exceptions and return 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("User deletion not completed: " + e.getMessage());
+        }
+
     }
 
     private void mapIngredients(SupplierDTO supplierDTO, Supplier updatedSupplier) {

@@ -3,85 +3,98 @@ const getIng = (ingList) => {
     selectedIngredients = [...ingList];
 };
 let tableSuppliersInstance;
-let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
-window.addEventListener("load", function () {
-    reloadSupTable();
-    getTransferList(ingredientList, [], getIng, 'add');
+window.addEventListener("load",  () => {
 
-    document.getElementById("supplierAddForm").onsubmit = function (event) {
-        event.preventDefault();
-        const ingList = [];
-        selectedIngredients.forEach((ing) => {
-            const i = {...ing};
-            delete i.suppliers;
-            ingList.push(i);
-        });
-        const supplier = {
-            regNo: document.getElementById("regNo").value,
-            supplierName: document.getElementById("supplierName").value,
-            contactPersonName: document.getElementById("contactPersonName").value,
-            contactNo: document.getElementById("contactNo").value,
-            email: document.getElementById("email").value,
-            address: document.getElementById("address").value,
-            note: document.getElementById("note").value,
-            joinDate: new Date(document.getElementById("joinDate").value),
-            supplierStatus: document.getElementById("supplierStatus").value,
-            ingredients: ingList,
-        };
-        let response = ajaxRequestBody("/supplier/addNewSupplier", "POST", supplier);
-        if (response.status === 200) {
-            swal.fire({
-                title: response.responseText,
-                icon: "success",
-            });
-            $("#modalSupplierAdd").modal("hide");
-            reloadSupTable();
-        } else {
-            swal.fire({
-                title: "Something Went Wrong",
-                text: response.responseText,
-                icon: "error",
-            });
-        }
-    };
-    document.getElementById("supplierEditForm").onsubmit = function (event) {
-        event.preventDefault();
-        const ingList = [];
-        selectedIngredients.forEach((ing) => {
-            const i = {...ing};
-            delete i.suppliers;
-            ingList.push(i);
-        });
-        const supplier = {
-            regNo: document.getElementById("edit-regNo").value,
-            supplierName: document.getElementById("edit-supplierName").value,
-            contactPersonName: document.getElementById("edit-contactPersonName").value,
-            contactNo: document.getElementById("edit-contactNo").value,
-            email: document.getElementById("edit-email").value,
-            address: document.getElementById("edit-address").value,
-            note: document.getElementById("edit-note").value,
-            joinDate: new Date(document.getElementById("edit-joinDate").value),
-            supplierStatus: document.getElementById("edit-supplierStatus").value,
-            ingredients: ingList,
-        };
-        let response = ajaxRequestBody("/supplier/updateSupplier", "PUT", supplier);
-        if (response.status === 200) {
-            swal.fire({
-                title: response.responseText,
-                icon: "success",
-            });
-            $("#modalSupplierEdit").modal("hide");
-            reloadSupTable();
-        } else {
-            swal.fire({
-                title: "Something Went Wrong",
-                text: response.responseText,
-                icon: "error",
-            });
-        }
-    };
+    //Call reloadSupTable function
+    reloadSupTable();
+
+    //Call supplier reg from refresh function
+    reloadSupplierForm();
+
+    //Call function for validation
+   SupformValidation();
+
+//    //Call getTransfter list function
+//    getTransferList(ingredientList, [], getIng, 'add');
+
+//Supplier Submit Function
+//    document.getElementById("supplierAddForm").onsubmit = function (event) {
+//        event.preventDefault();
+//        const ingList = [];
+//        selectedIngredients.forEach((ing) => {
+//            const i = {...ing};
+//            delete i.suppliers;
+//            ingList.push(i);
+//        });
+//        const supplier = {
+//            regNo: document.getElementById("regNo").value,
+//            supplierName: document.getElementById("supplierName").value,
+//            contactPersonName: document.getElementById("contactPersonName").value,
+//            contactNo: document.getElementById("contactNo").value,
+//            email: document.getElementById("email").value,
+//            address: document.getElementById("address").value,
+//            note: document.getElementById("note").value,
+//            joinDate: new Date(document.getElementById("joinDate").value),
+//            supplierStatus: document.getElementById("supplierStatus").value,
+//            ingredients: ingList,
+//        };
+//        let response = ajaxRequestBody("/supplier/addNewSupplier", "POST", supplier);
+//        if (response.status === 200) {
+//            swal.fire({
+//                title: response.responseText,
+//                icon: "success",
+//            });
+//            $("#modalSupplierAdd").modal("hide");
+//            reloadSupTable();
+//        } else {
+//            swal.fire({
+//                title: "Something Went Wrong",
+//                text: response.responseText,
+//                icon: "error",
+//            });
+//        }
+//    };
+
+//Supplier Edit Function
+//    document.getElementById("supplierEditForm").onsubmit = function (event) {
+//        event.preventDefault();
+//        const ingList = [];
+//        selectedIngredients.forEach((ing) => {
+//            const i = {...ing};
+//            delete i.suppliers;
+//            ingList.push(i);
+//        });
+//        const supplier = {
+//            regNo: document.getElementById("edit-regNo").value,
+//            supplierName: document.getElementById("edit-supplierName").value,
+//            contactPersonName: document.getElementById("edit-contactPersonName").value,
+//            contactNo: document.getElementById("edit-contactNo").value,
+//            email: document.getElementById("edit-email").value,
+//            address: document.getElementById("edit-address").value,
+//            note: document.getElementById("edit-note").value,
+//            joinDate: new Date(document.getElementById("edit-joinDate").value),
+//            supplierStatus: document.getElementById("edit-supplierStatus").value,
+//            ingredients: ingList,
+//        };
+//        let response = ajaxRequestBody("/supplier/updateSupplier", "PUT", supplier);
+//        if (response.status === 200) {
+//            swal.fire({
+//                title: response.responseText,
+//                icon: "success",
+//            });
+//            $("#modalSupplierEdit").modal("hide");
+//            reloadSupTable();
+//        } else {
+//            swal.fire({
+//                title: "Something Went Wrong",
+//                text: response.responseText,
+//                icon: "error",
+//            });
+//        }
+//    };
 });
 
+//
 const reloadSupTable = function () {
     const suppliers = ajaxGetRequest("/supplier/getAllSuppliers");
     let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
@@ -91,7 +104,7 @@ const reloadSupTable = function () {
             return '<p class="align-middle greenLabel mx-auto" style="width: 100px">Active </p>';
         }
         if (ob.supplierStatus === "InActive") {
-            return '<p class="align-middle redLabel mx-auto" style="width: 100px">InActive/p>';
+            return '<p class="align-middle redLabel mx-auto" style="width: 100px">InActive</p>';
         }
     };
     const displayProperty = [
@@ -123,6 +136,73 @@ const reloadSupTable = function () {
 
     tableSuppliersInstance = $("#tableSupplier").DataTable();
 };
+
+//Call function for validation and object binding
+const SupformValidation = () =>{
+
+    regNo.addEventListener('keyup',() => {
+                validation(regNo, '', 'supplier', 'regNo');
+        });
+
+
+    supplierName.addEventListener('keyup',  () => {
+                validation(supplierName, '', 'supplier', 'supplierName');
+    });
+
+    contactPersonName.addEventListener('keyup', () => {
+                    validation(contactPersonName, '', 'supplier', 'contactPersonName');
+    });
+
+    contactNo.addEventListener('keyup', () =>{
+                validation(contactNo,'','supplier','contactNo')
+    })
+
+    email.addEventListener('keyup', () =>{
+                    validation(email,'','supplier','email')
+    })
+
+    address.addEventListener('keyup', () =>{
+                        validation(address,'','supplier','address')
+     })
+
+    supplierStatus.addEventListener('change', () =>{
+    selectFieldValidator(supplierStatus,'','supplier','supplierStatus')
+    })
+
+    joinDate.addEventListener('change', () =>{
+        dateFeildValidator(joinDate,'','supplier','joinDate')
+    })
+
+    address.addEventListener('keyup', () =>{
+        validation(address,'','product','address')
+    })
+
+     note.addEventListener('keyup', () =>{
+            validation(note,'','product','note')
+        })
+
+
+
+}
+
+//Define Supplier reg form function
+const reloadSupplierForm = () =>{
+
+    supplier = new Object();
+    oldSupplier = null;
+
+    //Get all suppliers
+    const suppliers = ajaxGetRequest("/supplier/getAllSuppliers");
+
+    //Call getTransfter list function
+    let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
+    getTransferList(ingredientList, [], getIng, 'add');
+
+
+
+
+}
+
 const generateSupDropDown = (element) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
@@ -170,6 +250,7 @@ const viewSupplierData = (supplier) => {
 };
 
 const editSupplier = (supplier) => {
+    let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
     let excludedList = ingredientList.filter(i => !supplier.ingredients.some(si => si.ingredientCode === i.ingredientCode));
     getTransferList(excludedList, supplier.ingredients, getIng, 'edit');
 
@@ -184,10 +265,40 @@ const editSupplier = (supplier) => {
     document.getElementById("edit-supplierStatus").value = supplier.supplierStatus;
     $("#modalSupplierEdit").modal('show');
 };
-const deleteSupplier = (supplier)=>{
+
+//Function for refill the supplier form
+const supplierFormRefill = (ob, rowIndex) =>{
+
+$("#modalSupplierAdd").modal('show');
+  supplier = JSON.parse(JSON.stringify(ob));
+  oldSupplier = JSON.parse(JSON.stringify(ob));
+
+   regNo.value = supplier.regNo ;
+   supplierName.value = supplier.supplierName;
+   supplierStatus.value = supplier.supplierStatus;
+   contactPersonName.value = supplier.contactPersonName;
+   contactNo.value = supplier.contactNo;
+   email.value = supplier.email;
+   joinDate.value = convertDateTimeToDate(supplier.joinDate);
+   address.value = supplier.address;
+
+   if(supplier.note !=null){
+           note.value = supplier.note;
+         }else {
+           note.value = '';
+       }
+
+    let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
+
+    let excludedList = ingredientList.filter(i => !supplier.ingredients.some(si => si.ingredientCode === i.ingredientCode));
+    getTransferList(excludedList, supplier.ingredients, getIng, 'edit');
+
+}
+
+const deleteSupplier = (ob, rowIndex)=>{
     swal.fire({
         title: "Delete Supplier",
-        text: "Are you sure, you want to delete this?",
+        text: "Are you sure, you want to delete"+ " " + (ob.supplierName) + "?",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#cb421a",
@@ -195,17 +306,22 @@ const deleteSupplier = (supplier)=>{
         confirmButtonText: "Yes, Delete"
     }).then((result) => {
         if (result.isConfirmed) {
-            let response = ajaxDeleteRequest(`/supplier/deleteSupplier/${supplier.id}`);
-            if (response.status === 200) {
+            let deleteServiceRequestResponse =  ajaxRequestBody("/supplier", "DELETE", ob)
+            console.log(deleteServiceRequestResponse.status);
+            if (deleteServiceRequestResponse.status === 200 ) {
                 swal.fire({
                     title: response.responseText,
+                    text: "Supplier has been deleted.",
                     icon: "success"
                 });
                 reloadSupTable();
+                reloadSupplierForm();
+                supplierAddForm.reset();
+
             } else {
                 swal.fire({
-                    title: "Something Went Wrong",
-                    text: response.responseText,
+                    title: "Delete Not Successfully",
+                    text: deleteServiceRequestResponse,
                     icon: "error"
                 });
             }
@@ -213,7 +329,7 @@ const deleteSupplier = (supplier)=>{
     });
 }
 
-function bindSupplierData(data) {
+function selected(data) {
     let ingredientsHtml = "";
     if (data.ingredients && data.ingredients.length > 0) {
         ingredientsHtml = `<div class="mb-3">
@@ -238,9 +354,7 @@ function bindSupplierData(data) {
                 <strong>Supplier Name:</strong> ${data.supplierName}
             </div>
             <div class="mb-2">
-                <strong>Join Date:</strong> ${new Date(
-        data.joinDate
-    ).toLocaleDateString()}
+                <strong>Join Date:</strong> ${new Date(data.joinDate).toLocaleDateString()}
             </div>
             <div class="mb-4">
                 <strong>Status:</strong> ${data.supplierStatus}

@@ -4,17 +4,15 @@
             <h5 class="modal-title">Supplier Registration</h5>
             <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body ">
             <form id="supplierAddForm" class="needs-validation">
-                <!--        required mark start-->
+                <!--    required mark start-->
                 <div class="row">
                     <div class="col-12 text-start">
                         <span class="text-cus-red fw-medium">* required</span>
                     </div>
                 </div>
-                <!--        required mark start-->
-
-                <!--    Supplier name start-->
+                <!--    Supplier Reg No-->
                 <div class="row mt-2">
                     <div class="col">
                         <label class="form-label fw-medium" for="regNo"
@@ -28,10 +26,10 @@
                         />
                         <div class="valid-feedback"></div>
                         <div class="invalid-feedback">
-                            Please Enter Full name ex: Udara Deshan Udawatte
+                            Please Enter valid supplier Reg No
                         </div>
                     </div>
-
+                    <!--    Supplier Name-->
                     <div class="col">
                         <label class="form-label fw-medium" for="supplierName">
                             Supplier name<span class="text-danger"> * </span>
@@ -39,15 +37,15 @@
                         <input
                                 class="form-control"
                                 id="supplierName"
-                                onkeyup="validation(this,'\\b[A-Z][a-zA-Z]*\\s[A-Z][a-zA-Z]*\\s[A-Z][a-zA-Z]*\\b','employee','fullname'); genarateCallingNames();"
                                 type="text"
                                 placeholder="Enter Supplier Name"
                         />
                         <div class="valid-feedback"></div>
                         <div class="invalid-feedback">
-                            Please Enter Full name ex: Udara Deshan Udawatte
+                            Please enter supplier name ex: Udara Deshan
                         </div>
                     </div>
+                    <!--   Supplier Status-->
                     <div class="col">
                         <label class="form-label fw-medium" for="supplierStatus"
                         >Supplier Status<span class="text-danger"> * </span></label
@@ -58,13 +56,13 @@
                                 onchange="selectDynamicFieldValidator(selectStatus,'','employee','employeestatus_id')"
                                 required
                         >
-                            <option disabled value="">select status</option>
-                            <option selected value="Active">Active</option>
+                            <option disabled selected value="">Select Status</option>
+                            <option value="Active">Active</option>
                             <option value="InActive">InActive</option>
                         </select>
                     </div>
                 </div>
-
+                <!--    Contact person name-->
                 <div class="row mt-4">
                     <div class="col">
                         <label class="form-label fw-medium" for="contactPersonName"
@@ -78,7 +76,7 @@
                         />
                         <div class="valid-feedback"></div>
                         <div class="invalid-feedback">
-                            Please Enter Full name ex: Udara Deshan Udawatte
+                            Please enter contact person name ex: Udara Deshan
                         </div>
                     </div>
                     <div class="col">
@@ -97,7 +95,7 @@
                         </div>
                     </div>
                 </div>
-
+                <!--    Email -->
                 <div class="row mt-4">
                     <div class="col">
                         <label class="form-label fw-medium" for="email"
@@ -114,6 +112,7 @@
                             Please Enter Full name ex: Udara Deshan Udawatte
                         </div>
                     </div>
+                    <!--    Join date -->
                     <div class="col">
                         <label class="form-label fw-medium" for="joinDate"
                         >Join Date<span class="text-danger"> * </span>
@@ -125,10 +124,11 @@
                         />
                         <div class="valid-feedback"></div>
                         <div class="invalid-feedback">
-                            Please Enter Full name ex: Udara Deshan Udawatte
+                            Please Select Joined date
                         </div>
                     </div>
                 </div>
+                <!--    Address  -->
                 <div class="mt-3">
                     <label class="form-label fw-medium" for="address"
                     >Address<span class="text-danger"> * </span>
@@ -142,28 +142,49 @@
                     />
                     <div class="valid-feedback"></div>
                     <div class="invalid-feedback">
-                        Please Enter Full name ex: Udara Deshan Udawatte
+                        Please Enter Valid Address
                     </div>
                 </div>
+                <!--    Note -->
                 <div class="mt-3">
                     <label class="form-label fw-medium" for="note"
-                    >Note<span class="text-danger"> * </span>
+                    >Note<span class="text-danger"> </span>
                     </label>
                     <textarea type="text" class="form-control" id="note" placeholder="Enter a note"
-                              required rows="3"></textarea>
+                               rows="3"></textarea>
                     <div class="valid-feedback"></div>
                     <div class="invalid-feedback">
-                        Please Enter Full name ex: Udara Deshan Udawatte
+                        Please Enter valid supplier Reg No
                     </div>
                 </div>
 
-                <div th:replace="~{fragments/Supplier/IngredientTransferList.html::add}"></div>
-                <div class="d-flex justify-content-end mx-4" >
-                    <div>
-                        <button type="reset" class="btn btn-primary mx-2">Reset</button>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                <div th:replace="~{fragments/Supplier/IngredientTransferList.html::edit}"></div>
+                    <div class="row mt-3 mb-2">
+                        <div class="col-1">
+                            <button
+                                    type="reset"
+                                    class="btn btn-outline-danger"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                        <div class="col-7"></div>
+                        <div class="col-4">
+                            <button
+                                    class="btn cusbutton btn-update"
+                                    onclick="productUpdate()"
+                                    type="submit"
+                            >
+                                <i class="fa-solid fa-edit me-2"></i>Update
+                            </button>
+                            <button
+                                    class="btn cusbutton ms-4 btn-submit"
+                                    onclick="customerPaymentSubmit();"
+                            >
+                                <i class="fa-solid fa-plus me-2"></i>Add
+                            </button>
+                        </div>
                     </div>
-                </div>
             </form>
         </div>
     </div>

@@ -58,10 +58,10 @@ public class SupplierController {
         }
     }
 
-    @DeleteMapping("/deleteSupplier/{id}")
-    public ResponseEntity<?> DeleteSupplier(@PathVariable Integer id){
+    @DeleteMapping
+    public ResponseEntity<?> DeleteSupplier(@RequestBody Supplier supplier){
         try{
-            return supplierService.DeleteSupplier(id);
+            return supplierService.DeleteSupplier(supplier);
         }catch (Exception e){
             return ResponseEntity.internalServerError().body(e.getMessage());
         }

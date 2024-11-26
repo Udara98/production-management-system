@@ -150,7 +150,7 @@ const reloadQuotationTable = function () {
             return '<p class="align-middle redLabel mx-auto" style="width: 100px">Rejected</p>';
         }
         if (ob.quotationStatus === "Closed") {
-            return '<p class="align-middle GrayLabel mx-auto" style="width: 100px">Closed/p>';
+            return '<p class="align-middle GrayLabel mx-auto" style="width: 100px">Closed</p>';
         }
     };
     const displayProperty = [

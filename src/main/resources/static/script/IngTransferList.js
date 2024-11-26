@@ -1,3 +1,4 @@
+
 const getTransferList = (left = [], right = [], getIng, prefix = 'default') => {
     const leftList = document.getElementById(`${prefix}-left-list`);
     const rightList = document.getElementById(`${prefix}-right-list`);
@@ -12,8 +13,9 @@ const getTransferList = (left = [], right = [], getIng, prefix = 'default') => {
     let checked = [];
 
     function updateList(list, items) {
-        list.innerHTML = "";
+
         items.forEach(item => {
+            console.log(item)
             const listItem = document.createElement("li");
             listItem.className = "list-item";
             listItem.innerHTML = `
@@ -21,7 +23,6 @@ const getTransferList = (left = [], right = [], getIng, prefix = 'default') => {
                 ${item.ingredientName} (${item.ingredientCode})
             `;
             list.appendChild(listItem);
-
             listItem.addEventListener("click", (e) => {
                 if (e.target.tagName !== "INPUT") {
                     const checkbox = listItem.querySelector("input[type='checkbox']");
@@ -100,4 +101,5 @@ const getTransferList = (left = [], right = [], getIng, prefix = 'default') => {
     moveAllLeftButton.addEventListener("click", moveAllLeft);
 
     updateUI();
+
 };

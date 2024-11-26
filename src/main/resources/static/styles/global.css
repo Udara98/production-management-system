@@ -222,7 +222,7 @@ body {
 }
 
 .GrayLabel{
-  background-color: #4B4B4B;
+  background-color: #6a6a6a;
   text-align: center;
   color: #151515;
   width: 70px;
@@ -371,4 +371,9 @@ div.dt-container .dt-input {
   background-color: #f1f1f1;
   padding: 1rem;
   border-radius: 0.5rem;
+}
+
+.modal-body {
+  max-height: 90vh; /* Adjust the height as needed */
+  overflow-y: auto; /* Enable vertical scrolling */
 }

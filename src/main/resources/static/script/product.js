@@ -297,9 +297,6 @@ const formValidation = () =>{
                 fileValidation(filePhoto, 'product', 'product_photo', 'productPhotoName', productPhoto);
     })
 
-
-
-
 }
 
 
@@ -394,6 +391,7 @@ const itemTableRefresh = () => {
         generateProductDropDown,
         getPrivilege
     );
+
     productTableInstance = $("#tableProduct").DataTable({
         responsive: true,
         autoWidth: false,
@@ -512,7 +510,7 @@ const deleteProduct = (ob, rowIndex) => {
             if (deleteServiceRequestResponse === "OK") {
                 swal.fire({
                     title: "Deleted!",
-                    text: "User has been deleted.",
+                    text: "Product has been deleted.",
                     icon: "success"
                 });
                 userForm.reset();
