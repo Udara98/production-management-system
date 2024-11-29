@@ -232,7 +232,7 @@ const productFormRefill = (ob, rowIndex) => {
         addProductNote.value = product.note;
       }else {
         addProductNote.value = '';
-    }
+  }
 
 
   //refill  Batch No
@@ -257,15 +257,15 @@ const productFormRefill = (ob, rowIndex) => {
 //Call function for validation and object binding
 const formValidation = () =>{
 
-    addProductBatch.addEventListener('change', function () {
+    addProductBatch.addEventListener('change',  () => {
         DynamicSelectValidation(addProductBatch, 'product', 'batch');
     });
 
-    addProductName.addEventListener('keyup', function () {
+    addProductName.addEventListener('keyup',  () => {
             validation(addProductName, '', 'product', 'productName');
     });
 
-    addProductUnitSize.addEventListener('keyup', function () {
+    addProductUnitSize.addEventListener('keyup',  () => {
                 validation(addProductUnitSize, '^[1-9]$', 'product', 'unitSize');
     });
 

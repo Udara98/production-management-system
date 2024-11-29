@@ -186,6 +186,26 @@ const DynamicSelectValidation = function (dropdownId, object, property) {
 
     if (selectedValue !== '') {
         window[object][property] = JSON.parse(selectedValue);
+        console.log(JSON.parse(selectedValue).requestNo);
+        dropdownId.classList.remove('is-invalid');
+        dropdownId.classList.add('is-valid');
+    } else {
+        window[object][property] = null;
+        if (dropdownId.required) {
+            dropdownId.classList.remove('is-valid');
+            dropdownId.classList.add('is-invalid');
+        } else {
+            dropdownId.style.border = '1px solid #ced4da';
+        }
+    }
+}
+const DynamicSelectValidationOnlyValue = function (dropdownId, object, property,objectProp) {
+
+    const selectedValue = dropdownId.value;
+
+    if (selectedValue !== '') {
+        const parsedValue = JSON.parse(selectedValue);
+        window[object][property] = parsedValue[objectProp];
         dropdownId.classList.remove('is-invalid');
         dropdownId.classList.add('is-valid');
     } else {
@@ -231,7 +251,7 @@ const validation = (fieldId,pattern,object,property ) => {
 
 const selectFieldValidator= (fieldId, pattern,object,property) => {
   const fieldValue = fieldId.value;
-
+    console.log(fieldId)
 
   if (fieldId.value !== "") {
     fieldId.classList.add("is-valid");

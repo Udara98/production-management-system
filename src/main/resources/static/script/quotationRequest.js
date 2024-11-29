@@ -1,10 +1,13 @@
 let qRequestTableInstance;
 
-window.addEventListener("load", function () {
+window.addEventListener("load", () => {
+
+    //Call Request table function
     reloadQRequestTable();
 });
 
-const reloadQRequestTable = function (){
+//Define function for refresh the request table
+const reloadQRequestTable =  () =>{
     const qRequests = ajaxGetRequest("/quotation-request/getAllRequests")
     let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
 
@@ -13,7 +16,7 @@ const reloadQRequestTable = function (){
         {dataType: "text", propertyName: "ingCode"},
         {dataType: "date", propertyName: "requestDate"},
         {dataType: "List", propertyName: getSuppliers},
-        {dataType: "text", propertyName: "requestStatus"},
+        {dataType: "function", propertyName: getQRStatus},
     ];
 
     if(qRequestTableInstance){
@@ -30,6 +33,19 @@ const reloadQRequestTable = function (){
     )
     qRequestTableInstance = $("#tableQRequests").dataTable();
 }
+
+//Define function to display status in quotation requests
+const getQRStatus = (ob) => {
+        console.log(getQRStatus)
+        if (ob.requestStatus === "Send") {
+            return '<p class="align-middle greenLabel mx-auto" style="width: 100px">Accepted</p>';
+        }
+        if (ob.requestStatus === "Closed") {
+            return '<p class="align-middle GrayLabel mx-auto" style="width: 100px">Closed</p>';
+        }
+    };
+
+//Define button list function
 const generateQReqDropDown = (element) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
@@ -52,7 +68,7 @@ const generateQReqDropDown = (element) => {
     return dropdownMenu;
 };
 
-const getSuppliers = function (ob){
+const getSuppliers =  (ob)=> {
     const suppliers = [...ob.suppliers];
     const items = [];
     suppliers.forEach((sup)=>{
@@ -60,7 +76,7 @@ const getSuppliers = function (ob){
     })
     return items;
 }
-const deleteQRequest=function (ob){
+const deleteQRequest= (ob) => {
     swal.fire({
         title: "Delete Quotation Request",
         text: "Are you sure, you want to delete this?",

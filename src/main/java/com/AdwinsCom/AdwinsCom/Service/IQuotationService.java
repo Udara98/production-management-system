@@ -8,9 +8,9 @@ import java.security.NoSuchAlgorithmException;
 
 public interface IQuotationService {
 
-    ResponseEntity<?> AddNewQuotation(QuotationDTO quotationDTO, String userName) throws NoSuchAlgorithmException;
+    ResponseEntity<?> AddNewQuotation(QuotationDTO quotationDTO) throws NoSuchAlgorithmException;
     ResponseEntity<?> GetAllQuotations();
-    ResponseEntity<?> UpdateQuotation(QuotationDTO quotationDTO, String userName) throws NoSuchAlgorithmException;
+    ResponseEntity<?> UpdateQuotation(QuotationDTO quotationDTO) throws NoSuchAlgorithmException;
     ResponseEntity<?> DeleteQuotation(Integer id);
 
 }

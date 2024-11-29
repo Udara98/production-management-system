@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
@@ -15,7 +16,7 @@ public class QuotationDTO {
     private String ingredientCode;
     private String supplierRegNo;
     private Double pricePerUnit;
-    private LocalDateTime receivedDate;
-    private LocalDateTime deadline;
+    private LocalDate receivedDate;
+    private LocalDate deadline;
     private Quotation.QuotationStatus quotationStatus;
 }

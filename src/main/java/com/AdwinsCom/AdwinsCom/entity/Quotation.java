@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -46,10 +47,10 @@ public class Quotation {
     private Double pricePerUnit;
 
     @Column(name = "received_date")
-    private LocalDateTime receivedDate;
+    private LocalDate receivedDate;
 
     @Column(name = "deadline")
-    private LocalDateTime deadline;
+    private LocalDate deadline;
 
     @Column(name = "quotation_status")
     @Enumerated(EnumType.STRING)

@@ -25,11 +25,10 @@ public class QuotationController {
         return quotationMV;
     }
 
-    @PostMapping("/addNewQuotation")
+    @PostMapping()
     public ResponseEntity<?> AddNewQuotation(@RequestBody QuotationDTO quotationDTO) {
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            return quotationService.AddNewQuotation(quotationDTO, auth.getName());
+            return quotationService.AddNewQuotation(quotationDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
@@ -44,11 +43,10 @@ public class QuotationController {
         }
     }
 
-    @PutMapping("/editQuotation")
+    @PutMapping()
     public ResponseEntity<?> EditQuotation(@RequestBody QuotationDTO quotationDTO) {
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            return quotationService.UpdateQuotation(quotationDTO, auth.getName());
+            return quotationService.UpdateQuotation(quotationDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }

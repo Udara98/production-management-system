@@ -60,31 +60,29 @@ window.addEventListener('load', () => {
 
 const fillDataIntoTotal = () =>{
 
-        document.getElementById("add-cp-pa").value = "";
-        document.getElementById("add-cp-balance").value = "";
+    document.getElementById("add-cp-pa").value = "";
+    document.getElementById("add-cp-balance").value = "";
 
 
-        const order = document.getElementById("add-cp-ord").value;
-        const orderId = JSON.parse(order).id
+    const order = document.getElementById("add-cp-ord").value;
+    const orderId = JSON.parse(order).id
 
-        latestCusPayment = ajaxGetRequest("/cusPayment/latest-completed?orderid=" + orderId);
+    latestCusPayment = ajaxGetRequest("/cusPayment/latest-completed?orderid=" + orderId);
 
-         if(latestCusPayment){
-         document.getElementById("add-cp-tot-label").textContent = "Previous Balance";
-         document.getElementById("add-cp-tot").value = latestCusPayment.balance;
-         customerPayment.totalAmount = latestCusPayment.totalAmount;
-         document.getElementById("add-cp-tot").classList.add('is-valid');
-
-
-         }else{
-         document.getElementById("add-cp-tot-label").textContent = "Total Amount";
-         document.getElementById("add-cp-tot").value = JSON.parse(order).totalAmount;
-         document.getElementById("add-cp-tot").classList.add('is-valid');
-         customerPayment.totalAmount = JSON.parse(order).totalAmount;
-
-         }
+    if(latestCusPayment){
+    document.getElementById("add-cp-tot-label").textContent = "Previous Balance";
+    document.getElementById("add-cp-tot").value = latestCusPayment.balance;
+    customerPayment.totalAmount = latestCusPayment.totalAmount;
+    document.getElementById("add-cp-tot").classList.add('is-valid');
 
 
+    }else{
+    document.getElementById("add-cp-tot-label").textContent = "Total Amount";
+    document.getElementById("add-cp-tot").value = JSON.parse(order).totalAmount;
+    document.getElementById("add-cp-tot").classList.add('is-valid');
+    customerPayment.totalAmount = JSON.parse(order).totalAmount;
+
+    }
 }
 
 const calculateAdvancePayBalance = () => {
