@@ -112,34 +112,34 @@ window.addEventListener("load", () => {
     //Define function for validation and object binding
     const formValidation = () =>{
 
-        ingredientCode.addEventListener('keyup', () => {
-                validation(ingredientCode, '', 'ingredient', 'ingredientCode');
-        });
+    ingredientCode.addEventListener('keyup', () => {
+            validation(ingredientCode, '', 'ingredient', 'ingredientCode');
+    });
 
-        quantity.addEventListener('keyup', () => {
-                    validation(quantity, '^(?:[1-9][0-9]?|1[0-9]{2}|200)$', 'ingredient', 'quantity');
-        });
+    quantity.addEventListener('keyup', () => {
+                validation(quantity, '^(?:[1-9][0-9]?|1[0-9]{2}|200)$', 'ingredient', 'quantity');
+    });
 
-        ingredientName.addEventListener('keyup', () => {
-                            validation(ingredientName, '', 'ingredient', 'ingredientName');
-                });
+    ingredientName.addEventListener('keyup', () => {
+                        validation(ingredientName, '', 'ingredient', 'ingredientName');
+            });
 
-        unitType.addEventListener('change', () => {
-        selectFieldValidator(unitType,'','ingredient','unitType')
+    unitType.addEventListener('change', () => {
+    selectFieldValidator(unitType,'','ingredient','unitType')
+    })
+
+    rop.addEventListener('keyup', () =>{
+            validation(rop,'^[1-9][0-9]?$','ingredient','rop')
         })
 
-        rop.addEventListener('keyup', () =>{
-                validation(rop,'^[1-9][0-9]?$','ingredient','rop')
-            })
-
-        roq.addEventListener('keyup', () =>{
-                validation(roq,'^(?:[1-9][0-9]?|1[0-9]{2}|200)$','ingredient','roq')
-            })
+    roq.addEventListener('keyup', () =>{
+            validation(roq,'^(?:[1-9][0-9]?|1[0-9]{2}|200)$','ingredient','roq')
+        })
 
 
-        note.addEventListener('keyup', () =>{
-                     validation(note,'','ingredient','note')
-             })
+    note.addEventListener('keyup', () =>{
+                 validation(note,'','ingredient','note')
+         })
 
 
     }

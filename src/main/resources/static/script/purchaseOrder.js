@@ -3,35 +3,37 @@ let selectedPO;
 window.addEventListener("load", function () {
     reloadPOTable();
 
-    document.getElementById("purchaseOrderEditForm").onsubmit = function (event) {
-        event.preventDefault();
-        const total = selectedPO.pricePerUnit * parseInt(document.getElementById("edit-po-qty").value)
-        selectedPO.qty = document.getElementById("edit-po-qty").value;
-        selectedPO.totalPrice = total;
-        selectedPO.requiredDate = new Date(document.getElementById("edit-po-reqDate").value);
-        selectedPO.notes = document.getElementById("edit-po-note").value;
-        selectedPO.purchaseOrderStatus = document.getElementById("edit-po-status").value;
-
-        let response = ajaxRequestBody("/purchaseOrder/updatePurchaseOrder", "PUT", selectedPO);
-        if (response.status === 200) {
-            swal.fire({
-                title: response.responseText,
-                icon: "success",
-            });
-            reloadPOTable();
-            $("#modalPOEdit").modal("hide");
-
-        } else {
-            swal.fire({
-                title: "Something Went Wrong",
-                text: response.responseText,
-                icon: "error",
-            });
-        }
-    }
+//    document.getElementById("purchaseOrderEditForm").onsubmit = function (event) {
+//        event.preventDefault();
+//        const total = selectedPO.pricePerUnit * parseInt(document.getElementById("edit-po-qty").value)
+//        selectedPO.qty = document.getElementById("edit-po-qty").value;
+//        selectedPO.totalPrice = total;
+//        selectedPO.requiredDate = new Date(document.getElementById("edit-po-reqDate").value);
+//        selectedPO.notes = document.getElementById("edit-po-note").value;
+//        selectedPO.purchaseOrderStatus = document.getElementById("edit-po-status").value;
+//
+//        let response = ajaxRequestBody("/purchaseOrder/updatePurchaseOrder", "PUT", selectedPO);
+//        if (response.status === 200) {
+//            swal.fire({
+//                title: response.responseText,
+//                icon: "success",
+//            });
+//            reloadPOTable();
+//            $("#modalPOEdit").modal("hide");
+//
+//        } else {
+//            swal.fire({
+//                title: "Something Went Wrong",
+//                text: response.responseText,
+//                icon: "error",
+//            });
+//        }
+//    }
 
 })
-const reloadPOTable = function () {
+
+//Declare function to refresh the table
+const reloadPOTable =  () => {
     const purchaseOrders = ajaxGetRequest("/purchaseOrder/getAllPurchaseOrders");
     let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
 
@@ -71,6 +73,8 @@ const reloadPOTable = function () {
     )
     purchaseOrderTableInstance = $("#tablePOs").DataTable()
 }
+
+//Define the function to generate the dropdown
 const generatePODropDown = (element) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
@@ -99,6 +103,8 @@ const generatePODropDown = (element) => {
     });
     return dropdownMenu;
 };
+
+//Define function to view PO
 const viewPO = function (purchaseOrder) {
     $("#modalViewPO").modal('show');
     document.getElementById('purchaseOrderNo').textContent = 'Purchase Order: ' + purchaseOrder.purchaseOrderNo;
@@ -135,6 +141,8 @@ const editPO = function (purchaseOrder) {
     document.getElementById("edit-po-note").value = purchaseOrder.notes;
 
 }
+
+//Define function to Delete PO
 const deletePO = function (purchaseOrder) {
     swal.fire({
         title: "Delete Purchase Order",

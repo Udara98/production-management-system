@@ -17,11 +17,10 @@ public class GoodReceiveNoteController {
         this.goodReceiveNoteService = goodReceiveNoteService;
     }
 
-    @PostMapping("/addNewGRN")
+    @PostMapping()
     public ResponseEntity<?> AddNewGRN(@RequestBody GoodReceiveNoteDTO goodReceiveNoteDTO){
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            return goodReceiveNoteService.AddNewGRN(goodReceiveNoteDTO, auth.getName());
+            return goodReceiveNoteService.AddNewGRN(goodReceiveNoteDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
@@ -36,11 +35,10 @@ public class GoodReceiveNoteController {
         }
     }
 
-    @PutMapping("/updateGRN")
+    @PutMapping()
     public ResponseEntity<?> UpdateGRN(@RequestBody GoodReceiveNoteDTO goodReceiveNoteDTO){
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            return goodReceiveNoteService.UpdateGRN(goodReceiveNoteDTO, auth.getName());
+            return goodReceiveNoteService.UpdateGRN(goodReceiveNoteDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }

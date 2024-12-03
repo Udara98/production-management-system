@@ -40,7 +40,7 @@ public class IngredientService implements IIngredientService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         // Get privileges for the logged-in user
-        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER_PAYMENT");
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "INGREDIENT");
 
         // If user doesn't have "insert" permission, return 403 Forbidden
         if (!loguserPrivi.get("insert")) {

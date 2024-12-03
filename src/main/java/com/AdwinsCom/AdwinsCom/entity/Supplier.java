@@ -1,4 +1,5 @@
 package com.AdwinsCom.AdwinsCom.entity;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -55,7 +56,7 @@ public class Supplier {
     private String note;
 
     @Column(name = "join_date")
-    private LocalDateTime joinDate;
+    private LocalDate joinDate;
 
     @Column(name = "supplier_status")
     @Enumerated(EnumType.STRING)

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
@@ -16,5 +17,5 @@ public class GoodReceiveNoteDTO {
     private PurchaseOrder purchaseOrder;
     private Double totalAmount;
     private GoodReceiveNote.GRNStatus grnStatus;
-    private LocalDateTime receivedDate;
+    private LocalDate receivedDate;
 }

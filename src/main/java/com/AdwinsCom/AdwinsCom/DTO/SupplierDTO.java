@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 @Data
@@ -22,7 +23,7 @@ public class SupplierDTO {
     private String email;
     private String address;
     private String note;
-    private LocalDateTime joinDate;
+    private LocalDate joinDate;
     private Supplier.SupplierStatus supplierStatus;
     private Set<Ingredient> ingredients;
 }

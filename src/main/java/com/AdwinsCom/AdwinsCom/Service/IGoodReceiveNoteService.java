@@ -7,8 +7,8 @@ import java.security.NoSuchAlgorithmException;
 
 public interface IGoodReceiveNoteService {
 
-    ResponseEntity<?> AddNewGRN(GoodReceiveNoteDTO goodReceiveNoteDTO, String userName) throws NoSuchAlgorithmException;
-    ResponseEntity<?> UpdateGRN(GoodReceiveNoteDTO goodReceiveNoteDTO, String userName) throws NoSuchAlgorithmException;
+    ResponseEntity<?> AddNewGRN(GoodReceiveNoteDTO goodReceiveNoteDTO) throws NoSuchAlgorithmException;
+    ResponseEntity<?> UpdateGRN(GoodReceiveNoteDTO goodReceiveNoteDTO) throws NoSuchAlgorithmException;
     ResponseEntity<?> GetAllGRNs();
     ResponseEntity<?> DeleteGRN(Integer id);
 }

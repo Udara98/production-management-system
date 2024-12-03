@@ -29,7 +29,7 @@ public class SupplierController {
         return supplierMV;
     }
 
-    @PostMapping("/addNewSupplier")
+    @PostMapping()
     public ResponseEntity<?> AddNewSupplier(@RequestBody SupplierDTO supplierDTO){
         try{
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();

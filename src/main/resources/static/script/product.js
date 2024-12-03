@@ -103,60 +103,60 @@ window.addEventListener('load', () => {
 
 //Declare product submit function
  const productSubmit = () => {
-            event.preventDefault();
-            console.log("button Product Submit");
-            console.log(product);
+    event.preventDefault();
+    console.log("button Product Submit");
+    console.log(product);
 
-            // 1. Check form errors
-            const errors = checkProductFormError();
+    // 1. Check form errors
+    const errors = checkProductFormError();
 
-            if (errors === "") {
-                Swal.fire({
-                    title: "Are you sure?",
-                    text: "Do you want to add the product " + product.productName + "?",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#E11D48",
-                    cancelButtonColor: "#3f3f44",
-                    confirmButtonText: "Yes, Add"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const postServiceRequestResponse = ajaxRequestBody("/product", "POST", product);
+    if (errors === "") {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Do you want to add the product " + product.productName + "?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#E11D48",
+            cancelButtonColor: "#3f3f44",
+            confirmButtonText: "Yes, Add"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const postServiceRequestResponse = ajaxRequestBody("/product", "POST", product);
 
-                        // Check backend response
-                        if (postServiceRequestResponse.status === 200) {
-                            $("#modalAddProduct").modal('hide');
-                            productAddForm.reset();
-                            itemTableRefresh();
-                            reloadProductForm();
+                // Check backend response
+                if (postServiceRequestResponse.status === 200) {
+                    $("#modalAddProduct").modal('hide');
+                    productAddForm.reset();
+                    itemTableRefresh();
+                    reloadProductForm();
 
-                            // Reset validation classes
-                            Array.from(productAddForm.elements).forEach((field) => {
-                                field.classList.remove('is-valid', 'is-invalid');
-                            });
+                    // Reset validation classes
+                    Array.from(productAddForm.elements).forEach((field) => {
+                        field.classList.remove('is-valid', 'is-invalid');
+                    });
 
-                            Swal.fire({
-                                title: "Product Added Successfully!",
-                                icon: "success"
-                            });
+                    Swal.fire({
+                        title: "Product Added Successfully!",
+                        icon: "success"
+                    });
 
-                        } else {
-                            console.error(postServiceRequestResponse);
-                            Swal.fire({
-                                title: "Error",
-                                text: postServiceRequestResponse.responseText,
-                                icon: "error"
-                            });
-                        }
-                    }
-                });
-            } else {
-                Swal.fire({
-                    title: "Product Not Added",
-                    text: errors,
-                    icon: "error"
-                });
+                } else {
+                    console.error(postServiceRequestResponse);
+                    Swal.fire({
+                        title: "Error",
+                        text: postServiceRequestResponse.responseText,
+                        icon: "error"
+                    });
+                }
             }
+        });
+    } else {
+        Swal.fire({
+            title: "Product Not Added",
+            text: errors,
+            icon: "error"
+        });
+    }
 };
 
 //Reload product form
@@ -486,7 +486,7 @@ const editProduct = (product) => {
     $("#modalEditProduct").modal("show");
 
 }
-// create funtion for delete User
+// create function for delete User
 const deleteProduct = (ob, rowIndex) => {
     console.log("delete");
 
@@ -663,7 +663,7 @@ const checkProductFormError = () => {
     }
   }
 
-  //deifine method for check updates
+  //Define method for check updates
     const checkUpdates = () =>{
       let updates = "";
 
@@ -675,7 +675,7 @@ const checkProductFormError = () => {
         updates = updates + "Product Name is changed" + oldProduct.productName + " into " + product.productName +"<br>";
       }
 
-      if(product.unitSize !== oldProduct.quantity){
+      if(product.quantity !== oldProduct.quantity){
         updates = updates + "Quantity is changed" + oldProduct.quantity + " into " + product.quantity + "<br>";
       }
 

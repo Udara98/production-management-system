@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -21,7 +22,7 @@ public class SupplierWithIngredientsDTO {
     private String email;
     private String address;
     private String note;
-    private LocalDateTime joinDate;
+    private LocalDate joinDate;
     private Supplier.SupplierStatus supplierStatus;
     private String addedUser;
     private LocalDateTime addedDate;

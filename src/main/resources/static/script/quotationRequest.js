@@ -36,7 +36,6 @@ const reloadQRequestTable =  () =>{
 
 //Define function to display status in quotation requests
 const getQRStatus = (ob) => {
-        console.log(getQRStatus)
         if (ob.requestStatus === "Send") {
             return '<p class="align-middle greenLabel mx-auto" style="width: 100px">Accepted</p>';
         }

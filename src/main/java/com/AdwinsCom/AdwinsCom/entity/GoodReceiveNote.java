@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -40,7 +41,7 @@ public class GoodReceiveNote {
     private GRNStatus grnStatus;
 
     @Column(name = "received_date")
-    private LocalDateTime receivedDate;
+    private LocalDate receivedDate;
 
     @Column(name = "added_user")
     private String addedUser;

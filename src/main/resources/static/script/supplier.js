@@ -2,6 +2,7 @@ let selectedIngredients = [];
 const getIng = (ingList) => {
     selectedIngredients = [...ingList];
 };
+
 let tableSuppliersInstance;
 window.addEventListener("load",  () => {
 
@@ -94,8 +95,8 @@ window.addEventListener("load",  () => {
 //    };
 });
 
-//
-const reloadSupTable = function () {
+//Define function to generate Supplier table
+const reloadSupTable =  () => {
     const suppliers = ajaxGetRequest("/supplier/getAllSuppliers");
     let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
 
@@ -142,7 +143,7 @@ const SupformValidation = () =>{
 
     regNo.addEventListener('keyup',() => {
                 validation(regNo, '', 'supplier', 'regNo');
-        });
+    });
 
 
     supplierName.addEventListener('keyup',  () => {
@@ -177,13 +178,77 @@ const SupformValidation = () =>{
         validation(address,'','product','address')
     })
 
-     note.addEventListener('keyup', () =>{
+    note.addEventListener('keyup', () =>{
             validation(note,'','product','note')
-        })
-
-
-
+    })
 }
+
+//Define Supplier submit function
+ const supplierSubmit = () => {
+    event.preventDefault();
+    console.log(supplier);
+
+    const ingList = [];
+            selectedIngredients.forEach((ing) => {
+                const i = {...ing};
+                delete i.suppliers;
+                ingList.push(i);
+            });
+
+    supplier.ingredients = ingList;
+    console.log(supplier);
+
+    // Check form errors
+    const errors = checkSupplierFormError();
+
+    if (errors === "") {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Do you want to add the Supplier " + supplier.supplierName + "?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#E11D48",
+            cancelButtonColor: "#3f3f44",
+            confirmButtonText: "Yes, Add"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const postServiceRequestResponse = ajaxRequestBody("/supplier", "POST", supplier);
+
+                // Check backend response
+                if (postServiceRequestResponse.status === 200) {
+                    $("#modalSupplierAdd").modal('hide');
+                    supplierAddForm.reset();
+                    reloadSupTable();
+                    reloadSupplierForm();
+
+                    // Reset validation classes
+                    Array.from(supplierAddForm.elements).forEach((field) => {
+                        field.classList.remove('is-valid', 'is-invalid');
+                    });
+
+                    Swal.fire({
+                        title: "Supplier Added Successfully!",
+                        icon: "success"
+                    });
+
+                } else {
+                    console.error(postServiceRequestResponse);
+                    Swal.fire({
+                        title: "Error",
+                        text: postServiceRequestResponse.responseText,
+                        icon: "error"
+                    });
+                }
+            }
+        });
+    } else {
+        Swal.fire({
+            title: "Supplier does not Added",
+            text: errors,
+            icon: "error"
+        });
+    }
+};
 
 //Define Supplier reg form function
 const reloadSupplierForm = () =>{
@@ -194,15 +259,13 @@ const reloadSupplierForm = () =>{
     //Get all suppliers
     const suppliers = ajaxGetRequest("/supplier/getAllSuppliers");
 
-    //Call getTransfter list function
+    //Call getTransfer list function
     let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
     getTransferList(ingredientList, [], getIng, 'add');
 
-
-
-
 }
 
+//Define function to generate dropdown
 const generateSupDropDown = (element) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
@@ -230,6 +293,57 @@ const generateSupDropDown = (element) => {
     });
     return dropdownMenu;
 };
+
+//Check Supplier form errors
+const checkSupplierFormError = () => {
+    let errors = '';
+
+    if (supplier.regNo == null) {
+        errors = errors + "Reg No can't be null \n";
+        regNo.classList.add('is-invalid')
+    }
+
+    if (supplier.supplierName == null) {
+        errors = errors + "Supplier name can't be null \n";
+        supplierName.classList.add('is-invalid')
+    }
+
+
+    if (supplier.supplierStatus == null) {
+        errors = errors + "Supplier name can't be null  \n";
+        supplierStatus.classList.add('is-invalid')
+    }
+
+
+    if (supplier.contactPersonName == null) {
+        errors = errors + "Contact Person name can't be null \n";
+        contactPersonName.classList.add('is-invalid')
+    }
+
+
+    if (supplier.contactNo == null) {
+        errors = errors + "Contact No can't be null \n";
+        addProductUnitType.classList.add('is-invalid');
+    }
+
+    if (supplier.email == null) {
+            errors = errors + "Email can't be null  \n";
+            email.classList.add('is-invalid');
+        }
+
+    if (supplier.joinDate == null) {
+                errors = errors + "Join date can't be null  \n";
+                joinDate.classList.add('is-invalid');
+            }
+
+    if (supplier.address == null) {
+                errors = errors + "Address can't be null  \n";
+                address.classList.add('is-invalid');
+            }
+
+
+    return errors;
+}
 
 const getIngredients = function (ob) {
     const ingredients = [...ob.ingredients];

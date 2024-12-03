@@ -72,15 +72,4 @@ public class IngredientController {
         }
     }
 
-//    @GetMapping(value = "/availblelist", produces = "application/json")
-//    public List<Ingredient> getAvailableDataList() {
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        HashMap<String, Boolean> logUserPrivi = privilegeController.getPrivilegeByUserModule(auth.getName(), "Ingredient");
-//
-//        if (!logUserPrivi.get("select")) {
-//            return null;
-//        }
-//
-//        return ingredientRepository.getAvailableItemList();
-//    }
 }
