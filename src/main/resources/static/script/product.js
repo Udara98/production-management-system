@@ -101,7 +101,7 @@ window.addEventListener('load', () => {
 
 });
 
-//Declare product submit function
+//Define product submit function
  const productSubmit = () => {
     event.preventDefault();
     console.log("button Product Submit");

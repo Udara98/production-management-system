@@ -11,12 +11,17 @@ import com.AdwinsCom.AdwinsCom.entity.Production.ProductUnitType;
 import com.AdwinsCom.AdwinsCom.entity.Production.ProductionItem;
 import com.AdwinsCom.AdwinsCom.entity.Production.Recipe;
 import com.AdwinsCom.AdwinsCom.entity.Production.RecipeItem;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.method.P;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -26,6 +31,9 @@ public class ProductionItemService implements IProductionItemService {
     final RecipeRepository recipeRepository;
     final IngredientRepository ingredientRepository;
 
+    @Autowired
+    private IPrivilegeService privilegeService;
+
     public ProductionItemService(ProductionItemRepository productionItemRepository, RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
         this.productionItemRepository = productionItemRepository;
         this.recipeRepository = recipeRepository;
@@ -33,19 +41,42 @@ public class ProductionItemService implements IProductionItemService {
     }
 
     @Override
-    public ResponseEntity<?> AddNewProductionItem(ProductionItemDTO productionItemDTO, String userName) throws NoSuchAlgorithmException {
+    public ResponseEntity<?> AddNewProductionItem(ProductionItemDTO productionItemDTO) throws NoSuchAlgorithmException {
+        // Authentication and authorization
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        ProductionItem newProductionItem = new ProductionItem().mapDTO(null, productionItemDTO, userName);
+        // Get privileges for the logged-in user
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "PRODUCTION_ITEM");
+
+        // If user doesn't have "insert" permission, return 403 Forbidden
+        if (!loguserPrivi.get("insert")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Production Item Adds not Completed: You don't have permission!");
+        }
+
+        ProductionItem newProductionItem = new ProductionItem().mapDTO(null, productionItemDTO, auth.getName());
         productionItemRepository.save(newProductionItem);
 
         return ResponseEntity.ok("Production Item Added Successfully");
     }
 
     @Override
-    public ResponseEntity<?> UpdateProductionItem(ProductionItemDTO productionItemDTO, String userName) throws NoSuchAlgorithmException {
+    public ResponseEntity<?> UpdateProductionItem(ProductionItemDTO productionItemDTO) throws NoSuchAlgorithmException {
+
+        // Authentication and authorization
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        // Get privileges for the logged-in user
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "PRODUCTION_ITEM");
+
+        // If user doesn't have "delete" permission, return 403 Forbidden
+        if (!loguserPrivi.get("update")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Production Item update not Completed: You don't have permission!");
+        }
 
         ProductionItem productionItem = productionItemRepository.findById(productionItemDTO.getId()).get();
-        ProductionItem updateItem = new ProductionItem().mapDTO(productionItem,productionItemDTO,userName);
+        ProductionItem updateItem = new ProductionItem().mapDTO(productionItem,productionItemDTO, auth.getName());
         productionItemRepository.save(updateItem);
 
         return ResponseEntity.ok("Production Item Updated Successfully");

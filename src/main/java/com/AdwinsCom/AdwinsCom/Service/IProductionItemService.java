@@ -7,8 +7,8 @@ import java.security.NoSuchAlgorithmException;
 
 public interface IProductionItemService {
 
-    ResponseEntity<?> AddNewProductionItem(ProductionItemDTO productionItemDTO, String userName) throws NoSuchAlgorithmException;
-    ResponseEntity<?> UpdateProductionItem(ProductionItemDTO productionItemDTO, String userName) throws NoSuchAlgorithmException;
+    ResponseEntity<?> AddNewProductionItem(ProductionItemDTO productionItemDTO) throws NoSuchAlgorithmException;
+    ResponseEntity<?> UpdateProductionItem(ProductionItemDTO productionItemDTO) throws NoSuchAlgorithmException;
     ResponseEntity<?> GetAllProductionItems();
     ResponseEntity<?> DeleteProductionItem(Integer id);
 

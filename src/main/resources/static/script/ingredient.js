@@ -15,134 +15,134 @@ window.addEventListener("load", () => {
 });
 
     //Define function for Ingredient form refresh
-    const reloadIngredientsForm = () =>{
+const reloadIngredientsForm = () =>{
 
-     ingredient = new Object();
-     oldIngredient = null;
+ ingredient = new Object();
+ oldIngredient = null;
 
-     //Get all products
-      let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
+ //Get all products
+  let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
 
-    }
+}
 
-    //Define function for Ingredient Table Refresh
-    const ingredientTableRefresh = () =>{
+//Define function for Ingredient Table Refresh
+const ingredientTableRefresh = () =>{
 
-    //Get all Ingredients
-    const ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
+//Get all Ingredients
+const ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
 
-        const getQuantity = (ob) => ob.quantity + " " + ob.unitType;
-        const getROP = (ob) => ob.rop + " " + ob.unitType;
-        const getROQ = (ob) => ob.roq + " " + ob.unitType;
-        const getStatus = (ob) => {
-            if (ob.ingredientStatus === "InStock") {
-                return '<p class="align-middle greenLabel mx-auto" style="width: 100px">In stock </p>';
-            }
-            if (ob.ingredientStatus === "LowStock") {
-                return '<p class="align-middle yellowLabel mx-auto" style="width: 100px">Low stock</p>';
-            }
-            if (ob.ingredientStatus === "OutOfStock") {
-                return '<p class="align-middle redLabel mx-auto" style="width: 100px">Out of stock</p>';
-            }
-        };
-
-        const displayProperty = [
-            {dataType: "text", propertyName: "ingredientCode"},
-            {dataType: "text", propertyName: "ingredientName"},
-            {dataType: "function", propertyName: getQuantity},
-            {dataType: "function", propertyName: getStatus},
-            {dataType: "function", propertyName: getROP},
-            {dataType: "function", propertyName: getROQ},
-            {dataType: "price", propertyName: "avgCost"},
-        ];
-
-        let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/INGREDIENT");
-
-        // Destroy the existing DataTable instance if it exists
-        if (tableIngredientInstance) {
-            tableIngredientInstance.destroy();
+    const getQuantity = (ob) => ob.quantity + " " + ob.unitType;
+    const getROP = (ob) => ob.rop + " " + ob.unitType;
+    const getROQ = (ob) => ob.roq + " " + ob.unitType;
+    const getStatus = (ob) => {
+        if (ob.ingredientStatus === "InStock") {
+            return '<p class="align-middle greenLabel mx-auto" style="width: 100px">In stock </p>';
         }
+        if (ob.ingredientStatus === "LowStock") {
+            return '<p class="align-middle yellowLabel mx-auto" style="width: 100px">Low stock</p>';
+        }
+        if (ob.ingredientStatus === "OutOfStock") {
+            return '<p class="align-middle redLabel mx-auto" style="width: 100px">Out of stock</p>';
+        }
+    };
 
-        // Clear the table content
-        $('#tableIngredient tbody').empty();
+    const displayProperty = [
+        {dataType: "text", propertyName: "ingredientCode"},
+        {dataType: "text", propertyName: "ingredientName"},
+        {dataType: "function", propertyName: getQuantity},
+        {dataType: "function", propertyName: getStatus},
+        {dataType: "function", propertyName: getROP},
+        {dataType: "function", propertyName: getROQ},
+        {dataType: "price", propertyName: "avgCost"},
+    ];
 
-        //Define function for generate drop down
-        const generateDropDown = (element,index) => {
-            const dropdownMenu = document.createElement("ul");
-            dropdownMenu.className = "dropdown-menu";
+    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/INGREDIENT");
 
-            const buttonList = [
-                {name: "Edit", action: productFormRefill, icon: "fa-solid fa-edit me-2"},
-                {name: "Delete", action: deleteIngredient, icon: "fa-solid fa-trash me-2"},
-            ];
-            if (element.ingredientStatus !== "InStock") {
-                buttonList.push({name: "Send Quotation Request", action: sendQuotationRequest, icon: "fa-solid fa-file-lines me-2"});
-            }
-            buttonList.forEach((button) => {
-                const buttonElement = document.createElement("button");
-                buttonElement.className = "dropdown-item btn";
-                buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
-                buttonElement.onclick =  () => {
-                    button.action(element,index);
-                };
-                const liElement = document.createElement("li");
-                liElement.appendChild(buttonElement);
-                dropdownMenu.appendChild(liElement);
-            });
-            return dropdownMenu;
-        };
-
-        //Call function for fill date to table
-        tableDataBinder(
-            tableIngredient,
-            ingredientList,
-            displayProperty,
-            true,
-            generateDropDown,
-            getPrivilege
-        );
-
-        // Initialize DataTable and store the instance
-        tableIngredientInstance = $('#tableIngredient').DataTable();
-
+    // Destroy the existing DataTable instance if it exists
+    if (tableIngredientInstance) {
+        tableIngredientInstance.destroy();
     }
 
+    // Clear the table content
+    $('#tableIngredient tbody').empty();
+
+    //Define function for generate drop down
+    const generateDropDown = (element,index) => {
+        const dropdownMenu = document.createElement("ul");
+        dropdownMenu.className = "dropdown-menu";
+
+        const buttonList = [
+            {name: "Edit", action: productFormRefill, icon: "fa-solid fa-edit me-2"},
+            {name: "Delete", action: deleteIngredient, icon: "fa-solid fa-trash me-2"},
+        ];
+        if (element.ingredientStatus !== "InStock") {
+            buttonList.push({name: "Send Quotation Request", action: sendQuotationRequest, icon: "fa-solid fa-file-lines me-2"});
+        }
+        buttonList.forEach((button) => {
+            const buttonElement = document.createElement("button");
+            buttonElement.className = "dropdown-item btn";
+            buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
+            buttonElement.onclick =  () => {
+                button.action(element,index);
+            };
+            const liElement = document.createElement("li");
+            liElement.appendChild(buttonElement);
+            dropdownMenu.appendChild(liElement);
+        });
+        return dropdownMenu;
+    };
+
+    //Call function for fill date to table
+    tableDataBinder(
+        tableIngredient,
+        ingredientList,
+        displayProperty,
+        true,
+        generateDropDown,
+        getPrivilege
+    );
+
+    // Initialize DataTable and store the instance
+    tableIngredientInstance = $('#tableIngredient').DataTable();
+
+}
 
 
-    //Define function for validation and object binding
-    const formValidation = () =>{
 
-    ingredientCode.addEventListener('keyup', () => {
-            validation(ingredientCode, '', 'ingredient', 'ingredientCode');
-    });
+//Define function for validation and object binding
+const formValidation = () =>{
 
-    quantity.addEventListener('keyup', () => {
-                validation(quantity, '^(?:[1-9][0-9]?|1[0-9]{2}|200)$', 'ingredient', 'quantity');
-    });
+ingredientCode.addEventListener('keyup', () => {
+        validation(ingredientCode, '', 'ingredient', 'ingredientCode');
+});
 
-    ingredientName.addEventListener('keyup', () => {
-                        validation(ingredientName, '', 'ingredient', 'ingredientName');
-            });
+quantity.addEventListener('keyup', () => {
+            validation(quantity, '^(?:[1-9][0-9]?|1[0-9]{2}|200)$', 'ingredient', 'quantity');
+});
 
-    unitType.addEventListener('change', () => {
-    selectFieldValidator(unitType,'','ingredient','unitType')
+ingredientName.addEventListener('keyup', () => {
+                    validation(ingredientName, '', 'ingredient', 'ingredientName');
+        });
+
+unitType.addEventListener('change', () => {
+selectFieldValidator(unitType,'','ingredient','unitType')
+})
+
+rop.addEventListener('keyup', () =>{
+        validation(rop,'^[1-9][0-9]?$','ingredient','rop')
     })
 
-    rop.addEventListener('keyup', () =>{
-            validation(rop,'^[1-9][0-9]?$','ingredient','rop')
-        })
-
-    roq.addEventListener('keyup', () =>{
-            validation(roq,'^(?:[1-9][0-9]?|1[0-9]{2}|200)$','ingredient','roq')
-        })
+roq.addEventListener('keyup', () =>{
+        validation(roq,'^(?:[1-9][0-9]?|1[0-9]{2}|200)$','ingredient','roq')
+    })
 
 
-    note.addEventListener('keyup', () =>{
-                 validation(note,'','ingredient','note')
-         })
+note.addEventListener('keyup', () =>{
+             validation(note,'','ingredient','note')
+     })
 
 
-    }
+}
 
 
 

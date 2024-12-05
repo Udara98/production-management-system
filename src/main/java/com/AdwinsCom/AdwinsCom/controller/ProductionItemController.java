@@ -26,11 +26,10 @@ public class ProductionItemController {
         return productionItemMV;
     }
 
-    @PostMapping("/addNewPI")
+    @PostMapping()
     public ResponseEntity<?> AddNewProductionItem(@RequestBody ProductionItemDTO productionItemDTO){
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            return productionItemService.AddNewProductionItem(productionItemDTO, auth.getName());
+            return productionItemService.AddNewProductionItem(productionItemDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
@@ -54,11 +53,10 @@ public class ProductionItemController {
         }
     }
 
-    @PutMapping("/updatePI")
+    @PutMapping()
     public ResponseEntity<?> UpdatePI(@RequestBody ProductionItemDTO productionItemDTO){
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            return productionItemService.UpdateProductionItem(productionItemDTO, auth.getName());
+            return productionItemService.UpdateProductionItem(productionItemDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
