@@ -267,6 +267,7 @@ const generatePIDropDown = (element,index) => {
 
 //Define function to Make new batch
 const makeNewBatch = (pi) => {
+
     $("#modalMakeNewBatch").modal("show");
 
     document.getElementById("check-btn").addEventListener('click', () => {

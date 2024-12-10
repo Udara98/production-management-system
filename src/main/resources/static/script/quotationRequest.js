@@ -34,6 +34,28 @@ const reloadQRequestTable =  () =>{
     qRequestTableInstance = $("#tableQRequests").dataTable();
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //Define function to display status in quotation requests
 const getQRStatus = (ob) => {
         if (ob.requestStatus === "Send") {
@@ -93,6 +115,8 @@ const deleteQRequest= (ob) => {
                     icon: "success"
                 });
                 reloadQRequestTable();
+                reloadQRequestTable();
+                refreshQuotationReqForm();
             } else {
                 swal.fire({
                     title: "Something Went Wrong",
@@ -103,3 +127,4 @@ const deleteQRequest= (ob) => {
         }
     });
 }
+

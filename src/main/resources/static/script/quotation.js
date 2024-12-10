@@ -537,7 +537,7 @@ const generateQuotationDropDown = (element,index) => {
 
     if (element.quotationStatus === "Accepted") {
         buttonList.push({
-            name: "Send Perches Order",
+            name: "Send purchase order",
             action: sendPerchesOrder,
             icon: "fa-solid fa-basket-shopping me-2"
         })
@@ -609,6 +609,7 @@ const sendPerchesOrder = (quotation) => {
         style: "currency",
         currency: "LKR",
     });
+
 
 }
 document.getElementById("add-po-qty").addEventListener('change', (event) => {

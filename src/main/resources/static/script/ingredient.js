@@ -14,7 +14,7 @@ window.addEventListener("load", () => {
 
 });
 
-    //Define function for Ingredient form refresh
+  //Define function for Ingredient form refresh
 const reloadIngredientsForm = () =>{
 
  ingredient = new Object();
@@ -72,11 +72,11 @@ const ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
         dropdownMenu.className = "dropdown-menu";
 
         const buttonList = [
-            {name: "Edit", action: productFormRefill, icon: "fa-solid fa-edit me-2"},
+            {name: "Edit", action: ingredientFormRefill, icon: "fa-solid fa-edit me-2"},
             {name: "Delete", action: deleteIngredient, icon: "fa-solid fa-trash me-2"},
         ];
         if (element.ingredientStatus !== "InStock") {
-            buttonList.push({name: "Send Quotation Request", action: sendQuotationRequest, icon: "fa-solid fa-file-lines me-2"});
+            buttonList.push({name: "Send Quotation Request", action: quoRequestFormRefill, icon: "fa-solid fa-file-lines me-2"});
         }
         buttonList.forEach((button) => {
             const buttonElement = document.createElement("button");
@@ -381,8 +381,8 @@ const checkIngredientFormError = () => {
       return updates;
     }
 
-//Refill Product form fields
-const productFormRefill = (ob, rowIndex) => {
+//Refill Ingredient form fields
+const ingredientFormRefill = (ob, rowIndex) => {
 
     console.log(ob)
     console.log(rowIndex)
@@ -483,32 +483,103 @@ const deleteIngredient = (ingredient) => {
     });
 };
 
-const sendQuotationRequest=(ingredient)=>{
-    swal.fire({
-        title: "Send Quotation Request",
-        text: `Sending Quotation Requests for ${ingredient.ingredientName} (${ingredient.ingredientCode})`,
-        icon: "info",
-        showCancelButton: true,
-        confirmButtonColor: "#cb421a",
-        cancelButtonColor: "#3f3f44",
-        confirmButtonText: "Send"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            let response = ajaxRequestBody(`/quotation-request/send-new/${ingredient.id}`, "POST", {})
-            if (response.status === 200) {
-                swal.fire({
-                    title: response.responseText,
-                    icon: "success"
-                });
-                $("#modelIngredientEdit").modal('hide');
-                getAllIngredients();
-            } else {
-                swal.fire({
-                    title: "Something Went Wrong",
-                    text: response.responseText,
-                    icon: "error"
-                });
-            }
-        }
-    });
+//Define Quotation request form errors
+const checkQRFormError = () =>{
+
+    let errors = '';
+
+    if(quoRequest.quantity == null){
+       errors = errors + "Quantity can't be null \n";
+       quoQuantity.classList.add('is-invalid');
+    }
+
+    if (quoRequest.requiredDate == null) {
+         errors = errors + "Required Date can't be null \n";
+         QuoRequiredDate.classList.add('is-invalid');
+    }
+
+    return errors;
+
 }
+
+const sendQuotationRequest=()=>{
+    event.preventDefault();
+
+//    Check form errors
+    const errors = checkQRFormError();
+    if (errors === "") {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "Do you want to Send the Quotation Req "+ "?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#E11D48",
+                cancelButtonColor: "#3f3f44",
+                confirmButtonText: "Yes, Add"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const postServiceRequestResponse = ajaxRequestBody("/quotation-request/send-new/" + quoRequestIng.id, "POST",quoRequest);
+                    // Check backend response
+                    console.log(postServiceRequestResponse)
+                    if (postServiceRequestResponse.status === 200) {
+                        $("#modelQuotationRequest").modal('hide');
+;
+                        Swal.fire({
+                                title: "Quotation send Successfully!",
+                                icon: "success"
+                                    });
+
+                        // Reset validation classes
+                        Array.from(quotationRequestForm.elements).forEach((field) => {
+                            field.classList.remove('is-valid', 'is-invalid');
+                        });
+
+                    } else {
+                        console.error(postServiceRequestResponse);
+                        Swal.fire({
+                            title: "Error",
+                            text: postServiceRequestResponse.responseText,
+                            icon: "error"
+                        });
+                    }
+                }
+            });
+        } else {
+
+            Swal.fire({
+                title: "Quotation Req does not sent",
+                text: errors,
+                icon: "error"
+            });
+        }
+
+}
+
+//Refill Ingredient form fields
+const quoRequestFormRefill = (ob, rowIndex) => {
+  $("#modelQuotationRequest").modal('show');
+  quoRequestIng = JSON.parse(JSON.stringify(ob));
+  oldQuoRequestIng = JSON.parse(JSON.stringify(ob));
+
+  quoRequest = new Object();
+  oldQuoRequest = null;
+
+
+  quoRequest.ingredientCode = quoIngredientCode.value = quoRequestIng.ingredientCode;
+  quoIngredientCode.disabled = true;
+  quoRequest.ingredientName = quoIngredientName.value = quoRequestIng.ingredientName;
+  quoIngredientName.disabled = true;
+  quoRequest.unitType = quoUnitType.value = quoRequestIng.unitType;
+  quoUnitType.disabled = true;
+
+
+};
+
+////Define function to refresh the form
+//const refreshQuotationReqForm = () =>{
+//
+//    quotationReq = new Object();
+//    oldQuotationReq = null;
+//
+//
+//}

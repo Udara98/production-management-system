@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -61,6 +62,17 @@ public class QuotationRequest {
 
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
+
+    @Column(name = "quantity")
+    private Double quantity;
+
+    @Column(name = "required_date")
+    private LocalDate requiredDate;
+
+    @Column(name = "note")
+    private String note;
+
+
 
     public static String generateUniqueId(String prefix) throws NoSuchAlgorithmException {
         long timestamp = Instant.now().toEpochMilli();

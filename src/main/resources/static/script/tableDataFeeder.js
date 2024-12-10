@@ -33,10 +33,12 @@ const tableDataBinder = (
                 td.innerText = element[column.propertyName];
             }
             if (column.dataType === "price") {
-                td.innerText = parseFloat(element[column.propertyName]).toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "LKR",
-                });
+                td.innerText = element[column.propertyName] != null
+                    ? parseFloat(element[column.propertyName]).toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "LKR",
+                    })
+                    : "Not Available Yet";
             }
 
           if (column.dataType == 'photo') {

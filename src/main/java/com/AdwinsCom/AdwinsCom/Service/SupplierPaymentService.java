@@ -55,7 +55,6 @@ public class SupplierPaymentService implements ISupplierPaymentService {
         }
 
         //close quotations
-
         List<Quotation> quotations = quotationRepository.findByQuotationRequestNo(quotationRequest.getRequestNo());
         for (Quotation quotation: quotations
              ) {
@@ -72,12 +71,10 @@ public class SupplierPaymentService implements ISupplierPaymentService {
         goodReceiveNoteRepository.save(goodReceiveNote);
 
         //complete purchase order
-
         purchaseOrder.setPurchaseOrderStatus(PurchaseOrder.PurchaseOrderStatus.Completed);
         purchaseOrderRepository.save(purchaseOrder);
 
         //Update quantity and avg cost
-
         Double currentAvgCost = ingredient.getAvgCost();
         Double currentQuantity = ingredient.getQuantity();
 
@@ -85,7 +82,7 @@ public class SupplierPaymentService implements ISupplierPaymentService {
         Integer newQuantity = purchaseOrder.getQty();
 
         Double newAvgCost;
-        if (currentQuantity == 0) {
+        if (currentAvgCost == null) {
             newAvgCost = pricePerUnit;
         } else {
             newAvgCost = ((currentAvgCost * currentQuantity) + (pricePerUnit * newQuantity)) / (currentQuantity + newQuantity);

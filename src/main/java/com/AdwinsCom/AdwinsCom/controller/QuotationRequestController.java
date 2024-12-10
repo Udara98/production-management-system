@@ -1,5 +1,6 @@
 package com.AdwinsCom.AdwinsCom.controller;
 
+import com.AdwinsCom.AdwinsCom.DTO.QRequestGetDTO;
 import com.AdwinsCom.AdwinsCom.Service.IQuotationRequestService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -26,10 +27,9 @@ public class QuotationRequestController {
     }
 
     @PostMapping("/send-new/{ingId}")
-    public ResponseEntity<?> SendNewQuotationRequest(@PathVariable Integer ingId) {
+    public ResponseEntity<?> SendNewQuotationRequest(@PathVariable Integer ingId ,@RequestBody QRequestGetDTO request ) {
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            return quotationRequestService.AddNewQuotationRequest(ingId, auth.getName());
+            return quotationRequestService.AddNewQuotationRequest(ingId,request);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }

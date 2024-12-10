@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,4 +19,9 @@ public class QRequestGetDTO {
     private LocalDateTime requestDate;
     private List<String> suppliers;
     private QuotationRequest.QRequestStatus requestStatus;
+    private LocalDate requiredDate; // Date when the quantity is required
+    private Double quantity; // Quantity requested
+    private String note;
+
+
 }

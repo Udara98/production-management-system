@@ -229,6 +229,8 @@ const validation = (fieldId,pattern,object,property ) => {
       fieldId.classList.remove("is-invalid");
       fieldId.classList.add("is-valid");
       console.log("valid");
+      console.log(window[object])
+      console.log(window[object][property])
       window[object][property] = fieldValue;
       console.log(window[object])
     } else {

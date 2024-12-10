@@ -319,7 +319,6 @@ const editGRN = (grn) => {
 
 //Define method for GRN Delete
 const deleteGRN= (ob, rowIndex) => {
-    console.log("delete");
 
     Swal.fire({
         title: "Are you sure?",

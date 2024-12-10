@@ -1,0 +1,94 @@
+<div class="modal-dialog modal-lg">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Send New Quotation Request</h4>
+      <button
+              class="btn-close"
+              data-bs-dismiss="modal"
+              type="button"
+      ></button>
+    </div>
+    <div class="modal-body">
+      <!--            form start-->
+      <form id="quotationRequestForm">
+        <div>
+          <div class="row mb-3">
+            <div class="col">
+              <label for="quoIngredientCode" class="form-label fw-medium">Ingredient Code</label><span class="text-danger"> * </span>
+              <input type="text" class="form-control" id="quoIngredientCode" placeholder="Ex. ING1234567" required>
+            </div>
+            <div class="col">
+              <label for="quoIngredientName" class="form-label fw-medium">Ingredient Name</label><span class="text-danger"> * </span>
+              <input type="text" class="form-control" id="quoIngredientName" placeholder="Enter Ingredient Name" required>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col">
+              <label for="quoQuantity" class="form-label fw-medium">Quantity</label><span class="text-danger"> * </span>
+              <input type="text" class="form-control" id="quoQuantity" required placeholder="Enter the Quantity" onkeyup="validation(quoQuantity,'','quoRequest','quantity')">
+            </div>
+            <div class="col">
+              <label for="quoUnitType" class="form-label fw-medium">Unit Type</label><span class="text-danger"> * </span>
+              <select class="form-select" id="quoUnitType" required>
+                <option disabled selected value="">Select Unit Type</option>
+                <option value="KG" >KG</option>
+                <option value="G">G</option>
+                <option value="L">L</option>
+                <option value="MG">MG</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-6">
+              <label class="form-label fw-medium" for="QuoRequiredDate"
+              >Required Date<span class="text-danger"> * </span>
+              </label>
+              <input
+                      class="form-control"
+                      id="QuoRequiredDate"
+                      type="date"
+                      onchange=" dateFeildValidator(QuoRequiredDate,'','quoRequest','requiredDate')"
+              />
+              <div class="valid-feedback"></div>
+              <div class="invalid-feedback">
+                Please Select Required date
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="Quonote" class="form-label fw-medium">Note</label><span class="text-cus-red"> (optional)</span>
+            <textarea type="text" class="form-control" id="Quonote" placeholder="Enter a note" onkeyup="validation(Quonote,'','quoRequest','quoReqNote')"
+                       rows="3"></textarea>
+          </div>
+          <hr>
+          <div class="row mt-3 mb-2">
+            <div class="col-1">
+              <button
+                      type="reset"
+                      class="btn btn-outline-danger"
+              >
+                Clear
+              </button>
+            </div>
+            <div class="col-7"></div>
+            <div class="col-4">
+              <button
+                      class="btn cusbutton btn-update"
+                      onclick=""
+              >
+                <i class="fa-solid fa-edit me-2"></i>Update
+              </button>
+              <button
+                      class="btn cusbutton ms-4 btn-submit"
+                      onclick="sendQuotationRequest()"
+              >
+                <i class="fa-solid fa-plus me-2"></i>Send
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
