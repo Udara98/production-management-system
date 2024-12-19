@@ -294,7 +294,7 @@ const makeNewBatch = (pi) => {
             resultDiv.appendChild(viewResBtn);
 
             viewResBtn.addEventListener('click', () => {
-                displayResult(result.availabilityDTOS)
+                displayResult(result.availabilityDTOS,quotationRequests, quotations, purchaseOrders, grns)
             })
 
         } else {
@@ -338,18 +338,76 @@ const makeNewBatch = (pi) => {
 
 }
 
-//Define function to Display Results
-const displayResult = (result) => {
-    const resultDiv = document.getElementById("check-result")
-    resultDiv.className = "mt-5"
-    resultDiv.innerHTML = ''
+////Define function to Display Results
+//const displayResult = (result) => {
+//    const resultDiv = document.getElementById("check-result")
+//    resultDiv.className = "mt-5"
+//    resultDiv.innerHTML = ''
+//
+//    const titleDiv = document.createElement('h4');
+//    titleDiv.innerText = "Result"
+//
+//    resultDiv.appendChild(titleDiv)
+//
+//    result.forEach((res, index) => {
+//        const rowDiv = document.createElement('div');
+//        rowDiv.className = 'row mt-3';
+//
+//        const codeDiv = document.createElement('div');
+//        codeDiv.className = 'col';
+//        codeDiv.innerText = res.ingredientCode;
+//        rowDiv.appendChild(codeDiv);
+//
+//        const nameDiv = document.createElement('div');
+//        nameDiv.className = 'col';
+//        nameDiv.innerText = res.ingredientName;
+//        rowDiv.appendChild(nameDiv);
+//
+//        const quantityDiv = document.createElement('div');
+//        quantityDiv.className = 'col';
+//
+//        const resBtn = document.createElement("button")
+//        resBtn.className = res.isAvailable === true ? "btn  btn-outline-success btn-sm" : "btn  btn-outline-danger btn-sm";
+//        resBtn.disabled = true
+//        resBtn.style.cursor = "default"
+//        resBtn.style.width = '100%'
+//        resBtn.innerText = res.isAvailable === true ? "Stock Enough" : "Stock Not Enough";
+//        quantityDiv.appendChild(resBtn)
+//        rowDiv.appendChild(quantityDiv);
+//
+//
+//        const removeBtn = document.createElement('button');
+//        removeBtn.className = "btn btn-warning btn-sm ms-4"
+//        removeBtn.innerHTML = `<i class="fa-solid fa-file-lines me-2"></i> Send Quotation Request`
+//
+//        const btnDiv = document.createElement('div');
+//        btnDiv.className = 'col-4';
+//        if (!res.isAvailable === true) {
+//            btnDiv.appendChild(removeBtn)
+//        }
+//        rowDiv.appendChild(btnDiv);
+//        resultDiv.appendChild(rowDiv);
+//        resultDiv.appendChild(document.createElement('hr'))
+//    })
+//}
+
+const quotationRequests = ajaxGetRequest("/quotation-request/getAllRequests");
+const quotations = ajaxGetRequest("/quotation/getAllQuotations");
+const purchaseOrders = ajaxGetRequest("/purchaseOrder/getAllPurchaseOrders");
+const grns = ajaxGetRequest("/grn/getAllGRNs");
+
+// Function to handle and display the fetched result
+const displayResult = (ingredients, quotationRequests, quotations, purchaseOrders, grns) => {
+
+    const resultDiv = document.getElementById("check-result");
+    resultDiv.className = "mt-5";
+    resultDiv.innerHTML = '';  // Clear any existing content
 
     const titleDiv = document.createElement('h4');
-    titleDiv.innerText = "Result"
+    titleDiv.innerText = "Result";
+    resultDiv.appendChild(titleDiv);
 
-    resultDiv.appendChild(titleDiv)
-
-    result.forEach((res, index) => {
+    ingredients.forEach(res => {
         const rowDiv = document.createElement('div');
         rowDiv.className = 'row mt-3';
 
@@ -366,30 +424,100 @@ const displayResult = (result) => {
         const quantityDiv = document.createElement('div');
         quantityDiv.className = 'col';
 
-        const resBtn = document.createElement("button")
-        resBtn.className = res.isAvailable === true ? "btn  btn-outline-success btn-sm" : "btn  btn-outline-danger btn-sm";
-        resBtn.disabled = true
-        resBtn.style.cursor = "default"
-        resBtn.style.width = '100%'
+        const resBtn = document.createElement("button");
+        resBtn.className = res.isAvailable === true ? "btn btn-outline-success btn-sm" : "btn btn-outline-danger btn-sm";
+        resBtn.disabled = true;
+        resBtn.style.cursor = "default";
+        resBtn.style.width = '100%';
         resBtn.innerText = res.isAvailable === true ? "Stock Enough" : "Stock Not Enough";
-        quantityDiv.appendChild(resBtn)
+        quantityDiv.appendChild(resBtn);
         rowDiv.appendChild(quantityDiv);
 
-
-        const removeBtn = document.createElement('button');
-        removeBtn.className = "btn btn-warning btn-sm ms-4"
-        removeBtn.innerHTML = `<i class="fa-solid fa-file-lines me-2"></i> Send Quotation Request`
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'col-4';
 
         const btnDiv = document.createElement('div');
-        btnDiv.className = 'col-4';
+        btnDiv.className = 'col-3';
+
         if (!res.isAvailable === true) {
-            btnDiv.appendChild(removeBtn)
+            console.log(quotationRequests,res)
+            const relatedRequest = quotationRequests.find(
+                req => req.ingCode === res.ingredientCode && req.requestStatus === "Send"
+            );
+
+            const relatedQuotation = quotations.find(
+                quo => quo.ingredientCode === res.ingredientCode &&  relatedRequest?.requestNo=== quo.quotationRequestNo
+            );
+            const relatedOrder = purchaseOrders.find(order => order.ingredientCode === res.ingredientCode && order.purchaseOrderStatus === "Pending");
+
+
+            if (relatedOrder) {
+                const infoText = document.createElement('span');
+                infoText.textContent = `Please add a GRN for po ${relatedOrder.purchaseOrderNo}.`;
+                infoText.style.color = 'red';
+
+                const viewOrderBtn = document.createElement('button');
+                viewOrderBtn.textContent = "Add GRN";
+                viewOrderBtn.className = "btn btn-warning ms-2";
+                viewOrderBtn.onclick = () => {
+                    window.location.href = `/purchase-order/${relatedOrder.id}`;
+                };
+
+                infoDiv.appendChild(infoText);
+                btnDiv.appendChild(viewOrderBtn);
+            } else if (relatedQuotation) {
+                const infoText = document.createElement('span');
+                infoText.textContent = `Please Send Purchase Order for ${relatedQuotation.quotationNo} .`;
+                infoText.style.color = 'red';
+
+                const viewQuotationBtn = document.createElement('button');
+                viewQuotationBtn.textContent = "Send Purchase Order";
+                viewQuotationBtn.className = "btn btn-warning ms-2";
+                viewQuotationBtn.onclick = () => {
+                    window.location.href = `/quotation/${relatedQuotation.id}`;
+                };
+
+                infoDiv.appendChild(infoText);
+                btnDiv.appendChild(viewQuotationBtn);
+            } else if (relatedRequest) {
+                const infoText = document.createElement('span');
+                infoText.textContent = `Please add a quotation for Quotation Request No: ${relatedRequest.requestNo}.`;
+                infoText.style.color = 'red';
+
+                const viewRequestBtn = document.createElement('button');
+                viewRequestBtn.textContent = "Add Quotation";
+                viewRequestBtn.className = "btn btn-warning ms-2";
+                viewRequestBtn.onclick = () => {
+                    window.location.href = `/quotation-request/${relatedRequest.id}`;
+                };
+
+                infoDiv.appendChild(infoText);
+                btnDiv.appendChild(viewRequestBtn);
+            } else {
+                const infoText = document.createElement('span');
+                    infoText.textContent = `Please send Quotation Request for ingredient ${res.ingredientCode}.`;
+                    infoText.style.color = 'red';
+
+                    const sendQuoBtn = document.createElement('button');
+                    sendQuoBtn.className = "btn btn-warning ms-2";
+                    sendQuoBtn.innerHTML = `Send Quotation Request`;
+
+                    sendQuoBtn.onclick = () => {
+                    };
+
+                    infoDiv.appendChild(infoText);
+                    btnDiv.appendChild(sendQuoBtn);
+            }
         }
+
+        rowDiv.appendChild(infoDiv);
         rowDiv.appendChild(btnDiv);
         resultDiv.appendChild(rowDiv);
-        resultDiv.appendChild(document.createElement('hr'))
-    })
-}
+        resultDiv.appendChild(document.createElement('hr'));
+    });
+};
+
+
 
 //Define function for Product update
   const productionItemUpdate = () => {

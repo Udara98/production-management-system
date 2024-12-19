@@ -53,31 +53,32 @@ public class QuotationRequestService implements IQuotationRequestService {
 
         List<QuotationRequest> exQuotations = quotationRequestRepository.findByIngredientId(ingId);
 
-        for (QuotationRequest qReq: exQuotations
-             ) {
-            if (qReq.getRequestStatus() == QuotationRequest.QRequestStatus.Closed ||
-                    qReq.getRequestStatus() == QuotationRequest.QRequestStatus.Removed) {
-
-                QuotationRequest quotationRequest = new QuotationRequest();
-                quotationRequest.setIngredientId(ingId);
-                quotationRequest.setRequestNo(QuotationRequest.generateUniqueId("QREQ-"));
-                quotationRequest.setRequestDate(LocalDateTime.now());
-                quotationRequest.setSuppliers(supplierIngredientService.GetSuppliersByIngredientId(ingId));
-                quotationRequest.setAddedUser(auth.getName());
-                quotationRequest.setAddedDate(LocalDateTime.now());
-
-                // Set additional fields from QRequestGetDTO
-                quotationRequest.setQuantity(request.getQuantity());
-                quotationRequest.setRequiredDate(request.getRequiredDate());
-                quotationRequest.setNote(request.getNote());
-
-
-                // Save the quotation request
-                quotationRequestRepository.save(quotationRequest);
-                return ResponseEntity.ok("Quotation Request Sent");
+        for (QuotationRequest qReq : exQuotations) {
+            if (qReq.getRequestStatus() == QuotationRequest.QRequestStatus.Send) {
+                // If any request is in "Send" status, don't create a new request
+                return ResponseEntity.badRequest().body("Cannot create a new request. A request is already in 'Send' status.");
             }
-        }            return ResponseEntity.badRequest().body("Quotation Request Sent Already");
+        }
 
+        // At this point, all requests are either "Closed" or "Removed"
+
+        // Create a new QuotationRequest object
+        QuotationRequest quotationRequest = new QuotationRequest();
+        quotationRequest.setIngredientId(ingId);
+        quotationRequest.setRequestNo(QuotationRequest.generateUniqueId("QREQ-"));
+        quotationRequest.setRequestDate(LocalDateTime.now());
+        quotationRequest.setSuppliers(supplierIngredientService.GetSuppliersByIngredientId(ingId));
+        quotationRequest.setAddedUser(auth.getName());
+        quotationRequest.setAddedDate(LocalDateTime.now());
+
+        // Set additional fields from QRequestGetDTO
+        quotationRequest.setQuantity(request.getQuantity());
+        quotationRequest.setRequiredDate(request.getRequiredDate());
+        quotationRequest.setNote(request.getNote());
+
+        // Save the quotation request
+        quotationRequestRepository.save(quotationRequest);
+        return ResponseEntity.ok("Quotation Request Created Successfully");
 
     }
 
