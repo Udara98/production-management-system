@@ -100,11 +100,22 @@ window.addEventListener('load', () => {
 //        }
 //
 //    }
+
+   const recipes = ajaxGetRequest("/recipe/getAllRecipes").filter((recipe) => recipe.status === "Active");
+
+   const RecipeSelectElement = document.getElementById("sel-recipe");
+
+    recipes.forEach(rec => {
+        const option = document.createElement('option');
+        option.value = rec.recipeCode;
+        option.textContent = rec.recipeName + "-" + rec.recipeCode;
+        RecipeSelectElement.appendChild(option);
+    });
+
     document.getElementById('makeNewBatchForm').onsubmit = function (event) {
         event.preventDefault()
 
         const batch = {
-            productionItemNo: selectedPI.productionItemNo,
             totalQuantity: parseFloat(document.getElementById("add-batchSize").value),
             availableQuantity: parseFloat(document.getElementById("add-batchSize").value),
             manufactureDate: new Date(document.getElementById("add-bt-mnf").value),
@@ -247,9 +258,9 @@ const generatePIDropDown = (element,index) => {
 
     ];
 
-    if (element.status === 'Active') {
-        buttonList.push({name: "Make a New Batch", action: makeNewBatch, icon: "fa-solid fa-hands-holding-circle me-2"})
-    }
+//    if (element.status === 'Active') {
+//        buttonList.push({name: "Make a New Batch", action: makeNewBatch, icon: "fa-solid fa-hands-holding-circle me-2"})
+//    }
 
     buttonList.forEach((button) => {
         const buttonElement = document.createElement("button");
@@ -266,13 +277,98 @@ const generatePIDropDown = (element,index) => {
 };
 
 //Define function to Make new batch
-const makeNewBatch = (pi) => {
+//const makeNewBatch = (pi) => {
+//
+//    $("#modalMakeNewBatch").modal("show");
+//
+//    document.getElementById("check-btn").addEventListener('click', () => {
+//        const batchSize = document.getElementById("add-batchSize").value
+//        const result = ajaxGetRequest(`/productionItem/checkIngAvailability/${pi.recipeCode}/${batchSize}`);
+//
+//        const batchFormDiv = document.getElementById('batch-add-form');
+//        batchFormDiv.style.display = 'none'
+//
+//        const resultDiv = document.getElementById("check-result")
+//        resultDiv.className = "d-flex flex-column align-items-center m-3 mt-5 "
+//        resultDiv.innerHTML = ''
+//        if (!result.isIngAvailable) {
+//            let naMessage = document.createElement('div');
+//            naMessage.style.color = "red";
+//            naMessage.style.fontSize = "20px";
+//            naMessage.innerText = "Some or All Ingredients are not Available";
+//
+//            let viewResBtn = document.createElement('button');
+//            viewResBtn.className = "btn btn-primary mt-3";
+//            viewResBtn.innerText = "View Result";
+//
+//            resultDiv.appendChild(naMessage);
+//            resultDiv.appendChild(viewResBtn);
+//
+//            viewResBtn.addEventListener('click', () => {
+//                displayResult(result.availabilityDTOS,quotationRequests, quotations, purchaseOrders, grns)
+//            })
+//
+//        } else {
+//            selectedPI = pi;
+//            let avaMessage = document.createElement('div');
+//            avaMessage.style.color = "green";
+//            avaMessage.style.fontSize = "20px";
+//            avaMessage.innerText = "All Ingredients are Available";
+//
+//            let continueBtn = document.createElement('button');
+//            continueBtn.className = "btn btn-primary mt-3";
+//            continueBtn.innerText = "Continue";
+//
+//            resultDiv.appendChild(avaMessage);
+//            resultDiv.appendChild(continueBtn);
+//
+//            continueBtn.addEventListener('click', (e) => {
+//                e.preventDefault();
+//                resultDiv.innerHTML = ''
+//                batchFormDiv.style.display = 'block';
+//                document.getElementById('add-bt-ingCost').value = result.totalCost.toLocaleString("en-US", {
+//                    style: "currency",
+//                    currency: "LKR",
+//                });
+//            })
+//
+//
+//            document.getElementById('add-bt-utilCost').addEventListener('change', (event) => {
+//                const labourCost = parseFloat(document.getElementById('add-bt-labourCost').value)
+//                const utilityCost = parseFloat(event.target.value)
+//                totalCost = parseFloat(result.totalCost + labourCost + utilityCost)
+//                document.getElementById('add-bt-total').value = totalCost.toLocaleString("en-US", {
+//                    style: "currency",
+//                    currency: "LKR",
+//                });
+//
+//            })
+//
+//        }
+//    })
+//
+//}
+
+//Define function to Make new batch
+const makeNewProdBatch = () => {
 
     $("#modalMakeNewBatch").modal("show");
 
-    document.getElementById("check-btn").addEventListener('click', () => {
-        const batchSize = document.getElementById("add-batchSize").value
-        const result = ajaxGetRequest(`/productionItem/checkIngAvailability/${pi.recipeCode}/${batchSize}`);
+
+        let selRecipe = "";
+
+       document.getElementById("sel-recipe").addEventListener("change", function () {
+            selRecipe = this.value;
+       });
+
+
+
+document.getElementById("check-btn").addEventListener('click', () => {
+
+        const batchSize = document.getElementById("add-batchSize").value;
+
+        const result = ajaxGetRequest(`/productionItem/checkIngAvailability/${selRecipe}/${batchSize}`);
+        console.log(result)
 
         const batchFormDiv = document.getElementById('batch-add-form');
         batchFormDiv.style.display = 'none'
@@ -298,7 +394,6 @@ const makeNewBatch = (pi) => {
             })
 
         } else {
-            selectedPI = pi;
             let avaMessage = document.createElement('div');
             avaMessage.style.color = "green";
             avaMessage.style.fontSize = "20px";
@@ -334,8 +429,8 @@ const makeNewBatch = (pi) => {
             })
 
         }
-    })
 
+})
 }
 
 ////Define function to Display Results

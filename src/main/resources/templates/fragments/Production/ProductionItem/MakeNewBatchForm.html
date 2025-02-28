@@ -7,14 +7,22 @@
         <div class="modal-body">
             <form id="makeNewBatchForm" class="needs-validation">
                 <div class="d-flex row mt-2 align-items-center ">
-                    <div class="col-9">
+                    <div class="col-6">
                         <label class="form-label fw-medium" for="add-batchSize">Batch Size(L)<span class="text-danger"> * </span></label>
                         <input class="form-control" id="add-batchSize" type="number" placeholder="Enter Batch Size" />
                         <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        <div class="invalid-feedback">Please Enter Valid Number</div>
                     </div>
-                    <div class="col">
-                        <button id="check-btn" class="btn btn-primary mt-4 mx-2 " type="button">Check Ingredients</button>
+                    <div class="col-6">
+                        <label class="form-label fw-medium" for="sel-recipe">Recipe<span class="text-danger"> * </span></label>
+                        <select id="sel-recipe" class="form-select" required>
+                            <option value="" selected>Select Recipe</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a Recipe.</div>
+
+                    </div>
+                    <div class="col-12 text-center">
+                        <button id="check-btn" class="btn addPrimaryBtn mt-4 w-100 mx-auto fw-semibold" type="button">Check Ingredients</button>
                     </div>
                 </div>
                 <div id="check-result"></div>

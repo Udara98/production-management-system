@@ -20,6 +20,7 @@
                                     class="form-control"
                                     id="add-recipe-name"
                                     type="text"
+                                    placeholder="Enter Recipe Name"
                             />
                             <div class="valid-feedback"></div>
                             <div class="invalid-feedback">
@@ -56,7 +57,7 @@
                     </div>
                     <div class="col">
                         <label for="recipe-quantity" class="form-label">Quantity</label>
-                        <input type="number" class="form-control" id="recipe-quantity" required>
+                        <input type="number"  placeholder="Enter the quantity" class="form-control" id="recipe-quantity" required>
                     </div>
                     <div class="col">
                         <label for="recipe-unitType" class="form-label">Unit Type</label>
@@ -74,14 +75,42 @@
                 </div>
                 <div id="recipe-items" class="my-4" >
                 </div>
-                <div class="d-flex justify-content-end mx-4 mt-5" >
-                    <div>
-                        <button  class="btn btn-secondary mx-2 "
-                                 data-bs-dismiss="modal"
-                                 type="button">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                <hr>
+                <div class="row mt-3 mb-2">
+                    <div class="col-1">
+                        <button
+                                type="reset"
+                                class="btn btn-outline-danger"
+                        >
+                            Clear
+                        </button>
+                    </div>
+                    <div class="col-7"></div>
+                    <div class="col-4">
+                        <button
+                                class="btn cusbutton btn-update"
+                                onclick=""
+                        >
+                            <i class="fa-solid fa-edit me-2"></i>Update
+                        </button>
+                        <button
+                                class="btn cusbutton ms-4 btn-submit"
+                                onclick=""
+                                type="submit"
+                        >
+                            <i class="fa-solid fa-plus me-2"></i>Add
+                        </button>
                     </div>
                 </div>
+
+                <!--                <div class="d-flex justify-content-end mx-4 mt-5" >-->
+<!--                    <div>-->
+<!--                        <button  class="btn btn-secondary mx-2 "-->
+<!--                                 data-bs-dismiss="modal"-->
+<!--                                 type="button">Cancel</button>-->
+<!--                        <button type="submit" class="btn btn-primary">Submit</button>-->
+<!--                    </div>-->
+<!--                </div>-->
             </form>
         </div>
     </div>

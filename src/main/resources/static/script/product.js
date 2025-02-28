@@ -209,11 +209,11 @@ const productFormRefill = (ob, rowIndex) => {
   addProductUnitType.value = product.unitType;
 
 
-  if(product.photo !=null){
-    productPhoto.src = atob(product.photo);
+  if(product.productPhoto !=null){
+    productPhoto.src = atob(product.productPhoto);
 
   }else {
-     productPhoto.src = '/image/userprofilephotos/userprofilephotodummy.png';
+     productPhoto.src = '/image/productimages/photo-icon-picture-icon.jpg';
   }
 
   if(product.reorderPoint !=null){
@@ -236,7 +236,6 @@ const productFormRefill = (ob, rowIndex) => {
 
 
   //refill  Batch No
-
   const batchList = ajaxGetRequest('/batch/getAllBatches')
 
   const batchSelect = document.getElementById('addProductBatch')
@@ -383,13 +382,15 @@ const itemTableRefresh = () => {
         productTableInstance.destroy();
     }
     $("#tableProduct tbody").empty();
+    const dummyProductPhotoSrc = '/image/productimages/photo-icon-picture-icon.jpg';
     tableDataBinder(
         tableProduct,
         products,
         displayProperty,
         true,
         generateProductDropDown,
-        getPrivilege
+        getPrivilege,
+        dummyProductPhotoSrc
     );
 
     productTableInstance = $("#tableProduct").DataTable({
@@ -540,8 +541,9 @@ const deleteProduct = (ob, rowIndex) => {
 
     // Function to reset the photo back to the default
     function clearPhoto() {
-        document.getElementById('productPhoto').src = "/image/userprofilephotos/userprofilephotodummy.png";
+        document.getElementById('productPhoto').src = "/image/productimages/photo-icon-picture-icon.jpg";
         document.getElementById('filePhoto').value = "";  // Clear the file input value
+        product.productPhoto = null;
     }
 
 //
@@ -700,7 +702,7 @@ const checkProductFormError = () => {
       }
 
       if(product.productPhoto !== oldProduct.productPhoto){
-              updates = updates + "Product is Change " + oldProduct.productPhotoName + " into "+ product.productPhotoName+  "<br>";
+              updates = updates + "Product Image is Change " + oldProduct.productPhotoName + " into "+ product.productPhotoName+  "<br>";
             }
 
       return updates;

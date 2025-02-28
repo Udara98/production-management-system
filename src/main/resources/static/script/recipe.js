@@ -1,9 +1,65 @@
 let recipeTableInstance;
+
+//Browser on load event
+window.addEventListener("load",()=>{
+
+    //Create Recipe object
+    recipe = {};
+
+    //Call table refresh function
+    refreshRecipeTable();
+
+    // Refresh the Recipe form to reset all fields and reload data
+    refreshRecipeForm()
+
+});
+
+const refreshRecipeTable = () =>{
+
+const recipes = ajaxGetRequest("/recipe/getAllRecipes")
+    console.log(recipes)
+    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
+    const getStatus = (ob) => {
+        if (ob.status === "Active") {
+            return '<p class="align-middle greenLabel mx-auto" style="width: 100px">Active</p>';
+        }
+        if (ob.status === "InActive") {
+            return '<p class="align-middle redLabel mx-auto" style="width: 100px">InActive</p>';
+        }
+    };
+    const displayProperty = [
+        {dataType: "text", propertyName: "recipeCode"},
+        {dataType: "text", propertyName: "recipeName"},
+        {dataType: "function", propertyName: getStatus},
+        {dataType: "button", propertyName: displayRecipe, btnName:`<i class="fa-solid fa-eye mx-2"></i> View Recipe`},
+    ];
+    if (recipeTableInstance) {
+        recipeTableInstance.destroy();
+    }
+    $("#tableRecipe tbody").empty();
+    tableDataBinder(
+        tableRecipe,
+        recipes,
+        displayProperty,
+        true,
+        generateRecipeDropDown,
+        getPrivilege
+    )
+    recipeTableInstance = $("#tableRecipe").DataTable({
+        responsive: true,
+        autoWidth: false,
+    });
+
+
+}
+
 let recipeItems=[]
 let recipeIngTableInstance;
 let selectedRecipe;
+
+
 window.addEventListener('load', function (){
-    reloadRecipes();
+    refreshRecipeTable();
     let selectedIng;
 
     let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients");
@@ -49,7 +105,7 @@ window.addEventListener('load', function (){
                 title: response.responseText,
                 icon: "success"
             });
-            reloadRecipes();
+            refreshRecipeTable();
             $("#modalAddRecipe").modal('hide');
 
         } else {
@@ -74,7 +130,7 @@ window.addEventListener('load', function (){
                 title: response.responseText,
                 icon: "success"
             });
-            reloadRecipes();
+            refreshRecipeTable();
             $("#modalEditRecipe").modal('hide');
 
         } else {
@@ -87,6 +143,7 @@ window.addEventListener('load', function (){
     }
 
 })
+
 const displayRecipeItems =(id,recipeItems)=>{
     document.getElementById(id).innerHTML=''
     recipeItems.forEach((recipe, index)=>{
@@ -138,41 +195,6 @@ const removeIng = (id,index)=>{
     displayRecipeItems(id,recipeItems)
 }
 
-const reloadRecipes =function (){
-    const recipes = ajaxGetRequest("/recipe/getAllRecipes")
-    console.log(recipes)
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
-    const getStatus = (ob) => {
-        if (ob.status === "Active") {
-            return '<p class="align-middle greenLabel mx-auto" style="width: 100px">Active</p>';
-        }
-        if (ob.status === "InActive") {
-            return '<p class="align-middle redLabel mx-auto" style="width: 100px">InActive</p>';
-        }
-    };
-    const displayProperty = [
-        {dataType: "text", propertyName: "recipeCode"},
-        {dataType: "text", propertyName: "recipeName"},
-        {dataType: "function", propertyName: getStatus},
-        {dataType: "button", propertyName: displayRecipe, btnName:`<i class="fa-solid fa-eye mx-2"></i> View Recipe`},
-    ];
-    if (recipeTableInstance) {
-        recipeTableInstance.destroy();
-    }
-    $("#tableRecipe tbody").empty();
-    tableDataBinder(
-        tableRecipe,
-        recipes,
-        displayProperty,
-        true,
-        generateRecipeDropDown,
-        getPrivilege
-    )
-    recipeTableInstance = $("#tableRecipe").DataTable({
-        responsive: true,
-        autoWidth: false,
-    });
-}
 
 const generateRecipeDropDown = (element) => {
     const dropdownMenu = document.createElement("ul");
@@ -300,7 +322,7 @@ const deleteRecipe = (recipe)=>{
                     title: response.responseText,
                     icon: "success"
                 });
-                reloadRecipes();
+                refreshRecipeTable();
             } else {
                 swal.fire({
                     title: "Something Went Wrong",

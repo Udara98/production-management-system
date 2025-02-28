@@ -5,7 +5,7 @@ window.addEventListener("load", () => {
   //Create empty object
   employee = {};
 
-  // call table refresh funtion
+  // call table refresh function
   refreshEmployeeTable();
 
   //call form refresh function

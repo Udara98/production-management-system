@@ -11,7 +11,8 @@ const tableDataBinder = (
     columnsList,
     buttonVisibility = true,
     dropDown,
-    privilegeOb
+    privilegeOb,
+    dummyPhotoSrc
 ) => {
     const tableBody = tableID.children[1];
     tableBody.innerHTML = "";
@@ -52,7 +53,7 @@ const tableDataBinder = (
              img.src = atob(element[column.propertyName]);
     //         console.log(element[column.dataType])
               } else {
-                        img.src = '/image/userprofilephotos/userprofilephotodummy.png';
+                        img.src = dummyPhotoSrc;
                     }
                     td.appendChild(img);
                 }
