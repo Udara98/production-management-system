@@ -377,3 +377,8 @@ div.dt-container .dt-input {
   max-height: 90vh; /* Adjust the height as needed */
   overflow-y: auto; /* Enable vertical scrolling */
 }
+
+#offcanvasProductSettings{
+    width: 40%; /* Adjust as needed */
+    max-width: 600px; /* Optional: Prevent it from getting too large */
+}

@@ -1,5 +1,6 @@
 let OrderProductsTableInstance;
 let cusOrderTableInstance;
+
 window.addEventListener('load', () => {
     reloadOrderDetails()
     let orderProducts = []

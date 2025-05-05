@@ -21,6 +21,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PurchaseOrder {
+    public void ifPresent(Object o) {
+    }
+
     public enum PurchaseOrderStatus {
         Pending,
         Completed,
@@ -104,6 +107,10 @@ public class PurchaseOrder {
         newPurchaseOrder.setPurchaseOrderStatus(orderDTO.getPurchaseOrderStatus());
 
         return newPurchaseOrder;
+    }
+
+    public void setPurchaseOrderStatus(PurchaseOrderStatus purchaseOrderStatus) {
+        this.purchaseOrderStatus = purchaseOrderStatus;
     }
 
 }

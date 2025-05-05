@@ -41,6 +41,7 @@
                     data-bs-backdrop="static"
                     data-bs-keyboard="false"
                     id="modalAddProduct"
+                    aria-hidden="true"
             >
                 <div th:replace="~{fragments/Product/ProductAddForm.html}"  ></div>
             </div>
@@ -52,6 +53,22 @@
             >
                 <div th:replace="~{fragments/Product/ProductEditForm.html}"  ></div>
             </div>
+            <div
+            class="modal fade"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+            id="modalAddStockProduct"
+            >
+            <div th:replace="~{fragments/Product/StockAdditionForm.html}"  ></div>
+            </div>
+            <div
+            class="modal fade"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+            id="modalViewProduct"
+            >
+            <div th:replace="~{fragments/Product/viewProduct.html}"  ></div>
+    </div>
     </div>
 </div>
 </body>

@@ -10,4 +10,7 @@ public interface IBatchService {
     ResponseEntity<?> UpdateNewBatch(BatchDTO batchDTO, String userName) throws NoSuchAlgorithmException;
     ResponseEntity<?> GetAllBatches();
     ResponseEntity<?> DeleteBatch(Integer id);
+    ResponseEntity<?> getRecipeCodeFromProduct(Integer id);
+    ResponseEntity<?> getBatchesForProduct(Integer id,boolean fifo);
+    ResponseEntity<?> getBatchNoById(Integer id);
 }

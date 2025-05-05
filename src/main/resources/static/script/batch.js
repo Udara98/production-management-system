@@ -49,7 +49,8 @@ const reloadBatchTable=()=>{
     };
     const displayProperty = [
         {dataType: "text", propertyName: "batchNo"},
-        {dataType: "text", propertyName: "productionItemNo"},
+        {dataType: "text", propertyName: "recipeCode"},
+        {dataType: "text", propertyName: "recipeName"},
         {dataType: "date", propertyName: "manufactureDate"},
         {dataType: "date", propertyName: "expireDate"},
         {dataType: "text", propertyName: "availableQuantity"},

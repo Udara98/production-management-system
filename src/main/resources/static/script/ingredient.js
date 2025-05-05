@@ -12,6 +12,8 @@ window.addEventListener("load", () => {
      //Call Ingredient Refresh function
       ingredientTableRefresh();
 
+
+
 });
 
   //Define function for Ingredient form refresh
@@ -24,6 +26,8 @@ const reloadIngredientsForm = () =>{
   let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
 
 }
+
+
 
 //Define function for Ingredient Table Refresh
 const ingredientTableRefresh = () =>{
@@ -112,15 +116,16 @@ const ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
 //Define function for validation and object binding
 const formValidation = () =>{
 
-ingredientCode.addEventListener('keyup', () => {
+console.log(ingredientCode)
+ingredientCode.addEventListener('input', () => {
         validation(ingredientCode, '', 'ingredient', 'ingredientCode');
 });
 
-quantity.addEventListener('keyup', () => {
+quantity.addEventListener('input', () => {
             validation(quantity, '^(?:[1-9][0-9]?|1[0-9]{2}|200)$', 'ingredient', 'quantity');
 });
 
-ingredientName.addEventListener('keyup', () => {
+ingredientName.addEventListener('input', () => {
                     validation(ingredientName, '', 'ingredient', 'ingredientName');
         });
 
@@ -128,16 +133,16 @@ unitType.addEventListener('change', () => {
 selectFieldValidator(unitType,'','ingredient','unitType')
 })
 
-rop.addEventListener('keyup', () =>{
+rop.addEventListener('input', () =>{
         validation(rop,'^[1-9][0-9]?$','ingredient','rop')
     })
 
-roq.addEventListener('keyup', () =>{
+roq.addEventListener('input', () =>{
         validation(roq,'^(?:[1-9][0-9]?|1[0-9]{2}|200)$','ingredient','roq')
     })
 
 
-note.addEventListener('keyup', () =>{
+note.addEventListener('input', () =>{
              validation(note,'','ingredient','note')
      })
 

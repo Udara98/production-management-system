@@ -4,6 +4,8 @@ window.addEventListener("load", () => {
 
     //Call Request table function
     reloadQRequestTable();
+
+
 });
 
 //Define function for refresh the request table
@@ -22,6 +24,7 @@ const reloadQRequestTable =  () =>{
     if(qRequestTableInstance){
         qRequestTableInstance.destroy();
     }
+
     $("#tableQRequests tbody").empty();
     tableDataBinder(
         tableQRequests,
@@ -33,8 +36,6 @@ const reloadQRequestTable =  () =>{
     )
     qRequestTableInstance = $("#tableQRequests").dataTable();
 }
-
-
 
 
 

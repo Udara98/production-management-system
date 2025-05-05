@@ -11,6 +11,9 @@ window.addEventListener('load', () => {
     //Call function for validation
     formValidation();
 
+    //Call function for validation restock
+    restockFormValidation();
+
     let userPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/ITEM");
 
     const batchList = ajaxGetRequest('/batch/getAllBatches')
@@ -172,7 +175,17 @@ const reloadProductForm = () =>{
     //Get all batches
     const batchList = ajaxGetRequest('/batch/getAllBatches')
 
+    //Get all package types
+     const packageTypes = ajaxGetRequest('/packageType/getAllPackageTypes')
+
+     //Get all flavour types
+      const flavourTypes = ajaxGetRequest('/flavour/getAllFlavours')
+
     const batchSelect = document.getElementById('addProductBatch')
+
+    const packageTypeSelect = document.getElementById('addPackageType')
+
+    const flavourTypeSelect = document.getElementById('addFlavourType')
 
 //    batchList.forEach((batch) => {
 //        const option = document.createElement('option');
@@ -180,13 +193,51 @@ const reloadProductForm = () =>{
 //        option.textContent = batch.batchNo;
 //        batchSelect.appendChild(option);
 //    })
-   //Auto refill all batches on dropdown
+//Auto refill all batches on dropdown
    fillDataIntoSelect(
        batchSelect,
        "Select Batch",
        batchList,
        "batchNo",
  );
+
+//Auto refill all PackageTypes on dropdown
+//  fillDataIntoSelect(
+//        packageTypeSelect,
+//        "Select Package Type",
+//        packageTypes,
+//        "name",
+//  );
+
+//Auto refill all PackageTypes on dropdown
+//    fillDataIntoSelect(
+//          flavourTypeSelect,
+//          "Select Flavour Type",
+//          flavourTypes.map(flavour => flavour.name ),
+//          "name",
+//    );
+
+//Auto refill all flavourTypes on dropdown
+flavourTypes.forEach(flavour => {
+              const option = document.createElement('option');
+              option.value = flavour.name;
+              option.textContent = flavour.name;
+              flavourTypeSelect.appendChild(option);
+          });
+//Auto refill all PackageTypes on dropdown
+packageTypes.forEach(packageType => {
+              const option = document.createElement('option');
+              option.value = packageType.name;
+              option.textContent = packageType.name;
+              packageTypeSelect.appendChild(option);
+          });
+//    //Auto refill all PackageTypes on dropdown
+//        fillDataIntoSelect(
+//              flavourTypeSelect,
+//              "Select Flavour Type",
+//              packageTypes,
+//              "name",
+//        );
 
 
 
@@ -260,35 +311,43 @@ const formValidation = () =>{
         DynamicSelectValidation(addProductBatch, 'product', 'batch');
     });
 
-    addProductName.addEventListener('keyup',  () => {
+    addPackageType.addEventListener('change',  () => {
+            selectFieldValidator(addPackageType,'', 'product', 'packageType');
+        });
+
+     addFlavourType.addEventListener('change',  () => {
+                 selectFieldValidator(addFlavourType,'', 'product', 'flavour');
+             });
+
+    addProductName.addEventListener('input',  () => {
             validation(addProductName, '', 'product', 'productName');
     });
 
-    addProductUnitSize.addEventListener('keyup',  () => {
+    addProductUnitSize.addEventListener('input',  () => {
                 validation(addProductUnitSize, '^[1-9]$', 'product', 'unitSize');
     });
 
-    addProductUnitType.addEventListener('change', () =>{
+    addProductUnitType.addEventListener('input', () =>{
     selectFieldValidator(addProductUnitType,'','product','unitType')
     })
 
-    addProductQty.addEventListener('keyup', () =>{
+    addProductQty.addEventListener('input', () =>{
         validation(addProductQty,'^(?:[1-9][0-9]?|1[0-9]{2}|200)$','product','quantity')
     })
 
-    addProductROP.addEventListener('keyup', () =>{
+    addProductROP.addEventListener('input', () =>{
             validation(addProductROP,'^[1-9][0-9]?$','product','reorderPoint')
         })
 
-    addProductROQ.addEventListener('keyup', () =>{
+    addProductROQ.addEventListener('input', () =>{
             validation(addProductROQ,'^(?:[1-9][0-9]?|1[0-9]{2}|200)$','product','reorderQuantity')
         })
 
-    addProductPrice.addEventListener('keyup', () =>{
+    addProductPrice.addEventListener('input', () =>{
                 validation(addProductPrice,'^(?:[1-9]|[1-9][0-9]|[1-9][0-9]{3}|[1-9][0-9]{2})$','product','salePrice')
          })
 
-    addProductNote.addEventListener('keyup', () =>{
+    addProductNote.addEventListener('input', () =>{
                  validation(addProductNote,'','product','note')
          })
 
@@ -298,6 +357,36 @@ const formValidation = () =>{
 
 }
 
+const generateProductName = function () {
+
+
+    let flavourType = '';
+    if (addFlavourType.value != '') {
+        flavourType = addFlavourType.value;
+    }
+    let packageType = '';
+    if (addPackageType.value != '') {
+        packageType = addPackageType.value;
+    }
+
+    let unitSize = '';
+        if (addProductUnitSize.value != '') {
+            unitSize = addProductUnitSize.value;
+        }
+
+    let unitType = '';
+        if (addProductUnitType.value != '') {
+            unitType = addProductUnitType.value;
+        }
+
+    if ( flavourType != '' && packageType != '' && unitSize != '' && unitType != '') {
+        addProductName.value = flavourType + 'Ice Cream' + ' - ' + unitSize + unitType + ' - ' + packageType;
+
+        product.productName = addProductName.value;
+        addProductName.classList.remove('is-invalid');
+        addProductName.classList.add('is-valid');
+    }
+}
 
 
 //Define function for add item
@@ -335,11 +424,15 @@ const getStatus = (ob) => {
         if (ob.productStatus === "OutOfStock") {
             return '<p class="align-middle redLabel mx-auto" style="width: 100px">Out of stock</p>';
         }
-    };
+        if (ob.productStatus === "Removed") {
+            return '<p class="align-middle GrayLabel mx-auto" style="width: 100px">Removed</p>';
+        }
+};
 
 
 const getBatchNo = (ob) =>{
-    return ob.batch.batchNo;
+//    return ob.batch.batchNo;
+return "BatchNO";
 }
 
 const getUnitAmount = (ob) =>{
@@ -411,7 +504,18 @@ const generateProductDropDown = (element,index) => {
             action:productFormRefill,
             icon: "fa-solid fa-edit me-2",
         },
-        {name: "Delete", action: deleteProduct, icon: "fa-solid fa-trash me-2"}
+        {   name: "Delete",
+            action: deleteProduct,
+            icon: "fa-solid fa-trash me-2",
+         },
+         {  name: "Add Stocks",
+            action: stockAdditionFormRefill,
+            icon: "fa-solid fa-plus me-2",
+         },
+         {  name: "Detail View ",
+             action: viewProductDetailsTableRefill,
+            icon: "fa-solid fa-eye me-2",
+          }
     ];
 
     buttonList.forEach((button) => {
@@ -487,14 +591,20 @@ const editProduct = (product) => {
     $("#modalEditProduct").modal("show");
 
 }
+
+
+const detailView = (product) => {
+    $("#modalViewProduct").modal("show");
+}
+
 // create function for delete User
-const deleteProduct = (ob, rowIndex) => {
+const deleteProduct = (product) => {
     console.log("delete");
 
     Swal.fire({
         title: "Are you sure?",
         text: "Do you want to delete Product " +
-            "" + (ob.productName) +"?",
+            "" + (product.productName) +"?",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#E11D48",
@@ -504,30 +614,26 @@ const deleteProduct = (ob, rowIndex) => {
         if(result.isConfirmed) {
 
             // Delete Service
-            let deleteServiceRequestResponse = await ajaxRequestBody("/product", "DELETE", ob)
+            let deleteServiceRequestResponse = ajaxDeleteRequest(`/product/deleteProduct/${product.id}`);
 
 
             //Check Backend Service
-            if (deleteServiceRequestResponse === "OK") {
-                swal.fire({
-                    title: "Deleted!",
-                    text: "Product has been deleted.",
-                    icon: "success"
-                });
-                userForm.reset();
-                refreshUserTable();
-                refreshUserForm();
-
-            } else {
-                swal.fire({
-                    title: "Delete Not Successfully",
-                    text: deleteServiceRequestResponse,
-                    icon: "error"
-                });
-            }
-        }
-    })
-}
+            if (deleteServiceRequestResponse.status === 200) {
+                            swal.fire({
+                                title: deleteServiceRequestResponse.responseText,
+                                icon: "success"
+                            });
+                            itemTableRefresh();
+                        } else {
+                            swal.fire({
+                                title: "Something Went Wrong",
+                                text: deleteServiceRequestResponse.responseText,
+                                icon: "error"
+                            });
+                                        }
+                                    }
+                                });
+                            } ;
 
 // Function to preview the uploaded photo
     function previewPhoto(event) {
@@ -707,3 +813,236 @@ const checkProductFormError = () => {
 
       return updates;
     }
+
+
+    //Refill Ingredient form fields
+    const stockAdditionFormRefill = (ob, rowIndex) => {
+      $("#modalAddStockProduct").modal('show');
+      product = JSON.parse(JSON.stringify(ob));
+      console.log(product);
+      oldProduct = JSON.parse(JSON.stringify(ob));
+
+        const stockBatchSelect = document.getElementById('stockBatchSelect');
+
+        const stockProductName = document.getElementById('stockProductName');
+
+        const addStockQty = document.getElementById('addStockQty');
+
+        const stockUnitCost = document.getElementById('stockUnitCost');
+
+
+     const restockBatchList = ajaxGetRequest(`batch/getBatchesForProduct/${product.id}/true`)
+
+     console.log(restockBatchList);
+
+     //Fill Dropdown of  select Supplier
+       restockBatchList.forEach(batch => {
+               const option = document.createElement('option');
+               option.value = batch.id;
+               option.textContent = batch.batchNo;
+               stockBatchSelect.appendChild(option);
+        });
+
+
+      stockAdd = new Object();
+      oldStockAdd = null;
+
+      stockAdd.productId = product.id;
+
+
+      stockProductName.value = product.productName;
+      stockProductName.disabled = true;
+
+      currentStock.value = product.quantity;
+      currentStock.disabled = true;
+
+    };
+
+  const restockFormValidation = () =>{
+
+
+    stockBatchSelect.addEventListener('change',  () => {
+        selectFieldValidator(stockBatchSelect,'', 'stockAdd', 'batchId');
+    });
+
+    addStockQty.addEventListener('input', () =>{
+        validation(addStockQty,'^(?:[1-9][0-9]?|1[0-9]{2}|200)$','stockAdd','quantity')
+    })
+
+    stockUnitCost.addEventListener('input', () =>{
+        validation(stockUnitCost,'^(?:[1-9]|[1-9][0-9]|[1-9][0-9]{3}|[1-9][0-9]{2})$','stockAdd','salesPrice')
+     })
+
+  }
+
+  //Define product submit function
+   const productRestockSubmit = () => {
+      event.preventDefault();
+      console.log(stockAdd);
+
+      // 1. Check form errors
+      const errors = checkProductRestockFormError();
+
+      if (errors === "") {
+          Swal.fire({
+              title: "Are you sure?",
+              text: "Do you want to add the Stocks? "  + "?",
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#E11D48",
+              cancelButtonColor: "#3f3f44",
+              confirmButtonText: "Yes, Add"
+          }).then((result) => {
+              if (result.isConfirmed) {
+                  const postServiceRequestResponse = ajaxRequestBody("/product/restock", "POST", stockAdd);
+
+                  // Check backend response
+                  if (postServiceRequestResponse.status === 200) {
+                      $("#stockAddForm").modal('hide');
+                      stockAddForm.reset();
+//                      itemTableRefresh();
+//                      reloadProductForm();
+
+                      // Reset validation classes
+//                      Array.from(productAddForm.elements).forEach((field) => {
+//                          field.classList.remove('is-valid', 'is-invalid');
+//                      });
+
+                      Swal.fire({
+                          title: "Stock Added Successfully!",
+                          icon: "success"
+                      });
+
+                  } else {
+                      console.error(postServiceRequestResponse);
+                      Swal.fire({
+                          title: "Error",
+                          text: postServiceRequestResponse.responseText,
+                          icon: "error"
+                      });
+                  }
+              }
+          });
+      } else {
+          Swal.fire({
+              title: "Stock Not Added",
+              text: errors,
+              icon: "error"
+          });
+      }
+  };
+
+
+
+//Check product form errors
+const checkProductRestockFormError = () => {
+    let errors = '';
+
+
+    if (stockAdd.batchId == null) {
+        errors = errors + "Batch No can't be null \n";
+        restockBatchSelect.classList.add('is-invalid')
+    }
+
+
+    if (stockAdd.quantity == null) {
+        errors = errors + "Please Enter Quantity \n";
+        addProductQty.classList.add('is-invalid')
+    }
+
+
+    if (stockAdd.salesPrice == null) {
+        errors = errors + "Email Enter Valid Sales price \n";
+        stockUnitCost.classList.add('is-invalid')
+    }
+
+
+    return errors;
+}
+
+
+ //Refill Ingredient form fields
+    const viewProductDetailsTableRefill = (ob, rowIndex) => {
+      $("#modalViewProduct").modal('show');
+      product = JSON.parse(JSON.stringify(ob));
+      console.log(product);
+
+        const detailProductImageThumbnail = document.getElementById('detailProductImageThumbnail');
+
+        const detailProductName = document.getElementById('detailProductName');
+
+        const detailProductCode = document.getElementById('detailProductCode');
+
+        const detailProductStatus = document.getElementById('detailProductStatus');
+
+        const detailQuantity = document.getElementById('detailQuantity');
+
+
+         if(product.productPhoto !=null){
+            detailProductImageThumbnail.src = atob(product.productPhoto);
+
+          }else {
+             productPhoto.src = '/image/productimages/photo-icon-picture-icon.jpg';
+          }
+
+          detailProductName.innerText = product.productName;
+          detailProductCode.innerText = product.productCode;
+          detailProductStatus.innerHTML = getStatus(product);
+          detailQuantity.innerText = product.quantity;
+
+          const getBatchNo = (ob) =>{
+                      return ob.batch.batchNo;
+                      }
+
+
+           const displayProperty = [
+                      {dataType: "function", propertyName: getBatchNo},
+                      {dataType: "text", propertyName: "quantity"},
+                      {dataType: "text", propertyName: "expireDate"},
+                      {dataType: "price", propertyName: "salesPrice"},
+                  ];
+
+         let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/PRODUCT");
+
+         const productHasBatches = ajaxGetRequest(`/productHasBatch/getByProductId/${product.id}`)
+
+
+         tableDataBinder(
+             batchDetailsTable,
+             productHasBatches,
+             displayProperty,
+             null,
+             null,
+             getPrivilege,
+             null
+         );
+
+//        const stockUnitCost = document.getElementById('stockUnitCost');
+//
+//
+//     const restockBatchList = ajaxGetRequest(`batch/getBatchesForProduct/${product.id}/true`)
+//
+//     console.log(restockBatchList);
+//
+//     //Fill Dropdown of  select Supplier
+//       restockBatchList.forEach(batch => {
+//               const option = document.createElement('option');
+//               option.value = batch.id;
+//               option.textContent = batch.batchNo;
+//               stockBatchSelect.appendChild(option);
+//        });
+//
+//
+//      stockAdd = new Object();
+//      oldStockAdd = null;
+//
+//      stockAdd.productId = product.id;
+//
+//
+//      stockProductName.value = product.productName;
+//      stockProductName.disabled = true;
+//
+//      currentStock.value = product.quantity;
+//      currentStock.disabled = true;
+
+    };

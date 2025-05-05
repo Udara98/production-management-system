@@ -54,4 +54,21 @@ public class BatchController {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
+
+    @GetMapping("/getBatchesForProduct/{productId}/{fifo}")
+    public ResponseEntity<?> getBatchesForProduct(
+            @PathVariable Integer productId,
+            @PathVariable boolean fifo) {
+        try {
+            return batchService.getBatchesForProduct(productId, fifo);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getBatchNo/{id}")
+    public ResponseEntity<?> getBatchNo(@PathVariable Integer id) {
+        return batchService.getBatchNoById(id);
+    }
+
 }

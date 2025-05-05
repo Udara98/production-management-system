@@ -5,6 +5,7 @@ let selectedPT;
 window.addEventListener('load', () => {
     reloadSettingTables()
     document.getElementById('flavourAddForm').onsubmit = function (event) {
+
         event.preventDefault();
 
         const flavourName = document.getElementById("flavour-name").value;

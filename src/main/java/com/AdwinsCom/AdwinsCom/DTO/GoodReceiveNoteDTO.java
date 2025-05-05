@@ -18,4 +18,7 @@ public class GoodReceiveNoteDTO {
     private Double totalAmount;
     private GoodReceiveNote.GRNStatus grnStatus;
     private LocalDate receivedDate;
+    private Integer supplierId;
+    private GoodReceiveNote.PaymentStatus paymentStatus;
+
 }

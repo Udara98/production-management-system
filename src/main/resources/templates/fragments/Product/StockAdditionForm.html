@@ -1,0 +1,108 @@
+<div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Add Stock to Product</h5>
+            <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
+        </div>
+        <div class="modal-body">
+            <form id="stockAddForm" class="needs-validation">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium" for="stockProductName">Product<span class="text-danger"> * </span></label>
+                        <input id="stockProductName" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium" for="currentStock">Current Quantity</label>
+                        <input class="form-control" id="currentStock" type="text" readonly>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium" for="stockBatchSelect">Batch<span class="text-danger"> * </span></label>
+                        <select id="stockBatchSelect" class="form-select" required>
+                            <option selected disabled value="">Select Batch</option>
+                            <!-- Options will be populated via JavaScript -->
+                        </select>
+                        <div class="form-text">Available quantity: <span id="batchAvailableQty">0</span> <span id="batchUnitType"></span></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium" for="addStockQty">Quantity to Add<span class="text-danger"> * </span></label>
+                        <div class="input-group">
+                            <input class="form-control" id="addStockQty" type="text" min="1" step="1" placeholder="Enter quantity" required>
+                            <span class="input-group-text" id="productUnitTypeDisplay">units</span>
+                        </div>
+                        <div class="invalid-feedback">Please enter a valid quantity</div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium" for="stockUnitCost">Sales Price(Optional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">LKR</span>
+                            <input class="form-control" id="stockUnitCost" type="text">
+                        </div>
+                    </div>
+<!--                    <div class="col-md-6">-->
+<!--                        <label class="form-label fw-medium" for="stockExpiryDate">Expiry Date (Optional)</label>-->
+<!--                        <input class="form-control" id="stockExpiryDate" type="date">-->
+<!--                    </div>-->
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="form-floating">
+                            <textarea class="form-control" id="stockAdditionNote" placeholder="Enter note"></textarea>
+                            <label class="form-label fw-medium" for="stockAdditionNote">
+                                Notes <span class="text-cus-red">(optional)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+<!--                <div class="alert alert-warning d-flex align-items-center" role="alert" id="stockWarning" style="display: none;">-->
+<!--                    <i class="fas fa-exclamation-triangle me-2"></i>-->
+<!--                    <div id="warningMessage"></div>-->
+<!--                </div>-->
+
+                <hr>
+                <div class="row mt-3 mb-2">
+                    <div class="col-1">
+                        <button type="reset" class="btn btn-outline-danger">
+                            Clear
+                        </button>
+                    </div>
+                    <div class="col-8"></div>
+                    <div class="col-3 text-end">
+                        <button class="btn cusbutton btn-submit w-100 " onclick="productRestockSubmit();">
+                            <i class="fas fa-boxes me-2"></i>Add Stock
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Sample JavaScript functions that would be needed
+    function loadProductDetails() {
+        // This would fetch product details and update:
+        // - Current stock display
+        // - Unit type display
+        // - Available batches
+    }
+
+    function calculateNewStock() {
+        // This would calculate and display what the new stock level will be
+        // after adding the specified quantity
+    }
+
+    function validateStockAddition() {
+        // Validate that:
+        // 1. Selected batch has sufficient quantity
+        // 2. Quantity is positive
+        // 3. Product is selected
+    }
+</script>

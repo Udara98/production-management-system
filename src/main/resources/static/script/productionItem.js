@@ -1,6 +1,8 @@
 let productionItemTableInstance;
 let selectedPI;
 let totalCost;
+let recipeCode = "";
+let recipeName = "";
 const flavours = ajaxGetRequest("/flavour/getAllFlavours");
 const packageTypes = ajaxGetRequest("/packageType/getAllPackageTypes")
 const recipes = ajaxGetRequest("/recipe/getAllRecipes").filter((r) => r.status === "Active");
@@ -8,17 +10,17 @@ const recipes = ajaxGetRequest("/recipe/getAllRecipes").filter((r) => r.status =
 window.addEventListener('load', () => {
 
     //Call function to Reload the production table
-    reloadPITable();
+//    reloadPITable();
 
     //Call function to refresh the add production item form
-    refreshProductionItemForm();
+//    refreshProductionItemForm();
 
     //Call function to refresh the add new batch form
 
     //Call function to refresh the recipe form
 
     //Call Recipe form validation
-    productionItemValidation();
+//    productionItemValidation();
 
 //    const flavourSelectElement = document.getElementById("add_pi_flavourId");
 //    const ptSelectElement = document.getElementById("add_pi_ptId");
@@ -107,15 +109,19 @@ window.addEventListener('load', () => {
 
     recipes.forEach(rec => {
         const option = document.createElement('option');
-        option.value = rec.recipeCode;
+        option.value = rec.recipeName + "|" + rec.recipeCode;
         option.textContent = rec.recipeName + "-" + rec.recipeCode;
         RecipeSelectElement.appendChild(option);
     });
 
     document.getElementById('makeNewBatchForm').onsubmit = function (event) {
         event.preventDefault()
+                console.log(recipeName)
+                console.log(recipeCode)
 
         const batch = {
+            recipeCode: recipeCode,
+            recipeName:recipeName,
             totalQuantity: parseFloat(document.getElementById("add-batchSize").value),
             availableQuantity: parseFloat(document.getElementById("add-batchSize").value),
             manufactureDate: new Date(document.getElementById("add-bt-mnf").value),
@@ -355,10 +361,10 @@ const makeNewProdBatch = () => {
     $("#modalMakeNewBatch").modal("show");
 
 
-        let selRecipe = "";
-
        document.getElementById("sel-recipe").addEventListener("change", function () {
-            selRecipe = this.value;
+           let selectedData = this.value.split("|"); // Split back into an array
+              recipeName = selectedData[0];
+              recipeCode = selectedData[1];
        });
 
 
@@ -366,8 +372,10 @@ const makeNewProdBatch = () => {
 document.getElementById("check-btn").addEventListener('click', () => {
 
         const batchSize = document.getElementById("add-batchSize").value;
+        console.log(recipeName)
+        console.log(recipeCode)
 
-        const result = ajaxGetRequest(`/productionItem/checkIngAvailability/${selRecipe}/${batchSize}`);
+        const result = ajaxGetRequest(`/productionItem/checkIngAvailability/${recipeCode}/${batchSize}`);
         console.log(result)
 
         const batchFormDiv = document.getElementById('batch-add-form');

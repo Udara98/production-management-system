@@ -234,6 +234,7 @@ const reloadGRN = () => {
     let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
 
     const getPONo = (ob) => ob.purchaseOrder.purchaseOrderNo;
+
     const getStatus = (ob) => {
         if (ob.grnStatus === "Pending") {
             return '<p class="align-middle yellowLabel mx-auto" style="width: 100px">Pending</p>';
@@ -248,12 +249,26 @@ const reloadGRN = () => {
             return '<p class="align-middle GrayLabel mx-auto" style="width: 100px">Closed</p>';
         }
     };
+
+    const getPaymentStatus = (ob) => {
+            if (ob.PaymentStatus === "Pending") {
+                return '<p class="align-middle GrayLabel mx-auto" style="width: 100px">Closed</p>';
+            }
+            if (ob.grnStatus === "Paid") {
+                return '<p class="align-middle greenLabel mx-auto" style="width: 100px">Paid</p>';
+            }
+            if (ob.grnStatus === "Partially_Paid") {
+                return '<p class="align-middle yellowLabel mx-auto" style="width: 100px">Rejected</p>';
+            }
+        };
+
     const displayProperty = [
         {dataType: "text", propertyName: "grnNo"},
         {dataType: "function", propertyName: getPONo},
         {dataType: "price", propertyName: "totalAmount"},
         {dataType: "date", propertyName: "receivedDate"},
         {dataType: "function", propertyName: getStatus},
+        {dataType: "function", propertyName: getPaymentStatus},
     ];
 
     if (grnTableInstance) {

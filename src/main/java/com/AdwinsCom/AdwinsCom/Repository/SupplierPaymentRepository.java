@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SupplierPaymentRepository extends JpaRepository<SupplierPayment,Integer> {
 
-    SupplierPayment findByGoodReceiveNote(GoodReceiveNote grn);
+//    SupplierPayment findByGoodReceiveNote(GoodReceiveNote grn);
 
 }

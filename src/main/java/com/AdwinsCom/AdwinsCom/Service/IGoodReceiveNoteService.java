@@ -11,4 +11,8 @@ public interface IGoodReceiveNoteService {
     ResponseEntity<?> UpdateGRN(GoodReceiveNoteDTO goodReceiveNoteDTO) throws NoSuchAlgorithmException;
     ResponseEntity<?> GetAllGRNs();
     ResponseEntity<?> DeleteGRN(Integer id);
+    ResponseEntity<?>getGRNsBySupplierId(Integer id);
+    ResponseEntity<?>getGRNIdByGRNNo(String grnNo);
+    ResponseEntity<?>getActiveGRNBySupId(Integer id);
+
 }

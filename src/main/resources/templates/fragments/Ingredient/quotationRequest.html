@@ -25,7 +25,10 @@
           <div class="row mb-3">
             <div class="col">
               <label for="quoQuantity" class="form-label fw-medium">Quantity</label><span class="text-danger"> * </span>
-              <input type="text" class="form-control" id="quoQuantity" required placeholder="Enter the Quantity" onkeyup="validation(quoQuantity,'','quoRequest','quantity')">
+              <input type="text" class="form-control" id="quoQuantity" required placeholder="Enter the Quantity" oninput="validation(quoQuantity,'','quoRequest','quantity')">
+              <div class="invalid-feedback">
+                Please Enter Valid Quantity
+              </div>
             </div>
             <div class="col">
               <label for="quoUnitType" class="form-label fw-medium">Unit Type</label><span class="text-danger"> * </span>
@@ -58,7 +61,7 @@
           </div>
           <div class="mb-3">
             <label for="Quonote" class="form-label fw-medium">Note</label><span class="text-cus-red"> (optional)</span>
-            <textarea type="text" class="form-control" id="Quonote" placeholder="Enter a note" onkeyup="validation(Quonote,'','quoRequest','quoReqNote')"
+            <textarea type="text" class="form-control" id="Quonote" placeholder="Enter a note" oninput="validation(this,'','quoRequest','quoReqNote')"
                        rows="3"></textarea>
           </div>
           <hr>

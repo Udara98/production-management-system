@@ -11,9 +11,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class BatchDTO {
     private Integer id;
-    private String productionItemNo;
     private Double totalQuantity;
     private Double availableQuantity;
+    private String recipeCode;
+    private String recipeName;
     private Double damagedQuantity;
     private LocalDateTime manufactureDate;
     private LocalDateTime expireDate;

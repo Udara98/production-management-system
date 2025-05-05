@@ -1,3 +1,6 @@
+
+
+
 //define function for validate input element
 const inputValidation = (fieldId, pattern, object, property) => {
 
@@ -186,7 +189,6 @@ const DynamicSelectValidation = function (dropdownId, object, property) {
 
     if (selectedValue !== '') {
         window[object][property] = JSON.parse(selectedValue);
-        console.log(JSON.parse(selectedValue).requestNo);
         dropdownId.classList.remove('is-invalid');
         dropdownId.classList.add('is-valid');
     } else {
@@ -221,6 +223,7 @@ const DynamicSelectValidationOnlyValue = function (dropdownId, object, property,
 
 //Create Validation for full name and fill calling name parts
 const validation = (fieldId,pattern,object,property ) => {
+console.log("fieldId")
   const fieldValue = fieldId.value;
   const Pattern = new RegExp(pattern);
 
@@ -253,7 +256,6 @@ const validation = (fieldId,pattern,object,property ) => {
 
 const selectFieldValidator= (fieldId, pattern,object,property) => {
   const fieldValue = fieldId.value;
-    console.log(fieldId)
 
   if (fieldId.value !== "") {
     fieldId.classList.add("is-valid");

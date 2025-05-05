@@ -52,4 +52,19 @@ public class GoodReceiveNoteController {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
+
+    @GetMapping("getGRNBySupId/{supplierId}")
+    public ResponseEntity<?> getGRNsBySupplierId(@PathVariable Integer supplierId) {
+        return goodReceiveNoteService.getGRNsBySupplierId(supplierId);
+    }
+
+    @GetMapping("/get-grn-id/{grnNo}")
+    public ResponseEntity<?> getGRNIdByGRNNo(@PathVariable String grnNo) {
+        return goodReceiveNoteService.getGRNIdByGRNNo(grnNo);
+    }
+
+    @GetMapping("/get-active-non-paid-grns/{supplierId}")
+    public ResponseEntity<?> getActiveGRNBySupId(@PathVariable Integer supplierId) {
+        return goodReceiveNoteService.getActiveGRNBySupId(supplierId);
+    }
 }

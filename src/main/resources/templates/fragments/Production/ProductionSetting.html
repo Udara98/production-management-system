@@ -1,93 +1,91 @@
+<div class="flex-grow-1 container-fluid">
+    <div class="hstack mt-3 mb-3">
+        <h2 class="settingsHeader">Flavours</h2>
+        <button
+                class="btn ms-auto me-4 addPrimaryBtn"
+                data-bs-target="#modalFlavourAdd"
+                data-bs-toggle="modal"
+                type="button"
+        >
+            Add New
+        </button>
+    </div>
+    <table
+            class="table table-boarderd table-hover table-bordered bg-light cusTable mt-2"
+            id="tableFlavour"
+    >
+        <thead class="cusTableHead">
+        <tr>
+            <th>#</th>
+            <th>Flavour ID</th>
+            <th>Flavour Name</th>
+            <th>Modify</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<div class="flex-grow-1 container-fluid">
+    <div class="hstack mt-3 mb-3">
+        <h2 class="settingsHeader">Package Types</h2>
+        <button
+                class="btn ms-auto me-4 addPrimaryBtn"
+                data-bs-target="#modalPTAdd"
+                data-bs-toggle="modal"
+                type="button"
+        >
+            Add New
+        </button>
+    </div>
+    <table
+            class="table table-boarderd table-hover table-bordered bg-light cusTable mt-2"
+            id="tablePTs"
+    >
+        <thead class="cusTableHead">
+        <tr>
+            <th>#</th>
+            <th>Package ID</th>
+            <th>Package Type</th>
+            <th>Modify</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
 <div
-        aria-labelledby="setting-tab"
-        class="tab-pane fade"
-        id="setting-tab-pane"
-        role="tabpanel"
-        tabindex="3"
+        class="modal modal-sm fade"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        id="modalFlavourAdd"
 >
-            <div class="flex-grow-1 container-fluid ">
-                <div class="hstack mt-3 mb-3 ">
-                    <h2 class="settingsHeader">Flavours</h2>
-                    <button
-                            class="btn ms-auto me-4 addPrimaryBtn"
-                            data-bs-target="#modalFlavourAdd"
-                            data-bs-toggle="modal"
-                            type="button"
-                    >
-                        Add New
-                    </button>
-                </div>
-            </div>
-            <table
-                    class="table table-boarderd table-hover table-bordered bg-light cusTable mt-2"
-                    id="tableFlavour"
-            >
-                <thead class="cusTableHead">
-                <th>#</th>
-                <th>Flavour ID</th>
-                <th>Flavour Name</th>
-                <th>Modify</th>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <div class="flex-grow-1 container-fluid ">
-                <div class="hstack mt-3 mb-3 ">
-                    <h2 class="settingsHeader ">Package Types</h2>
-                    <button
-                            class="btn ms-auto me-4 addPrimaryBtn"
-                            data-bs-target="#modalPTAdd"
-                            data-bs-toggle="modal"
-                            type="button"
-                    >
-                        Add New
-                    </button>
-                </div>
-            </div>
-            <table
-                    class="table table-boarderd table-hover table-bordered bg-light cusTable mt-2"
-                    id="tablePTs"
-            >
-                <thead class="cusTableHead">
-                <th>#</th>
-                <th>Package ID</th>
-                <th>Package Type</th>
-                <th>Modify</th>
-                </thead>
-                <tbody></tbody>
-            </table>
-    </div>
+    <div th:replace="~{fragments/Production/Settings/FlavourAddForm.html}"></div>
+</div>
 
-    <div
-            class="modal modal-sm fade"
-            data-bs-backdrop="static"
-            data-bs-keyboard="false"
-            id="modalFlavourAdd"
-    >
-        <div th:replace="~{fragments/Production/Settings/FlavourAddForm.html}"  ></div>
-    </div>
-    <div
-            class="modal modal-sm fade"
-            data-bs-backdrop="static"
-            data-bs-keyboard="false"
-            id="modalFlavourEdit"
-    >
-        <div th:replace="~{fragments/Production/Settings/FlavourEditForm.html}"  ></div>
-    </div>
+<div
+        class="modal modal-sm fade"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        id="modalFlavourEdit"
+>
+    <div th:replace="~{fragments/Production/Settings/FlavourEditForm.html}"></div>
+</div>
 
-    <div
-            class="modal fade"
-            data-bs-backdrop="static"
-            data-bs-keyboard="false"
-            id="modalPTAdd"
-    >
-        <div th:replace="~{fragments/Production/Settings/PackageTypeAddFrom.html}"  ></div>
-    </div>
-    <div
-            class="modal fade"
-            data-bs-backdrop="static"
-            data-bs-keyboard="false"
-            id="modalPTEdit"
-    >
-        <div th:replace="~{fragments/Production/Settings/PackageTypeEditFrom.html}"  ></div>
-    </div>
+<div
+        class="modal fade"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        id="modalPTAdd"
+>
+    <div th:replace="~{fragments/Production/Settings/PackageTypeAddFrom.html}"></div>
+</div>
+
+<div
+        class="modal fade"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        id="modalPTEdit"
+>
+    <div th:replace="~{fragments/Production/Settings/PackageTypeEditFrom.html}"></div>
 </div>

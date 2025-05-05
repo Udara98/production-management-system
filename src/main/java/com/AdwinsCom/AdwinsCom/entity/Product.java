@@ -1,5 +1,6 @@
 package com.AdwinsCom.AdwinsCom.entity;
 import com.AdwinsCom.AdwinsCom.entity.Production.*;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -20,7 +23,7 @@ public class Product {
         InStock,
         LowStock,
         OutOfStock,
-
+        Removed
     }
 
     @Id
@@ -36,9 +39,13 @@ public class Product {
     @NotNull
     private String productName;
 
-    @ManyToOne
-    @JoinColumn(name = "batch_id" ,referencedColumnName = "id")
-    private Batch batch;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<ProductHasBatch> batches = new ArrayList<>();
+
+//    @ManyToOne
+//    @JoinColumn(name = "batch_id" ,referencedColumnName = "id")
+//    private Batch batch;
 
     @Column(name = "reorder_point")
     private Integer reorderPoint;

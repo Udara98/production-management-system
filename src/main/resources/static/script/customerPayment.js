@@ -119,7 +119,7 @@ const calculateAdvancePayBalance = () => {
 }
 
 
-//Reload product form
+//Reload CustomerPayment form
 const reloadCustomerPaymentForm = () =>{
 
     customerPayment = new Object();
@@ -299,6 +299,8 @@ const generateCPDropDown = (element) => {
 
 // show payment options according to selected payment method - ex- show bank transfer option
 const showPaymentOptionByMethod =  () => {
+    payment.paymentDate='';
+    payment.transferid='';
     inputBankTranferId.value = '';     // when payment changes from check to transfer , still might have a value in check
     inputChequeNo.value = '';
     inputCardRefNo.value = '';

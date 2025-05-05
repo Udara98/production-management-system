@@ -10,5 +10,5 @@ public interface ISupplierPaymentService {
     ResponseEntity<?> AddNewSupplierPayment(SupplierPaymentDTO supplierPaymentDTO, String userName) throws NoSuchAlgorithmException;
     ResponseEntity<?> GetAllSupplierPayment();
     ResponseEntity<?> DeleteSupplierPayment(Integer id);
-
+    ResponseEntity<?> CreateOrFetchPaymentMethod(SupplierPaymentDTO request);
 }

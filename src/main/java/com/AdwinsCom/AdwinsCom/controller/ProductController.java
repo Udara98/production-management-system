@@ -1,5 +1,6 @@
 package com.AdwinsCom.AdwinsCom.controller;
 
+import com.AdwinsCom.AdwinsCom.DTO.ProductRestockRequestDTO;
 import com.AdwinsCom.AdwinsCom.Repository.ProductRepository;
 import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
 import com.AdwinsCom.AdwinsCom.Service.IPrivilegeService;
@@ -57,11 +58,11 @@ public class ProductController {
         return productService.AddNewProduct(product);
     }
 
-    @PutMapping()
-    public ResponseEntity<?> UpdateProduct(@RequestBody Product product){
-            return productService.UpdateProduct(product);
-
-    }
+//    @PutMapping()
+//    public ResponseEntity<?> UpdateProduct(@RequestBody Product product){
+//            return productService.UpdateProduct(product);
+//
+//    }
 
     @GetMapping("/getAllProducts")
     public ResponseEntity<?> GetAllProducts() {
@@ -71,6 +72,25 @@ public class ProductController {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
+
+//    @DeleteMapping("/deleteProduct/{id}")
+//    public ResponseEntity<?> DeleteProduct(@PathVariable Integer id){
+//        try {
+//            return productService.deleteProduct(id);
+//        } catch (Exception e) {
+//            return ResponseEntity.internalServerError().body(e.getMessage());
+//        }
+//    }
+
+    @PostMapping("/restock")
+    public ResponseEntity<?> restockProduct(@RequestBody ProductRestockRequestDTO request) {
+        try {
+            return productService.restockProduct(request);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
 
 
 }

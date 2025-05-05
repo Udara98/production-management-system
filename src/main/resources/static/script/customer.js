@@ -1,7 +1,5 @@
-let OrderProductsTableInstance;
 let OrderProductsEditTableInstance;
 let OrderProductsViewTableInstance;
-let cusOrderTableInstance;
 let orderProducts = []
 let totalAmount = 0
 let selectedCO;
@@ -218,36 +216,36 @@ window.addEventListener('load', () => {
     }
 })
 
-const displayOrderProducts = (products) => {
-    const getProdCode = (ob) => ob.product.productCode
-    const getProdName = (ob) => ob.product.productName
-    const displayProperty = [
-        {dataType: "function", propertyName: getProdCode},
-        {dataType: "function", propertyName: getProdName},
-        {dataType: "text", propertyName: "quantity"},
-        {dataType: "price", propertyName: "productPrice"},
-        {dataType: "price", propertyName: "productLinePrice"},
-    ];
-    if (OrderProductsTableInstance) {
-        OrderProductsTableInstance.destroy();
-    }
-    $('#tableOPs tbody').empty();
-
-    tableDataBinder(
-        tableOPs,
-        products,
-        displayProperty,
-        true,
-        generateDropDown,
-        null
-    );
-    OrderProductsTableInstance = $('#tableOPs').DataTable({
-        searching: false,
-        ordering: false,
-        paging: false,
-        info: false,
-    });
-}
+//const displayOrderProducts = (products) => {
+//    const getProdCode = (ob) => ob.product.productCode
+//    const getProdName = (ob) => ob.product.productName
+//    const displayProperty = [
+//        {dataType: "function", propertyName: getProdCode},
+//        {dataType: "function", propertyName: getProdName},
+//        {dataType: "text", propertyName: "quantity"},
+//        {dataType: "price", propertyName: "productPrice"},
+//        {dataType: "price", propertyName: "productLinePrice"},
+//    ];
+//    if (OrderProductsTableInstance) {
+//        OrderProductsTableInstance.destroy();
+//    }
+//    $('#tableOPs tbody').empty();
+//
+//    tableDataBinder(
+//        tableOPs,
+//        products,
+//        displayProperty,
+//        true,
+//        generateDropDown,
+//        null
+//    );
+//    OrderProductsTableInstance = $('#tableOPs').DataTable({
+//        searching: false,
+//        ordering: false,
+//        paging: false,
+//        info: false,
+//    });
+//}
 const generateDropDown = (element) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";

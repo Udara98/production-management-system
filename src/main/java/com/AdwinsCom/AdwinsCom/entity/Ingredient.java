@@ -79,6 +79,8 @@ public class Ingredient {
     @ManyToMany(mappedBy = "ingredients")
     private Set<Supplier> suppliers;
 
+
+
     public Ingredient mapDTO(Ingredient ingredient,IngredientDTO addDTO, String userName) {
         Ingredient newIngredient = new Ingredient();
         if(ingredient != null){

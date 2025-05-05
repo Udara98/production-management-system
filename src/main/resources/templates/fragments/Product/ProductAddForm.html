@@ -17,6 +17,18 @@
                         <button type="button" class="btn btn-outline-danger me-auto w-100" onclick="clearPhoto()">Clear Photo</button>
                         </div>
                 </div>
+                <div class="text-end">
+                <button class="btn addPrimaryBtn mx-" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasProductSettings " aria-controls="offcanvasRight">Product Settings</button>
+                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasProductSettings" aria-labelledby="offcanvasRightLabel" data-bs-backdrop="false">
+                    <div class="offcanvas-header">
+                        <h5 class="offcanvas-title" id="offcanvasRightLabel">Product Settings</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body">
+                        <div th:replace = "~{fragments/Production/ProductionSetting.html}"></div>
+                    </div>
+                </div>
+                </div>
                 <div class="row mt-4">
                     <div class="col">
                         <label class="form-label fw-medium" for="addProductBatch"
@@ -26,6 +38,51 @@
                             <option selected>Select Batch</option>
                         </select>
                     </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="addFlavourType"
+                        >Flavour Type<span class="text-danger"> * </span></label
+                        >
+                        <select id="addFlavourType" class="form-select" required onchange="generateProductName();">
+                            <option selected>Select Flavour Type</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-4">
+                        <label class="form-label fw-medium" for="addPackageType"
+                        >Package Type<span class="text-danger"> * </span></label
+                        >
+                        <select id="addPackageType" class="form-select" required onchange="generateProductName();">
+                            <option selected disabled value="">Package Type</option>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label fw-medium" for="addProductUnitSize"
+                        >Unit Size<span class="text-danger"> * </span>
+                        </label>
+                        <input
+                                class="form-control"
+                                id="addProductUnitSize"
+                                type="text"
+                                placeholder="Enter Unit Size"
+                                required
+                                onchange="generateProductName();"
+                        />
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">Please enter a valid unit size: a single number (1 to 9).
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label fw-medium" for="addProductUnitType">Unit Type<span
+                                class="text-danger"> * </span></label>
+                        <select id="addProductUnitType" class="form-select" onchange="generateProductName();" required>
+                            <option selected disabled value="">Select Unit Type</option>
+                            <option value="ML">ML</option>
+                            <option value="L">L</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-4">
                     <div class="col">
                         <label class="form-label fw-medium" for="addProductName"
                         >Product Name<span class="text-danger"> * </span>
@@ -39,53 +96,28 @@
                         />
                         <div class="valid-feedback"></div>
                         <div class="invalid-feedback">
-                            Please Enter Full name ex: Udara Deshan Udawatte
+                            Vanilla Ice Cream - 4L - Container
                         </div>
+                </div>
+                <div class="col">
+                    <label class="form-label fw-medium" for="addProductQty"
+                    >Quantity<span class="text-danger"> * </span>
+                    </label>
+                    <input
+                            class="form-control"
+                            id="addProductQty"
+                            type="text"
+                            placeholder="Enter Quantity"
+                            required
+                    />
+                    <div class="valid-feedback"></div>
+                    <div class="invalid-feedback">
+                        Please enter a valid quantity (1 to 200).
                     </div>
                 </div>
-                <div class="row mt-4">
-                    <div class="col">
-                        <label class="form-label fw-medium" for="addProductUnitSize"
-                        >Unit Size<span class="text-danger"> * </span>
-                        </label>
-                        <input
-                                class="form-control"
-                                id="addProductUnitSize"
-                                type="text"
-                                placeholder="Enter Unit Size"
-                                required
-                        />
-                        <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">Please enter a valid unit size: a single number (1 to 9).
-                        </div>
-                    </div>
-                    <div class="col">
-                        <label class="form-label fw-medium" for="addProductUnitType">Unit Type<span
-                                class="text-danger"> * </span></label>
-                        <select id="addProductUnitType" class="form-select" required>
-                            <option selected value="ML">ML</option>
-                            <option value="L">L</option>
-                        </select>
-                    </div>
-                    <div class="col">
-                        <label class="form-label fw-medium" for="addProductQty"
-                        >Quantity<span class="text-danger"> * </span>
-                        </label>
-                        <input
-                                class="form-control"
-                                id="addProductQty"
-                                type="text"
-                                placeholder="Enter Quantity"
-                                required
-                        />
-                        <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">
-                            Please enter a valid quantity (1 to 200).
-                        </div>
-                    </div>
                 </div>
                 <div class="row mt-4">
-                    <div class="col">
+                    <div class="col-4">
                         <label class="form-label fw-medium" for="addProductROP"
                         >ROP<span class="text-danger"> * </span>
                         </label>
@@ -100,7 +132,7 @@
                             Please enter a valid ROP (1 to 99).
                         </div>
                     </div>
-                    <div class="col">
+                    <div class="col-4">
                         <label class="form-label fw-medium" for="addProductROQ"
                         >ROQ<span class="text-danger"> * </span>
                         </label>
@@ -115,7 +147,7 @@
                             Please enter a valid ROQ (1 to 200).
                         </div>
                     </div>
-                    <div class="col">
+                    <div class="col-4">
                         <label class="form-label fw-medium" for="addProductPrice"
                         >Sale Price<span class="text-danger"> * </span>
                         </label>

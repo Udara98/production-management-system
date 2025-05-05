@@ -3,6 +3,7 @@ package com.AdwinsCom.AdwinsCom.Service;
 import com.AdwinsCom.AdwinsCom.DTO.IngredientDTO;
 import com.AdwinsCom.AdwinsCom.Repository.IngredientRepository;
 import com.AdwinsCom.AdwinsCom.Repository.QuotationRequestRepository;
+import com.AdwinsCom.AdwinsCom.Repository.RecipeItemRepository;
 import com.AdwinsCom.AdwinsCom.entity.Ingredient;
 import com.AdwinsCom.AdwinsCom.entity.QuotationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +23,15 @@ public class IngredientService implements IIngredientService {
 
     final IngredientRepository ingredientRepository;
     final SupplierService supplierService;
+    final RecipeItemRepository recipeItemRepository;
     final QuotationRequestRepository quotationRequestRepository;
 
     @Autowired
     private IPrivilegeService privilegeService;
 
-    public IngredientService(IngredientRepository ingredientRepository, SupplierService supplierService, QuotationRequestRepository quotationRequestRepository) {
+    public IngredientService(IngredientRepository ingredientRepository, SupplierService supplierService, QuotationRequestRepository quotationRequestRepository, RecipeItemRepository recipeItemRepository) {
         this.ingredientRepository = ingredientRepository;
+        this.recipeItemRepository = recipeItemRepository;
         this.supplierService = supplierService;
         this.quotationRequestRepository = quotationRequestRepository;
     }
@@ -76,8 +79,23 @@ public class IngredientService implements IIngredientService {
     @Override
     @Transactional
     public ResponseEntity<?> DeleteIngredient(Integer id) {
+
+        Ingredient ingredient = ingredientRepository.findById(id).orElse(null);
+        if (ingredient == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Ingredient not found with ID: " + id);
+        }
+
+
+        // Check if the ingredient is associated with any recipe
+        boolean isIngredientInRecipe = recipeItemRepository.existsByIngredientCode(ingredient.getIngredientCode());
+        if (isIngredientInRecipe) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Cannot delete ingredient as it is associated with a recipe.");
+        }
+
+
         List<QuotationRequest> quotationRequests = quotationRequestRepository.findByIngredientId(id);
-        Ingredient ingredient = ingredientRepository.findById(id).get();
         boolean hasActiveQuotations=false;
         for (QuotationRequest qReq : quotationRequests
         ) {

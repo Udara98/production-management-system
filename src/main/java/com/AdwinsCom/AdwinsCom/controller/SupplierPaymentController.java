@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/supplier_payment")
 public class SupplierPaymentController {
 
-    final ISupplierPaymentService supplierPaymentService;
+    final ISupplierPaymentService  supplierPaymentService;
     public SupplierPaymentController(ISupplierPaymentService supplierPaymentService) {
         this.supplierPaymentService = supplierPaymentService;
     }

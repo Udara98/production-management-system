@@ -2,12 +2,19 @@ package com.AdwinsCom.AdwinsCom.Service;
 
 import com.AdwinsCom.AdwinsCom.DTO.GoodReceiveNoteDTO;
 import com.AdwinsCom.AdwinsCom.Repository.GoodReceiveNoteRepository;
+import com.AdwinsCom.AdwinsCom.Repository.IngredientRepository;
+import com.AdwinsCom.AdwinsCom.Repository.PurchaseOrderRepository;
+import com.AdwinsCom.AdwinsCom.Repository.SupplierRepository;
 import com.AdwinsCom.AdwinsCom.entity.GoodReceiveNote;
+import com.AdwinsCom.AdwinsCom.entity.Ingredient;
+import com.AdwinsCom.AdwinsCom.entity.PurchaseOrder;
+import com.AdwinsCom.AdwinsCom.entity.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
@@ -19,11 +26,20 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
 
     final GoodReceiveNoteRepository goodReceiveNoteRepository;
 
+    final PurchaseOrderRepository purchaseOrderRepository;
+
+    final SupplierRepository supplierRepository;
+
+    final IngredientRepository ingredientRepository;
+
     @Autowired
     private IPrivilegeService privilegeService;
 
-    public GoodReceiveNoteService(GoodReceiveNoteRepository goodReceiveNoteRepository) {
+    public GoodReceiveNoteService(GoodReceiveNoteRepository goodReceiveNoteRepository, PurchaseOrderRepository purchaseOrderRepository, IngredientRepository ingredientRepository, SupplierRepository supplierRepository) {
+        this.purchaseOrderRepository = purchaseOrderRepository;
+        this.ingredientRepository = ingredientRepository;
         this.goodReceiveNoteRepository = goodReceiveNoteRepository;
+        this.supplierRepository = supplierRepository;
     }
 
     @Override
@@ -41,11 +57,35 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
                     .body("GRN Adds not Completed: You don't have permission!");
         }
 
+
         GoodReceiveNote exGoodReceiveNote = goodReceiveNoteRepository.findByPurchaseOrder(goodReceiveNoteDTO.getPurchaseOrder());
         if(exGoodReceiveNote!=null){
             return ResponseEntity.badRequest().body("There is a GRN Available for this Purchase Order.");
         }
-        GoodReceiveNote newGoodReceiveNote = new GoodReceiveNote().mapDTO(null,goodReceiveNoteDTO, auth.getName());
+
+        // Fetch the PurchaseOrder entity to get the supplierRegNo
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(goodReceiveNoteDTO.getPurchaseOrder().getId())
+                .orElseThrow(() -> new RuntimeException("Purchase Order not found"));
+
+        // Convert String to Integer
+        String supplierRegNoStr = purchaseOrder.getSupplierRegNo();
+
+        // Fetch the Supplier using the supplierRegNo from the PurchaseOrder
+        Supplier supplier = supplierRepository.getSupplierByRegNo(supplierRegNoStr);
+
+        // Set the supplier in the GoodReceiveNoteDTO
+        goodReceiveNoteDTO.setSupplierId(supplier.getId());
+
+        // Update ingredient quantity
+        Ingredient ingredient = ingredientRepository.getIngredientByIngredientCode(purchaseOrder.getIngredientCode());
+        Double currentQuantity = ingredient.getQuantity();
+        Integer newQuantity = purchaseOrder.getQty();
+        ingredient.setQuantity(currentQuantity + newQuantity);
+        ingredientRepository.save(ingredient);
+
+
+
+        GoodReceiveNote newGoodReceiveNote = new GoodReceiveNote().mapDTO(null, goodReceiveNoteDTO, auth.getName());
         goodReceiveNoteRepository.save(newGoodReceiveNote);
 
         return ResponseEntity.ok("GRN Added Successfully");
@@ -91,4 +131,38 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
 
        return ResponseEntity.ok("GRN Deleted Successfully");
     }
+
+    @Override
+    public ResponseEntity<?> getGRNsBySupplierId(Integer supplierId) {
+        List<GoodReceiveNote> goodReceiveNotes = goodReceiveNoteRepository.findBySupplierId(supplierId);
+
+        if (goodReceiveNotes.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No GRNs found for the given supplier ID.");
+        }
+
+        return ResponseEntity.ok(goodReceiveNotes);
+    }
+
+    @Override
+    public ResponseEntity<?>  getGRNIdByGRNNo(String grnNo) {
+        Integer grnId = goodReceiveNoteRepository.getGRNIdByGRNNo(grnNo);
+        if (grnId != null) {
+            return ResponseEntity.ok(grnId); // 200 OK with the GRNId
+        } else {
+            return ResponseEntity.notFound().build(); // 404 Not Found if no GRNId is found
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> getActiveGRNBySupId(Integer supplierId) {
+        List<GoodReceiveNote> grnList = goodReceiveNoteRepository.getActiveGRNBySupId(supplierId);
+
+        if (grnList.isEmpty()) {
+            return ResponseEntity.status(404).body("No active Good Receive Notes found for the given SupId.");
+        }
+        return ResponseEntity.ok(grnList);
+    }
+
 }
+

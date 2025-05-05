@@ -1,51 +1,78 @@
-<div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title">Make Supplier Payment</h5>
+            <h4 class="modal-title">Make Supplier Payment</h4>
             <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
         </div>
         <div class="modal-body">
             <form id="spAddForm" class="needs-validation">
+                <!-- Supplier Selection -->
                 <div class="row mt-2">
                     <div class="col">
-                        <label class="form-label fw-medium" for="add_sp_grn"
-                        >GRN<span class="text-danger"> * </span></label
-                        >
-                        <select id="add_sp_grn" class="form-select">
-                            <option selected>Select GRN</option>
+                        <label class="form-label fw-medium" for="add_sp_supplier">
+                            Supplier<span class="text-danger"> * </span>
+                        </label>
+                        <select id="add_sp_supplier" class="form-select" required>
+                            <option selected>Select Supplier</option>
                         </select>
                     </div>
-                    <div class="col">
-                        <label class="form-label fw-medium" for="add_sp_spId">
-                            Supplier ID
-                        </label>
-                        <input
-                                class="form-control"
-                                id="add_sp_spId"
-                                type="text"
-                                placeholder="Supplier ID"
-                                disabled
-                        />
+                </div>
+
+                <!-- GRN List Section -->
+                <div class="mt-4" id="grnListSection" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6>Outstanding GRNs</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="payTotalCheckbox">
+                            <label class="form-check-label" for="payTotalCheckbox">
+                                Pay Total Outstanding Balance
+                            </label>
+                        </div>
                     </div>
-                    <div class="col">
-                        <label class="form-label fw-medium" for="add_sp_ingId">
-                            Ingredient ID
-                        </label>
-                        <input
-                                class="form-control"
-                                id="add_sp_ingId"
-                                type="text"
-                                placeholder="Ingredient ID"
-                                disabled
-                        />
+
+                    <!-- GRN Table -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="cusTableHead">
+                            <tr>
+                                <th>GRN ID</th>
+                                <th>ING ID</th>
+                                <th>Total Amount</th>
+                                <th>Balance</th>
+                                <th>Pay Amount</th>
+                                <th>New Balance</th>
+                            </tr>
+                            </thead>
+                            <tbody class="grn-list">
+                            <!-- Dynamic GRN rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Totals Section -->
+                    <div class="row mt-4">
+                        <div class="col">
+                            <label class="form-label fw-medium">Total Payable (LKR)</label>
+                            <input type="text" class="form-control" id="totalPayable" disabled>
+                        </div>
+                        <div class="col">
+                            <label class="form-label fw-medium">Total Paid (LKR)</label>
+                            <input type="text" class="form-control" id="totalPaid" disabled>
+                        </div>
+                        <div class="col">
+                            <label class="form-label fw-medium">Remaining Balance (LKR)</label>
+                            <input type="text" class="form-control" id="remainingBalance" disabled>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Payment Details -->
                 <div class="row mt-4">
-                    <div class="col">
-                        <label class="form-label fw-medium" for="add-sp-paymentMethod"
-                        >Payment Method<span class="text-danger"> * </span></label
-                        >
-                        <select id="add-sp-paymentMethod" class="form-select">
+                    <div class="col-md-6" id="paymentMethodCol">
+                        <label class="form-label fw-medium" for="add-sp-paymentMethod">
+                            Payment Method<span class="text-danger"> * </span>
+                        </label>
+                        <select id="add-sp-paymentMethod" class="form-select" onchange="showPaymentOptionByMethod();" required>
                             <option selected value="VISA_CARD">VISA CARD</option>
                             <option value="MASTER_CARD">MASTER CARD</option>
                             <option value="BANK_TRANSFER">BANK TRANSFER</option>
@@ -53,76 +80,238 @@
                             <option value="CHEQUE">CHEQUE</option>
                         </select>
                     </div>
-                    <div class="col">
-                        <label class="form-label fw-medium" for="add-sp-payDate"
-                        >Payment Date<span class="text-danger"> * </span>
+                    <div class="col-md-6" id="paymentDateCol">
+                        <label class="form-label fw-medium" for="add-sp-payDate">
+                            Payment Date<span class="text-danger"> * </span>
                         </label>
-                        <input
-                                class="form-control"
-                                id="add-sp-payDate"
-                                type="date"
-                        />
-                        <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">
-                            Please Enter Full name ex: Udara Deshan Udawatte
+                        <input class="form-control" id="add-sp-payDate" type="date" required>
+                    </div>
+                </div>
+                <!--               Bank Transfer Card-->
+                <div class="row mt-3 mb-4 d-none" id="bankTranferDivRow">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <b>Bank Transfer</b>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label class="form-label mb-0 fw-bold"
+                                               style="font-size: 12.5px;" for="inputBankTranferId"><span
+                                                style="color: #fa5252;">* </span>Transaction
+                                            ID:</label>
+
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <input class="form-control" type="text"
+                                                       id="inputBankTranferId"
+                                                       style="background-color: #E6E6E6;" required>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <label class="form-label mb-0 fw-bold"
+                                               style="font-size: 12.5px;"
+                                               for="inputBankTransferredDateTime"><span
+                                                style="color: #fa5252;">* </span>Transfer Date &
+                                            Time:</label>
+
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <input class="form-control" type="date"
+                                                       id="inputBankTransferredDateTime"
+                                                       style="background-color: #E6E6E6;" required
+                                                       onkeydown="return false">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="row mt-4">
-                    <div class="col">
-                        <label class="form-label fw-medium" for="add-sp-total"
-                        >Total Amount(LKR)<span class="text-danger"> * </span>
-                        </label>
-                        <input
-                                class="form-control"
-                                id="add-sp-total"
-                                type="text"
-                                disabled
-                        />
-                        <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">
-                            Please Enter Full name ex: Udara Deshan Udawatte
-                        </div>
-                    </div>
-                    <div class="col">
-                        <label class="form-label fw-medium" for="add-sp-paidAmount"
-                        >Total Paid Amount(LKR)<span class="text-danger"> * </span>
-                        </label>
-                        <input
-                                class="form-control"
-                                id="add-sp-paidAmount"
-                                type="number"
-                                placeholder="Enter Total Paid Amount"
-                        />
-                        <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">
-                            Please Enter Full name ex: Udara Deshan Udawatte
-                        </div>
-                    </div>
-                    <div class="col">
-                        <label class="form-label fw-medium" for="add-sp-balanceAmount"
-                        >Total Balance Amount(LKR)<span class="text-danger"> * </span>
-                        </label>
-                        <input
-                                class="form-control"
-                                id="add-sp-balanceAmount"
-                                type="text"
-                        />
-                        <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">
-                            Please Enter Full name ex: Udara Deshan Udawatte
+
+                <!--               Cheque Details card-->
+                <div class="row mt-3 mb-4 d-none" id="chequeDivRow">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <b>Cheque</b>
+                            </div>
+                            <div class="card-body">
+
+                                <div class="row">
+                                    <!-- * text cheque no  -->
+                                    <div class="col-6">
+                                        <label class="form-label mb-0 fw-bold"
+                                               style="font-size: 12.5px;" for="inputChequeNo"><span
+                                                style="color: #fa5252;">* </span>Cheque
+                                            Number:</label>
+
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <input class="form-control" type="text"
+                                                       id="inputChequeNo" style="background-color: #E6E6E6;"
+                                                       required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- * date cheque Date-->
+                                    <div class="col-6">
+                                        <label class="form-label mb-0 fw-bold"
+                                               style="font-size: 12.5px;" for="inputChequeDate"><span
+                                                style="color: #fa5252;">* </span>Cheque
+                                            Date:</label>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <input class="form-control" type="date"
+                                                       id="inputChequeDate"
+                                                       style="background-color: #E6E6E6;" required
+                                                       onkeydown="return false">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-end mx-4 mt-5" >
+                <!--               Card details Card div-->
+                <div class="row mt-3 mb-4 d-none" id="cardDivRow">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <b>Card Payment</b>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- * text Card  -->
+                                    <div class="col-6">
+                                        <label class="form-label mb-0 fw-bold"
+                                               style="font-size: 12.5px;" for="inputCardRefNo"><span
+                                                style="color: #fa5252;">* </span>Transaction ID</label>
+
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <input class="form-control" type="text"
+                                                       id="inputCardRefNo" style="background-color: #E6E6E6;"
+                                                       required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- * date checkDate-->
+                                    <div class="col-6">
+                                        <label class="form-label mb-0 fw-bold"
+                                               style="font-size: 12.5px;" for="inputCardDate"><span
+                                                style="color: #fa5252;">* </span>Transfer Date & Time</label>
+
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <input class="form-control" type="date"
+                                                       id="inputCardDate"
+                                                       style="background-color: #E6E6E6;" required
+                                                       onkeydown="return false">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex justify-content-end mx-4 mt-5">
                     <div>
-                        <button  class="btn btn-secondary mx-2"
-                                 data-bs-dismiss="modal"
-                                 type="button">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button class="btn btn-secondary mx-2"
+                                data-bs-dismiss="modal"
+                                type="button">Cancel</button>
+                        <button onclick="supplierPaymentSubmit()" class="btn btn-primary">Submit Payment</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const supplierSelect = document.getElementById('add_sp_supplier');
+        const grnListSection = document.getElementById('grnListSection');
+        const grnList = document.querySelector('.grn-list');
+        const payTotalCheckbox = document.getElementById('payTotalCheckbox');
+
+<!--        // Sample data - Replace with actual API data-->
+<!--        const grnData = {-->
+<!--            'supplier1': [-->
+<!--                { id: 'GRN001', ingredient: 'ING001', total: 50000, balance: 25000 },-->
+<!--                { id: 'GRN002', ingredient: 'ING002', total: 75000, balance: 75000 }-->
+<!--            ],-->
+<!--            'supplier2': [-->
+<!--                { id: 'GRN003', ingredient: 'ING003', total: 100000, balance: 50000 }-->
+<!--            ]-->
+<!--        };-->
+
+
+
+<!--        payTotalCheckbox.addEventListener('change', function() {-->
+<!--            const paymentInputs = document.querySelectorAll('.payment-amount');-->
+<!--            const isChecked = this.checked;-->
+
+<!--            paymentInputs.forEach(input => {-->
+<!--                if (isChecked) {-->
+<!--                    input.value = input.max;-->
+<!--                    input.disabled = true;-->
+<!--                } else {-->
+<!--                    input.value = '';-->
+<!--                    input.disabled = false;-->
+<!--                }-->
+<!--            });-->
+<!--            updateBalances();-->
+<!--        });-->
+
+<!--        window.updateBalances = function() {-->
+<!--            if (payTotalCheckbox.checked) {-->
+<!--                payTotalCheckbox.checked = false;-->
+<!--                document.querySelectorAll('.payment-amount').forEach(input => {-->
+<!--                    input.disabled = false;-->
+<!--                });-->
+<!--            }-->
+
+<!--            document.querySelectorAll('.grn-row').forEach(row => {-->
+<!--                const balanceInput = row.querySelector('.balance');-->
+<!--                const paymentInput = row.querySelector('.payment-amount');-->
+<!--                const newBalanceInput = row.querySelector('.new-balance');-->
+
+<!--                const balance = parseFloat(balanceInput.value);-->
+<!--                const payment = parseFloat(paymentInput.value) || 0;-->
+
+<!--                if (payment > balance) {-->
+<!--                    paymentInput.value = balance;-->
+<!--                    newBalanceInput.value = 0;-->
+<!--                } else {-->
+<!--                    newBalanceInput.value = balance - payment;-->
+<!--                }-->
+<!--            });-->
+<!--            updateTotals();-->
+<!--        };-->
+
+<!--        function updateTotals() {-->
+<!--            let totalPayable = 0;-->
+<!--            let totalPaid = 0;-->
+<!--            let totalBalance = 0;-->
+
+<!--            document.querySelectorAll('.grn-row').forEach(row => {-->
+<!--                totalPayable += parseFloat(row.querySelector('.total-amount').value);-->
+<!--                totalPaid += parseFloat(row.querySelector('.payment-amount').value) || 0;-->
+<!--                totalBalance += parseFloat(row.querySelector('.new-balance').value) || 0;-->
+<!--            });-->
+
+<!--            document.getElementById('totalPayable').value = totalPayable.toFixed(2);-->
+<!--            document.getElementById('totalPaid').value = totalPaid.toFixed(2);-->
+<!--            document.getElementById('remainingBalance').value = totalBalance.toFixed(2);-->
+<!--        }-->
+    });
+</script>

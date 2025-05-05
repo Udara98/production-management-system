@@ -10,7 +10,7 @@ window.addEventListener("load",()=>{
     refreshRecipeTable();
 
     // Refresh the Recipe form to reset all fields and reload data
-    refreshRecipeForm()
+//    refreshRecipeForm()
 
 });
 

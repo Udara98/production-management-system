@@ -1,14 +1,21 @@
 package com.AdwinsCom.AdwinsCom.entity.Production;
 
 import com.AdwinsCom.AdwinsCom.DTO.BatchDTO;
+import com.AdwinsCom.AdwinsCom.entity.Product;
+import com.AdwinsCom.AdwinsCom.entity.ProductHasBatch;
 import com.AdwinsCom.AdwinsCom.entity.QuotationRequest;
+import com.AdwinsCom.AdwinsCom.entity.SupplierPaymentHasGoodReceiveNote;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "batch")
@@ -31,11 +38,18 @@ public class Batch {
     @Column(name = "batch_no")
     private String batchNo;
 
-    @Column(name = "production_item_no")
-    private String productionItemNo;
+    @Column(name = "recipe_Code")
+    private String recipeCode;
+
+    @Column(name = "recipe_name")
+    private String recipeName;
 
     @Column(name = "total_quantity")
     private Double totalQuantity;
+
+    @OneToMany(mappedBy = "batch", cascade = CascadeType.ALL)
+    @JsonBackReference
+    private List<ProductHasBatch> products = new ArrayList<>();
 
     @Column(name = "available_quantity")
     private Double availableQuantity;
@@ -74,6 +88,7 @@ public class Batch {
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
 
+
     public Batch mapDTO(Batch batch, BatchDTO batchDTO,String userName) throws NoSuchAlgorithmException {
         Batch newBatch = new Batch();
         if(batch != null){
@@ -83,7 +98,6 @@ public class Batch {
             newBatch.setUpdatedUser(userName);
             newBatch.setUpdatedDate(LocalDateTime.now());
         }else {
-            newBatch.setProductionItemNo(batchDTO.getProductionItemNo());
             newBatch.setBatchNo(QuotationRequest.generateUniqueId("BCH-"));
             newBatch.setDamagedQuantity(0.0);
             newBatch.setTotalSale(0.0);
@@ -91,6 +105,8 @@ public class Batch {
             newBatch.setAddedUser(userName);
             newBatch.setAddedDate(LocalDateTime.now());
         }
+        newBatch.setRecipeCode(batchDTO.getRecipeCode());
+        newBatch.setRecipeName(batchDTO.getRecipeName());
         newBatch.setTotalQuantity(batchDTO.getTotalQuantity());
         newBatch.setManufactureDate(batchDTO.getManufactureDate());
         newBatch.setExpireDate(batchDTO.getExpireDate());
