@@ -1,15 +1,32 @@
 window.addEventListener('load', function () {
+    // Add show class to sidebar container
+    const sidebarContainer = document.getElementById('sidebarContainer');
+    if (sidebarContainer) {
+        sidebarContainer.classList.add('show');
+    }
 
-    // Call the function when the page loads
-    addShowClass();
-
-        const sideItems = document.querySelectorAll('.sideItem');
-        const activeIndex = localStorage.getItem('activeSideItem');
-
-        if (activeIndex !== null) {
-            sideItems[activeIndex].classList.add('activeSideIcon');
+    // Handle active states for sidebar items
+    const sideItems = document.querySelectorAll('.sideItem');
+    const currentPath = window.location.pathname;
+    
+    sideItems.forEach((item, index) => {
+        const link = item.querySelector('a');
+        if (link && link.getAttribute('href') === currentPath) {
+            item.classList.add('activeSideIcon');
+            localStorage.setItem('activeSideItem', index);
         }
-
+        
+        // Add hover effect
+        item.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('activeSideIcon')) {
+                this.classList.add('hover');
+            }
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.classList.remove('hover');
+        });
+    });
 });
 
 
