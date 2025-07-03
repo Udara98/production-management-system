@@ -124,7 +124,26 @@ window.addEventListener('load', () => {
             confirmButtonText: "Yes, Add"
         }).then((result) => {
             if (result.isConfirmed) {
-                const postServiceRequestResponse = ajaxRequestBody("/product", "POST", product);
+                // Create ProductDTO structure
+                const productNew = {
+                    productName: product.productName,
+                    quantity: parseInt(product.quantity),
+                    // salePrice: product.salePrice,
+                    unitType: product.unitType,
+                    unitSize: parseInt(product.unitSize),
+                    reorderPoint: parseInt(product.reorderPoint),
+                    reorderQuantity: parseInt(product.reorderQuantity),
+                    note: product.note,
+                    productPhoto: product.productPhoto,
+                    productPhotoName: product.productPhotoName,
+                    salesPrice: parseInt(product.salePrice),
+                    batch:product.batch
+                    
+                };
+
+                console.log(productNew)
+
+                const postServiceRequestResponse = ajaxRequestBody("/product/addnew", "POST", productNew);
 
                 // Check backend response
                 if (postServiceRequestResponse.status === 200) {
@@ -721,7 +740,28 @@ const checkProductFormError = () => {
           confirmButtonText: "Yes, Update"
         }).then((result) =>{
           if(result.isConfirmed){
-            let updateServiceResponse = ajaxRequestBody("/product", "PUT", product);
+            // Create ProductDTO structure
+            const productDTO = {
+                id: product.id,
+                productName: product.productName,
+                quantity: product.quantity,
+                salePrice: product.salePrice,
+                unitType: product.unitType,
+                unitSize: product.unitSize,
+                reorderPoint: product.reorderPoint,
+                reorderQuantity: product.reorderQuantity,
+                note: product.note,
+                productPhoto: product.productPhoto,
+                productPhotoName: product.productPhotoName,
+                // Create the batches array in DTO format
+                batches: [{
+                    batchId: product.batch.id,
+                    quantity: product.quantity,
+                    salesPrice: product.salePrice
+                }]
+            };
+
+            let updateServiceResponse = ajaxRequestBody("/product", "PUT", productDTO);
 
             if (updateServiceResponse.status === 200) {
               // alert("Update successfully ...! \n");
@@ -858,22 +898,27 @@ const checkProductFormError = () => {
 
     };
 
-  const restockFormValidation = () =>{
-
-
-    stockBatchSelect.addEventListener('change',  () => {
-        selectFieldValidator(stockBatchSelect,'', 'stockAdd', 'batchId');
+  const restockFormValidation = () => {
+    // Batch validation
+    stockBatchSelect.addEventListener('change', () => {
+        selectFieldValidator(stockBatchSelect, '', 'stockAdd', 'batchId');
     });
 
-    addStockQty.addEventListener('input', () =>{
-        validation(addStockQty,'^(?:[1-9][0-9]?|1[0-9]{2}|200)$','stockAdd','quantity')
-    })
+    // Quantity validation - must be between 1 and 200
+    addStockQty.addEventListener('input', () => {
+        validation(addStockQty, '^(?:[1-9][0-9]?|1[0-9]{2}|200)$', 'stockAdd', 'quantity');
+    });
 
-    stockUnitCost.addEventListener('input', () =>{
-        validation(stockUnitCost,'^(?:[1-9]|[1-9][0-9]|[1-9][0-9]{3}|[1-9][0-9]{2})$','stockAdd','salesPrice')
-     })
+    // Sales Price validation - must be a positive number
+    stockUnitCost.addEventListener('input', () => {
+        validation(stockUnitCost, '^(?:[1-9]|[1-9][0-9]|[1-9][0-9]{3}|[1-9][0-9]{2})$', 'stockAdd', 'salesPrice');
+    });
 
-  }
+    // Notes validation - optional text field
+    stockAdditionNote.addEventListener('input', () => {
+        validation(stockAdditionNote, '', 'stockAdd', 'note');
+    });
+  };
 
   //Define product submit function
    const productRestockSubmit = () => {
@@ -898,15 +943,20 @@ const checkProductFormError = () => {
 
                   // Check backend response
                   if (postServiceRequestResponse.status === 200) {
-                      $("#stockAddForm").modal('hide');
+                      $("#modalAddStockProduct").modal('hide');
                       stockAddForm.reset();
-//                      itemTableRefresh();
-//                      reloadProductForm();
+
+                      // Refresh the product table
+                      itemTableRefresh();
 
                       // Reset validation classes
-//                      Array.from(productAddForm.elements).forEach((field) => {
-//                          field.classList.remove('is-valid', 'is-invalid');
-//                      });
+                      Array.from(stockAddForm.elements).forEach((field) => {
+                          field.classList.remove('is-valid', 'is-invalid');
+                      });
+
+                      // Clear the stockAdd object
+                      stockAdd = new Object();
+                      oldStockAdd = null;
 
                       Swal.fire({
                           title: "Stock Added Successfully!",
@@ -938,27 +988,29 @@ const checkProductFormError = () => {
 const checkProductRestockFormError = () => {
     let errors = '';
 
-
+    // Validate Batch
     if (stockAdd.batchId == null) {
-        errors = errors + "Batch No can't be null \n";
-        restockBatchSelect.classList.add('is-invalid')
+        errors = errors + "Please select a Batch\n";
+        stockBatchSelect.classList.add('is-invalid');
     }
 
-
+    // Validate Quantity
     if (stockAdd.quantity == null) {
-        errors = errors + "Please Enter Quantity \n";
-        addProductQty.classList.add('is-invalid')
+        errors = errors + "Please enter a valid quantity (1-200)\n";
+        addStockQty.classList.add('is-invalid');
     }
 
-
+    // Validate Sales Price (required)
     if (stockAdd.salesPrice == null) {
-        errors = errors + "Email Enter Valid Sales price \n";
-        stockUnitCost.classList.add('is-invalid')
+        errors = errors + "Please enter a valid sales price\n";
+        stockUnitCost.classList.add('is-invalid');
+    } else if (!/^(?:[1-9]|[1-9][0-9]|[1-9][0-9]{3}|[1-9][0-9]{2})$/.test(stockAdd.salesPrice)) {
+        errors = errors + "Please enter a valid sales price\n";
+        stockUnitCost.classList.add('is-invalid');
     }
-
 
     return errors;
-}
+};
 
 
  //Refill Ingredient form fields

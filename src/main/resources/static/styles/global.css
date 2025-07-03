@@ -469,8 +469,8 @@ div.dt-container .dt-input {
     filter: grayscale(0%);
 }
 
-/* Adjust main content to account for sidebar */
+/* Adjust main content to account for sidebar
 .flex-grow-1 {
     margin-left: 250px;
     transition: margin-left 0.3s ease;
-}
+} */

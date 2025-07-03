@@ -1,5 +1,6 @@
 package com.AdwinsCom.AdwinsCom.controller;
 
+import com.AdwinsCom.AdwinsCom.DTO.ProductBatchDTO;
 import com.AdwinsCom.AdwinsCom.DTO.ProductRestockRequestDTO;
 import com.AdwinsCom.AdwinsCom.Repository.ProductRepository;
 import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
@@ -53,9 +54,10 @@ public class ProductController {
     }
 
 
-    @PostMapping()
-    public ResponseEntity<?> AddNewProduct(@RequestBody Product product){
-        return productService.AddNewProduct(product);
+    @PostMapping("/addnew")
+    public ResponseEntity<?> AddNewProduct(@RequestBody ProductBatchDTO  dto){
+        System.out.println("Received product: " + dto);
+        return productService.AddNewProduct(dto);
     }
 
 //    @PutMapping()

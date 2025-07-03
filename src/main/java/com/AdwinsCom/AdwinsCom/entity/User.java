@@ -49,7 +49,6 @@ public class User {
     private LocalDateTime deleteddatetime;
 
     @Column(name = "createduser")
-    @NotNull
     private Integer createduser;
 
     @Column(name = "modifieduser")

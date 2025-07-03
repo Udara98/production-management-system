@@ -140,51 +140,41 @@ const reloadSupTable =  () => {
 
 //Call function for validation and object binding
 const SupformValidation = () =>{
-
-    regNo.addEventListener('keyup',() => {
-                validation(regNo, '', 'supplier', 'regNo');
+    supplierName.addEventListener('input', () => {
+        validation(supplierName, '^[A-Za-z ]{2,50}$', 'supplier', 'supplierName');
     });
 
-
-    supplierName.addEventListener('keyup',  () => {
-                validation(supplierName, '', 'supplier', 'supplierName');
+    supplierStatus.addEventListener('change', () => {
+        selectFieldValidator(supplierStatus, '', 'supplier', 'supplierStatus');
     });
 
-    contactPersonName.addEventListener('keyup', () => {
-                    validation(contactPersonName, '', 'supplier', 'contactPersonName');
+    contactPersonName.addEventListener('input', () => {
+        validation(contactPersonName, '^[A-Za-z ]{2,50}$', 'supplier', 'contactPersonName');
     });
 
-    contactNo.addEventListener('keyup', () =>{
-                validation(contactNo,'','supplier','contactNo')
-    })
+    contactNo.addEventListener('input', () => {
+        validation(contactNo, '^\\d{10}$', 'supplier', 'contactNo');
+    });
 
-    email.addEventListener('keyup', () =>{
-                    validation(email,'','supplier','email')
-    })
+    email.addEventListener('input', () => {
+        validation(email, '^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$', 'supplier', 'email');
+    });
 
-    address.addEventListener('keyup', () =>{
-                        validation(address,'','supplier','address')
-     })
+    joinDate.addEventListener('change', () => {
+        dateFeildValidator(joinDate, '', 'supplier', 'joinDate');
+    });
 
-    supplierStatus.addEventListener('change', () =>{
-    selectFieldValidator(supplierStatus,'','supplier','supplierStatus')
-    })
+    address.addEventListener('input', () => {
+        validation(address, '^.{5,}$', 'supplier', 'address');
+    });
 
-    joinDate.addEventListener('change', () =>{
-        dateFeildValidator(joinDate,'','supplier','joinDate')
-    })
-
-    address.addEventListener('keyup', () =>{
-        validation(address,'','product','address')
-    })
-
-    note.addEventListener('keyup', () =>{
-            validation(note,'','product','note')
-    })
+    note.addEventListener('input', () => {
+        validation(note, '^.{0,255}$', 'supplier', 'note');
+    });
 }
 
 //Define Supplier submit function
- const supplierSubmit = () => {
+const supplierSubmit = () => {
     event.preventDefault();
     console.log(supplier);
 
@@ -298,49 +288,34 @@ const generateSupDropDown = (element) => {
 const checkSupplierFormError = () => {
     let errors = '';
 
-    if (supplier.regNo == null) {
-        errors = errors + "Reg No can't be null \n";
-        regNo.classList.add('is-invalid')
+    if (supplierName.value.trim() === '') {
+        errors += "Supplier name can't be null\n";
+        supplierName.classList.add('is-invalid');
     }
-
-    if (supplier.supplierName == null) {
-        errors = errors + "Supplier name can't be null \n";
-        supplierName.classList.add('is-invalid')
+    if (!supplierStatus.value) {
+        errors += "Supplier status can't be null\n";
+        supplierStatus.classList.add('is-invalid');
     }
-
-
-    if (supplier.supplierStatus == null) {
-        errors = errors + "Supplier name can't be null  \n";
-        supplierStatus.classList.add('is-invalid')
+    if (contactPersonName.value.trim() === '') {
+        errors += "Contact Person name can't be null\n";
+        contactPersonName.classList.add('is-invalid');
     }
-
-
-    if (supplier.contactPersonName == null) {
-        errors = errors + "Contact Person name can't be null \n";
-        contactPersonName.classList.add('is-invalid')
+    if (contactNo.value.trim() === '' || !/^\d{10}$/.test(contactNo.value)) {
+        errors += "Contact No must be a 10-digit number\n";
+        contactNo.classList.add('is-invalid');
     }
-
-
-    if (supplier.contactNo == null) {
-        errors = errors + "Contact No can't be null \n";
-        addProductUnitType.classList.add('is-invalid');
+    if (email.value.trim() === '' || !/^\S+@\S+\.\S+$/.test(email.value)) {
+        errors += "Email is invalid\n";
+        email.classList.add('is-invalid');
     }
-
-    if (supplier.email == null) {
-            errors = errors + "Email can't be null  \n";
-            email.classList.add('is-invalid');
-        }
-
-    if (supplier.joinDate == null) {
-                errors = errors + "Join date can't be null  \n";
-                joinDate.classList.add('is-invalid');
-            }
-
-    if (supplier.address == null) {
-                errors = errors + "Address can't be null  \n";
-                address.classList.add('is-invalid');
-            }
-
+    if (!joinDate.value) {
+        errors += "Join date can't be null\n";
+        joinDate.classList.add('is-invalid');
+    }
+    if (address.value.trim() === '') {
+        errors += "Address can't be null\n";
+        address.classList.add('is-invalid');
+    }
 
     return errors;
 }
@@ -363,22 +338,59 @@ const viewSupplierData = (supplier) => {
     supplierModal.show();
 };
 
-const editSupplier = (supplier) => {
+function openAddSupplierForm() {
+    // Set modal title
+    const modalTitle = document.querySelector('.modal-title');
+    if (modalTitle) modalTitle.textContent = 'Add Supplier';
+
+    // Reset form fields
+    supplierAddForm.reset();
+    // Remove validation classes
+    Array.from(supplierAddForm.elements).forEach((field) => {
+        field.classList.remove('is-valid', 'is-invalid');
+    });
+    // Enable Add, disable Update
+    document.querySelector('.btn-submit').disabled = false;
+    document.querySelector('.btn-update').disabled = true;
+    // Reset transfer list
+    reloadSupplierForm();
+    $("#modalSupplierAdd").modal('show');
+}
+
+function openEditSupplierForm(supplier) {
+
+    supplier = JSON.parse(JSON.stringify(supplier));
+    oldSupplier = JSON.parse(JSON.stringify(supplier));
+    // Set modal title
+    const modalTitle = document.querySelector('.modal-title');
+    if (modalTitle) modalTitle.textContent = 'Edit Supplier';
+
+    // Fill form fields
+    supplierName.value = supplier.supplierName;
+    supplierStatus.value = supplier.supplierStatus;
+    contactPersonName.value = supplier.contactPersonName;
+    contactNo.value = supplier.contactNo;
+    email.value = supplier.email;
+    joinDate.value = convertDateTimeToDate(supplier.joinDate);
+    address.value = supplier.address;
+    note.value = supplier.note || '';
+    // Set transfer list
     let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
     let excludedList = ingredientList.filter(i => !supplier.ingredients.some(si => si.ingredientCode === i.ingredientCode));
-    getTransferList(excludedList, supplier.ingredients, getIng, 'edit');
+    getTransferList(excludedList, supplier.ingredients, getIng, 'add');
+    // Enable Update, disable Add
+    document.querySelector('.btn-submit').disabled = true;
+    document.querySelector('.btn-update').disabled = false;
+    $("#modalSupplierAdd").modal('show');
+}
 
-    document.getElementById("edit-regNo").value = supplier.regNo;
-    document.getElementById("edit-supplierName").value = supplier.supplierName;
-    document.getElementById("edit-contactPersonName").value = supplier.contactPersonName;
-    document.getElementById("edit-contactNo").value = supplier.contactNo;
-    document.getElementById("edit-email").value = supplier.email;
-    document.getElementById("edit-address").value = supplier.address;
-    document.getElementById("edit-note").value = supplier.note;
-    document.getElementById("edit-joinDate").value = convertDateTimeToDate(supplier.joinDate)
-    document.getElementById("edit-supplierStatus").value = supplier.supplierStatus;
-    $("#modalSupplierEdit").modal('show');
+// Update editSupplier to use openEditSupplierForm
+const editSupplier = (supplier) => {
+    openEditSupplierForm(supplier);
 };
+
+// Optionally, add a global for opening add form
+window.openAddSupplierForm = openAddSupplierForm;
 
 //Function for refill the supplier form
 const supplierFormRefill = (ob, rowIndex) =>{
@@ -387,7 +399,6 @@ $("#modalSupplierAdd").modal('show');
   supplier = JSON.parse(JSON.stringify(ob));
   oldSupplier = JSON.parse(JSON.stringify(ob));
 
-   regNo.value = supplier.regNo ;
    supplierName.value = supplier.supplierName;
    supplierStatus.value = supplier.supplierStatus;
    contactPersonName.value = supplier.contactPersonName;
@@ -409,10 +420,10 @@ $("#modalSupplierAdd").modal('show');
 
 }
 
-const deleteSupplier = (ob, rowIndex)=>{
+const deleteSupplier = (supplier) => {
     swal.fire({
         title: "Delete Supplier",
-        text: "Are you sure, you want to delete"+ " " + (ob.supplierName) + "?",
+        text: `Are you sure, you want to delete ${supplier.supplierName}?`,
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#cb421a",
@@ -420,28 +431,24 @@ const deleteSupplier = (ob, rowIndex)=>{
         confirmButtonText: "Yes, Delete"
     }).then((result) => {
         if (result.isConfirmed) {
-            let deleteServiceRequestResponse =  ajaxRequestBody("/supplier", "DELETE", ob)
-            console.log(deleteServiceRequestResponse.status);
-            if (deleteServiceRequestResponse.status === 200 ) {
+            let response = ajaxRequestBody("/supplier", "Delete", supplier);
+            if (response.status === 200) {
                 swal.fire({
                     title: response.responseText,
-                    text: "Supplier has been deleted.",
                     icon: "success"
                 });
                 reloadSupTable();
                 reloadSupplierForm();
-                supplierAddForm.reset();
-
             } else {
                 swal.fire({
-                    title: "Delete Not Successfully",
-                    text: deleteServiceRequestResponse,
+                    title: "Something Went Wrong",
+                    text: response.responseText,
                     icon: "error"
                 });
             }
         }
     });
-}
+};
 
 function selected(data) {
     let ingredientsHtml = "";
@@ -500,3 +507,113 @@ function selected(data) {
             ${ingredientsHtml}
         `;
 }
+
+const checkSupplierUpdates = () => {
+    let updates = "";
+    if (!oldSupplier) return updates;
+    if (supplier.supplierName !== oldSupplier.supplierName) {
+        updates += `Supplier Name changed from <b>${oldSupplier.supplierName}</b> to <b>${supplier.supplierName}</b>.<br>`;
+    }
+    if (supplier.supplierStatus !== oldSupplier.supplierStatus) {
+        updates += `Status changed from <b>${oldSupplier.supplierStatus}</b> to <b>${supplier.supplierStatus}</b>.<br>`;
+    }
+    if (supplier.contactPersonName !== oldSupplier.contactPersonName) {
+        updates += `Contact Person Name changed from <b>${oldSupplier.contactPersonName}</b> to <b>${supplier.contactPersonName}</b>.<br>`;
+    }
+    if (supplier.contactNo !== oldSupplier.contactNo) {
+        updates += `Contact No changed from <b>${oldSupplier.contactNo}</b> to <b>${supplier.contactNo}</b>.<br>`;
+    }
+    if (supplier.email !== oldSupplier.email) {
+        updates += `Email changed from <b>${oldSupplier.email}</b> to <b>${supplier.email}</b>.<br>`;
+    }
+    if (supplier.joinDate !== oldSupplier.joinDate) {
+        updates += `Join Date changed from <b>${oldSupplier.joinDate}</b> to <b>${supplier.joinDate}</b>.<br>`;
+    }
+    if (supplier.address !== oldSupplier.address) {
+        updates += `Address changed from <b>${oldSupplier.address}</b> to <b>${supplier.address}</b>.<br>`;
+    }
+    if ((supplier.note || "") !== (oldSupplier.note || "")) {
+        updates += `Note changed from <b>${oldSupplier.note || ''}</b> to <b>${supplier.note || ''}</b>.<br>`;
+    }
+    // Compare ingredients (simple string compare)
+    if (JSON.stringify(supplier.ingredients) !== JSON.stringify(oldSupplier.ingredients)) {
+        updates += `Ingredients list has been changed.<br>`;
+    }
+    return updates;
+};
+
+const supplierUpdate = () => {
+    event.preventDefault();
+    supplierAddForm.classList.add('needs-validation');
+    // Gather form data into supplier object
+    supplier.supplierName = supplierName.value;
+    supplier.supplierStatus = supplierStatus.value;
+    supplier.contactPersonName = contactPersonName.value;
+    supplier.contactNo = contactNo.value;
+    supplier.email = email.value;
+    supplier.joinDate = joinDate.value;
+    supplier.address = address.value;
+    supplier.note = note.value;
+    supplier.ingredients = selectedIngredients;
+    supplier.regNo = oldSupplier.regNo; // or from the form if you display it
+    // Ingredients already set by transfer list
+    
+    // Check form errors
+    let errors = checkSupplierFormError();
+    if (errors === "") {
+        let updates = checkSupplierUpdates();
+        supplierAddForm.classList.remove('was-validated');
+        $('#modalSupplierAdd').modal('hide');
+        if (updates !== "") {
+            Swal.fire({
+                title: `Do you want to update ${supplier.supplierName}?`,
+                html: updates,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#cb421a",
+                cancelButtonColor: "#3f3f44",
+                confirmButtonText: "Yes, Update"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let updateServiceResponse = ajaxRequestBody("/supplier/updateSupplier", "PUT", supplier);
+                    if (updateServiceResponse.status === 200) {
+                        Swal.fire({
+                            title: "Update successfully!",
+                            text: "",
+                            icon: "success"
+                        });
+                        supplierAddForm.reset();
+                        reloadSupTable();
+                        reloadSupplierForm();
+                        // Remove validation classes
+                        document.querySelectorAll('.needs-validation input,.needs-validation select, .needs-validation textarea ').forEach((input) => {
+                            input.classList.remove('is-valid', 'is-invalid');
+                        });
+                        supplierAddForm.classList.remove('was-validated');
+                        $('#modalSupplierAdd').modal('hide');
+                    } else {
+                        Swal.fire({
+                            title: "Update Not Successfully ...!",
+                            text: updateServiceResponse.responseText,
+                            icon: "error"
+                        });
+                    }
+                }
+            });
+        } else {
+            $('#modalSupplierAdd').modal('hide');
+            Swal.fire({
+                title: "No updates found!",
+                text: '',
+                icon: "question"
+            });
+        }
+    } else {
+        $('#modalSupplierAdd').modal('hide');
+        Swal.fire({
+            title: "Form has following errors!",
+            text: errors,
+            icon: "error"
+        });
+    }
+};

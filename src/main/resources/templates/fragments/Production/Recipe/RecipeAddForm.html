@@ -31,7 +31,8 @@
                     <div class="col">
                         <label class="form-label fw-medium" for="add-recipe-status">Status<span class="text-danger"> * </span></label>
                         <select id="add-recipe-status" class="form-select">
-                            <option selected value="Active">Active</option>
+                            <option value="" selected disabled>Select Status</option>
+                            <option value="Active">Active</option>
                             <option value="InActive">Inactive</option>
                         </select>
                     </div>
@@ -40,7 +41,7 @@
                     <div class="col">
                         <label class="form-label fw-medium" for="recipe-ing-code">Ingredient Code</label>
                         <select id="recipe-ing-code" class="form-select">
-                            <option selected>Select Ingredient</option>
+                            <option value="" selected disabled>Select Ingredient</option>
                         </select>
                     </div>
                     <div class="col">
@@ -62,14 +63,15 @@
                     <div class="col">
                         <label for="recipe-unitType" class="form-label">Unit Type</label>
                         <select class="form-select" id="recipe-unitType" required>
-                            <option value="KG" selected>KG</option>
+                            <option value="" selected disabled>Select Unit Type</option>
+                            <option value="KG">KG</option>
                             <option value="G">G</option>
                             <option value="L">L</option>
-                            <option value="MG">MG</option>
+                            <option value="MG">ML</option>
                         </select>
                     </div>
                     <div class="col mt-4">
-                        <button type="button" id="recipe-add-btn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add</button>
+                        <button type="button" id="recipe-add-btn" class="btn btn-primary" onclick="addRecipe();"><i class="fa-solid fa-plus"></i> Add</button>
 
                     </div>
                 </div>
@@ -88,15 +90,16 @@
                     <div class="col-7"></div>
                     <div class="col-4">
                         <button
-                                class="btn cusbutton btn-update"
-                                onclick=""
+                                id="btnRecipeUpdate"
+                                onclick="recipeUpdate();"
+                                type="button"
                         >
                             <i class="fa-solid fa-edit me-2"></i>Update
                         </button>
                         <button
-                                class="btn cusbutton ms-4 btn-submit"
-                                onclick=""
-                                type="submit"
+                                id="btnRecipeSubmit"
+                                onclick="recipeSubmit();"
+                                type="button"
                         >
                             <i class="fa-solid fa-plus me-2"></i>Add
                         </button>
@@ -115,3 +118,119 @@
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById('recipeAddForm').addEventListener('reset', function (event) {
+    // Prevent default reset if you want custom logic, or just call your reset function after default reset
+    setTimeout(() => {
+        resetAddRecipeForm();
+    }, 0);
+});
+
+function validateForm() {
+    let errors = "";
+
+    const name = document.getElementById('add-recipe-name');
+    if (!name.value || name.value.trim() === "") {
+        errors += "Please enter a recipe name.\n";
+        name.classList.add('is-invalid');
+    } else {
+        name.classList.remove('is-invalid');
+        name.classList.add('is-valid');
+    }
+
+    const status = document.getElementById('add-recipe-status');
+    if (!status.value || status.value === "") {
+        errors += "Please select a status.<br>";
+        status.classList.add('is-invalid');
+    } else {
+        status.classList.remove('is-invalid');
+        status.classList.add('is-valid');
+    }
+
+    const unitType = document.getElementById('recipe-unitType');
+    if (!unitType.value || unitType.value === "") {
+        errors += "Please select a unit type.\n";
+        unitType.classList.add('is-invalid');
+    } else {
+        unitType.classList.remove('is-invalid');
+        unitType.classList.add('is-valid');
+    }
+
+    if (errors) {
+        Swal.fire({
+            title: "Recipe Not Added",
+            html: errors.replace(/\n/g, "<br>"),
+            icon: "error"
+        });
+        return false;
+    }
+    return true;
+}
+
+document.getElementById('add-recipe-status').addEventListener('change', function() {
+    if (this.value !== "") {
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+    } else {
+        this.classList.remove('is-valid');
+        this.classList.add('is-invalid');
+    }
+});
+
+document.getElementById('recipe-unitType').addEventListener('change', function() {
+    if (this.value !== "") {
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+    } else {
+        this.classList.remove('is-valid');
+        this.classList.add('is-invalid');
+    }
+});
+
+document.getElementById('recipe-ing-code').addEventListener('change', function() {
+    if (this.value !== "") {
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+    } else {
+        this.classList.remove('is-valid');
+        this.classList.add('is-invalid');
+    }
+});
+
+function validateRecipeEditForm() {
+    let errors = "";
+
+    const name = document.getElementById('edit-recipe-name');
+    if (!name.value || name.value.trim() === "") {
+        errors += "Please enter a recipe name.<br>";
+        name.classList.add('is-invalid');
+    } else {
+        name.classList.remove('is-invalid');
+        name.classList.add('is-valid');
+    }
+
+    const status = document.getElementById('edit-recipe-status');
+    if (!status.value || status.value === "") {
+        errors += "Please select a status.<br>";
+        status.classList.add('is-invalid');
+    } else {
+        status.classList.remove('is-invalid');
+        status.classList.add('is-valid');
+    }
+
+    // You can add more checks if needed (e.g., at least one ingredient, etc.)
+
+    if (errors) {
+        Swal.fire({
+            title: "Recipe Not Updated",
+            html: errors,
+            icon: "error"
+        });
+        return false;
+    }
+    return true;
+}
+
+
+</script>

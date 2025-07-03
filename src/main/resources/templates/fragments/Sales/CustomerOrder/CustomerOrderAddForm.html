@@ -16,13 +16,13 @@
                     </div>
                     <div class="col">
                         <label class="form-label fw-medium" for="add-co-reqDate">Required Date<span class="text-danger"> * </span></label>
-                        <input class="form-control" id="add-co-reqDate" type="date" />
+                        <input class="form-control" id="add-co-reqDate" type="date" required />
                         <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        <div class="invalid-feedback">Please Enter Valid Date</div>
                     </div>
                     <div class="col">
                         <label class="form-label fw-medium" for="add-co-status">Order Status<span class="text-danger"> * </span></label>
-                        <select id="add-co-status" class="form-select">
+                        <select id="add-co-status" class="form-select" required>
                             <option selected value="Pending">Pending</option>
                             <option value="Completed">Completed</option>
                             <option value="Canceled">Canceled</option>
@@ -32,7 +32,7 @@
                 <div class="row mt-4 d-flex align-items-center">
                     <div class="col-5">
                         <label class="form-label fw-medium" for="add-co-product">Product<span class="text-danger"> * </span></label>
-                        <select id="add-co-product" class="form-select">
+                        <select id="add-co-product" class="form-select" required>
                             <option value="" selected>Select Product</option>
                         </select>
                         <div class="invalid-feedback">Please select a Product.</div>
@@ -40,8 +40,8 @@
                     <div class="col-5">
                         <label class="form-label fw-medium" for="add-co-qty">Quantity<span
                                 class="text-danger"> * </span></label>
-                        <input class="form-control" id="add-co-qty" type="number" placeholder="Enter Quantity"/>
-                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        <input class="form-control" id="add-co-qty" type="number" placeholder="Enter Quantity" required/>
+                        <div class="invalid-feedback">Please Enter Valid Quantity (1-200)</div>
                     </div>
                     <div class="col mt-4">
                         <button id="product-add-btn" class="btn btn-primary" ><i class="fa-solid fa-cart-plus me-3"></i>Add</button>

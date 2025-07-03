@@ -17,18 +17,6 @@
                         <button type="button" class="btn btn-outline-danger me-auto w-100" onclick="clearPhoto()">Clear Photo</button>
                         </div>
                 </div>
-                <div class="text-end">
-                <button class="btn addPrimaryBtn mx-" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasProductSettings" aria-controls="offcanvasRight">Product Settings</button>
-                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasProductSettings" aria-labelledby="offcanvasRightLabel">
-                    <div class="offcanvas-header">
-                        <h5 class="offcanvas-title" id="offcanvasRightLabel">Product Settings</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                    </div>
-                    <div class="offcanvas-body">
-                        <div th:replace = "~{fragments/Production/ProductionSetting.html}"></div>
-                    </div>
-                </div>
-                </div>
                 <div class="row mt-4">
                     <div class="col">
                         <label class="form-label fw-medium" for="addProductBatch"
@@ -215,35 +203,3 @@
     </div>
 </div>
 
-<!-- Add modals at root level -->
-<div class="modal fade" id="modalFlavourAdd" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalFlavourAddLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div th:replace="~{fragments/Production/Settings/FlavourAddForm.html}"></div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="modalFlavourEdit" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalFlavourEditLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div th:replace="~{fragments/Production/Settings/FlavourEditForm.html}"></div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="modalPTAdd" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalPTAddLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div th:replace="~{fragments/Production/Settings/PackageTypeAddFrom.html}"></div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="modalPTEdit" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalPTEditLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div th:replace="~{fragments/Production/Settings/PackageTypeEditFrom.html}"></div>
-        </div>
-    </div>
-</div>

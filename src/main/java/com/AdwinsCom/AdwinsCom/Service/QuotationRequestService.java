@@ -1,17 +1,20 @@
 package com.AdwinsCom.AdwinsCom.Service;
 
 import com.AdwinsCom.AdwinsCom.DTO.QRequestGetDTO;
+import com.AdwinsCom.AdwinsCom.DTO.QuotationRequestEmailDTO;
 import com.AdwinsCom.AdwinsCom.Repository.IngredientRepository;
 import com.AdwinsCom.AdwinsCom.Repository.QuotationRequestRepository;
 import com.AdwinsCom.AdwinsCom.Repository.SupplierRepository;
 import com.AdwinsCom.AdwinsCom.entity.Ingredient;
 import com.AdwinsCom.AdwinsCom.entity.QuotationRequest;
+import com.AdwinsCom.AdwinsCom.entity.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
 
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
@@ -24,6 +27,9 @@ public class QuotationRequestService implements IQuotationRequestService {
 
     @Autowired
     private IPrivilegeService privilegeService;
+
+    @Autowired
+    private EmailService emailService;
 
     final QuotationRequestRepository quotationRequestRepository;
     final SupplierRepository supplierRepository;
@@ -78,6 +84,21 @@ public class QuotationRequestService implements IQuotationRequestService {
 
         // Save the quotation request
         quotationRequestRepository.save(quotationRequest);
+
+            // Build the email DTO
+        Ingredient ingredient = ingredientRepository.findById(ingId).orElse(null);
+        QuotationRequestEmailDTO emailDTO = new QuotationRequestEmailDTO();
+        emailDTO.setIngredientId(ingId);
+        emailDTO.setIngredientName(ingredient != null ? ingredient.getIngredientName() : "");
+        emailDTO.setUnit(ingredient != null ? ingredient.getUnitType().toString() : "");
+        emailDTO.setRequiredDate(request.getRequiredDate());
+        emailDTO.setRequestNo(quotationRequest.getRequestNo());
+        emailDTO.setQuantity(request.getQuantity());
+        emailDTO.setNote(request.getNote());
+
+        // Send emails
+        sendQuotationRequestToAllSuppliers(emailDTO);   
+
         return ResponseEntity.ok("Quotation Request Created Successfully");
 
     }
@@ -119,5 +140,41 @@ public class QuotationRequestService implements IQuotationRequestService {
         quotationRequest.setRequestStatus(QuotationRequest.QRequestStatus.Removed);
         quotationRequestRepository.save(quotationRequest);
         return ResponseEntity.ok("Quotation Request Deleted");
+    }
+
+    @Override
+    public ResponseEntity<?> sendQuotationRequestToAllSuppliers(QuotationRequestEmailDTO emailDTO) {
+        // Fetch ingredient details if needed (for validation or extra info)
+        // Ingredient ingredient = ingredientRepository.findById(emailDTO.getIngredientId()).orElse(null);
+        // String ingredientName = ingredient != null ? ingredient.getIngredientName() : emailDTO.getIngredientName();
+        // String unit = ingredient != null ? ingredient.getUnitType().toString() : emailDTO.getUnit();
+
+        // Find all suppliers for the ingredient by ID
+        List<Supplier> suppliers = supplierRepository.findSuppliersByIngredientId(emailDTO.getIngredientId());
+
+        System.out.println("sendQuotationRequestToAllSuppliers called with: " + emailDTO);
+
+        // For each supplier, send an email
+        for (Supplier supplier : suppliers) {
+            String email = supplier.getEmail();
+            String subject = "Quotation Request for " + emailDTO.getIngredientName();
+            String link = "http://localhost:8080/supplier-quotation-form.html?requestId=" + emailDTO.getRequestNo();
+            String body = String.format(
+                "Dear %s,\n\n" +
+                "We request a quotation for the following ingredient/product:\n" +
+                "Name: %s\n" +
+                "Quantity: %s %s\n" +
+                "Required Date: %s\n" +
+                "Please submit your quotation here: %s\n\nThank you.",
+                supplier.getSupplierName(),
+                emailDTO.getIngredientName(),
+                emailDTO.getUnit(),
+                emailDTO.getQuantity(),
+                emailDTO.getRequiredDate(),
+                link
+            );
+            emailService.sendEmail(email, subject, body);
+        }
+        return ResponseEntity.ok("Quotation request sent to all suppliers for this ingredient.");
     }
 }

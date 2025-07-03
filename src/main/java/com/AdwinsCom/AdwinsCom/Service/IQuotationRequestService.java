@@ -1,6 +1,7 @@
 package com.AdwinsCom.AdwinsCom.Service;
 
 import com.AdwinsCom.AdwinsCom.DTO.QRequestGetDTO;
+import com.AdwinsCom.AdwinsCom.DTO.QuotationRequestEmailDTO;
 import com.AdwinsCom.AdwinsCom.entity.QuotationRequest;
 import org.springframework.http.ResponseEntity;
 
@@ -12,5 +13,6 @@ public interface IQuotationRequestService {
     ResponseEntity<?> GetAllQuotationRequests();
     ResponseEntity<?> UpdateQuotationRequest(QuotationRequest quotationRequest);
     ResponseEntity<?> DeleteQuotationRequest(Integer id);
+    ResponseEntity<?> sendQuotationRequestToAllSuppliers(QuotationRequestEmailDTO emailDTO);
 
 }

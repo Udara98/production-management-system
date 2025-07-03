@@ -83,7 +83,7 @@
                                     <input
                                             class="form-control"
                                             id="textFullName"
-                                            onkeyup="validation(this,'\\b[A-Z][a-zA-Z]*\\s[A-Z][a-zA-Z]*\\s[A-Z][a-zA-Z]*\\b','employee','fullname'); genarateCallingNames();"
+                                            oninput="validation(this,'^[A-Z][a-zA-Z]*(\\s[A-Z][a-zA-Z]*){0,2}$','employee','fullname'); genarateCallingNames();"
                                             type="text"
                                             placeholder="Enter Full Name"
                                     />
@@ -105,7 +105,7 @@
                                             class="form-control"
                                             id="txtCallingName"
                                             list="callingNames"
-                                            onkeyup="textCallingNameValidator(this)"
+                                            oninput="textCallingNameValidator(this)"
                                             placeholder="Enter Calling Name"
                                             type="text"
                                     />
@@ -126,7 +126,7 @@
                                     <input
                                             class="form-control"
                                             id="txtNic"
-                                            onkeyup="validation(this,'(^[0-9]{9}[VvXx]$)|(^[0-9]{12}$)','employee','nic')"
+                                            oninput="validation(this,'(^[0-9]{9}[VvXx]$)|(^[0-9]{12}$)','employee','nic')"
                                             placeholder="Enter NIC"
                                             type="text"
                                     />
@@ -223,7 +223,7 @@
                                         <input
                                                 class="form-control"
                                                 id="textEmail"
-                                                onkeyup="validation(this,'^[A-Za-z0-9\\-\\_]{6,20}[@][a-z]{3,10}[.][a-z]{2,3}$','employee','email')"
+                                                oninput="validation(this,'^[A-Za-z0-9\-\_]{6,20}[@][a-z]{3,10}[.][a-z]{2,3}$','employee','email')"
                                                 placeholder="Enter Email"
                                                 type="email"
                                         />
@@ -249,7 +249,7 @@
                                         <input
                                                 class="form-control"
                                                 id="textMobile"
-                                                onkeyup="validation(this,'^[0][7][01245678][0-9]{7}$','employee','mobile')"
+                                                oninput="validation(this,'^[0][7][01245678][0-9]{7}$','employee','mobile')"
                                                 placeholder="Enter Mobile Number"
                                                 required
                                                 type="text"
@@ -275,7 +275,7 @@
                                         <input
                                                 class="form-control"
                                                 id="textLand"
-                                                onkeyup="validation(this,'^[0][1][01245678][0-9]{7}$','employee', 'landno')"
+                                                oninput="validation(this,'^[0][1][01245678][0-9]{7}$','employee', 'landno')"
                                                 placeholder="Enter Land Number"
                                                 type="text"
                                         />
@@ -294,7 +294,7 @@
                               <textarea
                                       class="form-control"
                                       id="textAddress"
-                                      onkeyup="validation(this,'^.*','employee','address')"
+                                      oninput="validation(this,'^.*','employee','address')"
                                       placeholder="Enter address"
                               ></textarea>
                                     <div class="valid-feedback"></div>
@@ -314,7 +314,7 @@
                                 <textarea
                                         class="form-control"
                                         id="textNote"
-                                        onkeyup="validation(this,'^.*','employee','note')"
+                                        oninput="validation(this,'^.*','employee','note')"
                                         placeholder="Enter note"
                                 ></textarea>
                                         <label

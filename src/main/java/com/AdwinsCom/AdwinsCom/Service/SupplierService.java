@@ -39,15 +39,37 @@ public class SupplierService implements ISupplierService {
     @Override
     @Transactional
     public ResponseEntity<?> AddNewSupplier(SupplierDTO supplierDTO, String userName) {
-        Supplier supplier = supplierRepository.getSupplierByRegNo(supplierDTO.getRegNo());
-        if (supplier != null) {
-            return ResponseEntity.badRequest().body("Supplier Already Exist");
-        }
+
+         // Authentication and authorization
+         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+         // Get privileges for the logged-in user
+         HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "SUPPLIER");
+ 
+         // If user doesn't have "insert" permission, return 403 Forbidden
+         if (!loguserPrivi.get("insert")) {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                     .body("Supplier Adds not Completed: You don't have permission!");
+         }
+
 
         Supplier newSupplier = new Supplier().mapDTO(null, supplierDTO, userName);
 
+        if (newSupplier.getRegNo() == null || newSupplier.getRegNo().isEmpty()) {
+            newSupplier.setRegNo(getNextSupplierRegNo());
+        }
+
         mapIngredients(supplierDTO, newSupplier);
         return ResponseEntity.ok("Supplier Registered Successfully");
+    }
+
+    public String getNextSupplierRegNo() {
+        String maxRegNo = supplierRepository.getMaxRegNo(); // e.g. "SUP-0023"
+        int nextNumber = 1;
+        if (maxRegNo != null && maxRegNo.startsWith("SUP-")) {
+            nextNumber = Integer.parseInt(maxRegNo.substring(4)) + 1;
+        }
+        return String.format("SUP-%04d", nextNumber);
     }
 
     @Override

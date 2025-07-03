@@ -1,7 +1,6 @@
 package com.AdwinsCom.AdwinsCom.Service;
 
 import com.AdwinsCom.AdwinsCom.DTO.SupplierDTO;
-import com.AdwinsCom.AdwinsCom.DTO.SupplierPaymentDTO;
 import com.AdwinsCom.AdwinsCom.entity.Supplier;
 import org.springframework.http.ResponseEntity;
 

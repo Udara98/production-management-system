@@ -36,14 +36,6 @@
     <!--link table common function js file-->
     <script src="/script/tableCommonFunction.js"></script>
 
-    <!--  link employee js-->
-    <script src="/script/employee.js"></script>
-
-    <!--  link user js-->
-    <script src="/script/user.js"></script>
-
-    <!--    Link Privilege js-->
-    <script src="/script/privilege.js" ></script>
 
     <!-- Link Data Table  js-->
     <script src="/dataTables/datatables.min.js"></script>
@@ -58,6 +50,15 @@
     <script src="/script/dashboard.js"></script>
     <script src="/script/tableDataFeeder.js"></script>
     <script src="/script/sidebar.js"></script>
+
+    <!--  link user js-->
+    <script src="/script/user.js" defer></script>
+
+    <!--  link employee js-->
+    <script src="/script/employee.js"></script>
+
+    <!--    Link Privilege js-->
+    <script src="/script/privilege.js" ></script>
 
 
 
@@ -594,6 +595,11 @@
     <link href="/styles/index.css" rel="stylesheet"/>
 
     <link href="/fontawesome-free-6.4.2-web/css/all.css" rel="stylesheet"/>
+
+    <script th:inline="javascript">
+        var currentUser = /*[[${loggedUsername}]]*/ 'UnknownUser';
+    </script>
+    
     <!--    Link JQuery-->
     <script src="/script/jQuery%20v3.7.1.js"></script>
 
@@ -664,6 +670,8 @@
 
     <!--    Link common js file-->
     <script src="/script/common.js"></script>
+
+    <script src="/script/notification.js"></script>
 
     <!-- Link Validation js-->
     <script src="/script/validationFunction.js"></script>

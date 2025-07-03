@@ -6,7 +6,9 @@ import com.AdwinsCom.AdwinsCom.DTO.ProductionItemDTO;
 import com.AdwinsCom.AdwinsCom.Repository.IngredientRepository;
 import com.AdwinsCom.AdwinsCom.Repository.ProductionItemRepository;
 import com.AdwinsCom.AdwinsCom.Repository.RecipeRepository;
+import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
 import com.AdwinsCom.AdwinsCom.entity.Ingredient;
+import com.AdwinsCom.AdwinsCom.entity.User;
 import com.AdwinsCom.AdwinsCom.entity.Production.ProductUnitType;
 import com.AdwinsCom.AdwinsCom.entity.Production.ProductionItem;
 import com.AdwinsCom.AdwinsCom.entity.Production.Recipe;
@@ -18,6 +20,7 @@ import org.springframework.security.access.method.P;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -34,10 +37,32 @@ public class ProductionItemService implements IProductionItemService {
     @Autowired
     private IPrivilegeService privilegeService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     public ProductionItemService(ProductionItemRepository productionItemRepository, RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
         this.productionItemRepository = productionItemRepository;
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
+    }
+
+    @Override
+    public ModelAndView GetProductionItemUI() {
+
+        ModelAndView productionItemMV = new ModelAndView();
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        User loggedUser = userRepository.getUserByUserName(auth.getName());
+
+
+        productionItemMV.addObject("loggedUsername", auth.getName());
+        productionItemMV.addObject("loggeduserrole", loggedUser.getRoles().iterator().next().getName());
+        productionItemMV.addObject("loggeduserphoto", loggedUser.getPhoto()); 
+
+        productionItemMV.setViewName("ProductionManagement.html");
+
+        return productionItemMV;
     }
 
     @Override
@@ -123,6 +148,8 @@ public class ProductionItemService implements IProductionItemService {
             IngredientAvailabilityDTO availabilityDTO = new IngredientAvailabilityDTO();
             availabilityDTO.setIngredientCode(ingredient.getIngredientCode());
             availabilityDTO.setIngredientName(ingredient.getIngredientName());
+            availabilityDTO.setRequiredQty(ingRecipeQuantity * batchSize);
+            availabilityDTO.setUnitType(ingredient.getUnitType().toString());
             if(ingredientStockLevel > (ingRecipeQuantity * batchSize)){
                 availabilityDTO.setIsAvailable(true);
                 cost += (ingRecipeQuantity * batchSize)*ingredient.getAvgCost();

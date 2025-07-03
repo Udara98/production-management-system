@@ -1,6 +1,7 @@
 package com.AdwinsCom.AdwinsCom.Service;
 import java.util.*;
 
+import com.AdwinsCom.AdwinsCom.DTO.ProductBatchDTO;
 import com.AdwinsCom.AdwinsCom.DTO.ProductRestockRequestDTO;
 import com.AdwinsCom.AdwinsCom.Repository.*;
 import com.AdwinsCom.AdwinsCom.entity.Product;
@@ -53,71 +54,86 @@ public class ProductService implements IProductService{
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
-    @Transactional
-    public ResponseEntity<?> AddNewProduct(Product product) {
+@Transactional
+public ResponseEntity<?> AddNewProduct(ProductBatchDTO dto) {
 
-        // Authentication and authorization
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    // Authentication and authorization
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        // Get privileges for the logged-in user
-        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "PRODUCT");
+    // Get privileges for the logged-in user
+    HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "PRODUCT");
 
-        // If user doesn't have "insert" permission, return 403 Forbidden
-        if (!loguserPrivi.get("insert")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Product Adds not Completed: You don't have permission!");
-        }
-
-
-
-//        Batch selectedBatch = batchRepository.findById(product.getBatches().getId()).orElse(null);
-
-        // Validate that at least one batch is provided
-        if (product.getBatches() == null || product.getBatches().isEmpty()) {
-            return ResponseEntity.badRequest().body("At least one batch is required.");
-        }
-
-        for (ProductHasBatch phb : product.getBatches()) {
-            Batch batch = batchRepository.findById(phb.getBatch().getId()).orElse(null);
-            if (batch == null) {
-                return ResponseEntity.badRequest().body("Batch with ID " + phb.getBatch().getId() + " does not exist.");
-            }
-
-            Double unitSize = product.getUnitSize();
-            if (product.getUnitType() == ProductUnitType.ML) {
-                unitSize = unitSize / 1000;
-            }
-
-            Double requiredQty = unitSize * product.getQuantity();
-
-            if (batch.getAvailableQuantity() < requiredQty) {
-                return ResponseEntity.badRequest().body("Insufficient batch quantity for batch ID " + batch.getId());
-            }
-
-            batch.setAvailableQuantity(batch.getAvailableQuantity() - requiredQty);
-            batchRepository.save(batch);
-
-            // Set product and batch reference for the join table
-            phb.setProduct(product);
-            phb.setBatch(batch);
-            phb.setQuantity(product.getQuantity());
-            phb.setExpireDate(batch.getExpireDate()); // Set expiration date from batch
-
-        }
-        try {
-            product.setProductCode(QuotationRequest.generateUniqueId("PR-"));
-        } catch (NoSuchAlgorithmException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error generating unique product code.");
-        }
-
-        product.setAddedUser(userRepository.getUserByUserName(auth.getName()).getId());
-        product.setAddedDate(LocalDateTime.now());
-
-        productRepository.save(product);
-
-        return ResponseEntity.ok("Product Added Successfully");
+    if (!loguserPrivi.get("insert")) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body("Product Add not Completed: You don't have permission!");
     }
+
+    // Validate and fetch the batch
+    if (dto.getBatch() == null || dto.getBatch().getId() == null) {
+        return ResponseEntity.badRequest().body("A valid batch is required.");
+    }
+
+    Batch batch = batchRepository.findById(dto.getBatch().getId()).orElse(null);
+    if (batch == null) {
+        return ResponseEntity.badRequest().body("Batch with ID " + dto.getBatch().getId() + " does not exist.");
+    }
+
+    // Check available quantity
+    double unitSize = dto.getUnitSize();
+    if (dto.getUnitType() == Product.ProductUnitType.ML) {
+        unitSize = unitSize / 1000.0;
+    }
+
+    double requiredQty = unitSize * dto.getQuantity();
+    if (batch.getAvailableQuantity() < requiredQty) {
+        return ResponseEntity.badRequest().body("Insufficient batch quantity for batch ID " + batch.getId());
+    }
+
+    // Deduct batch quantity
+    batch.setAvailableQuantity(batch.getAvailableQuantity() - requiredQty);
+    batchRepository.save(batch);
+
+    // Create product
+    Product product = new Product();
+    product.setProductName(dto.getProductName());
+    product.setQuantity(dto.getQuantity());
+    product.setUnitSize(dto.getUnitSize());
+    product.setUnitType(dto.getUnitType());
+    product.setReorderPoint(dto.getReorderPoint());
+    product.setSalePrice(dto.getSalesPrice());
+    product.setReorderQuantity(dto.getReorderQuantity());
+    product.setNote(dto.getNote());
+    product.setProductPhoto(dto.getProductPhoto());
+    product.setProductStatus(Product.ProductStatus.InStock);
+
+    try {
+        product.setProductCode(QuotationRequest.generateUniqueId("PR-"));
+    } catch (NoSuchAlgorithmException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error generating unique product code.");
+    }
+
+    product.setAddedUser(userRepository.getUserByUserName(auth.getName()).getId());
+    product.setAddedDate(LocalDateTime.now());
+
+    // Create ProductHasBatch and assign to product
+    ProductHasBatch phb = new ProductHasBatch();
+    phb.setProduct(product);
+    phb.setBatch(batch);
+    phb.setQuantity(dto.getQuantity());
+    phb.setSalesPrice(dto.getSalesPrice().doubleValue());
+    phb.setExpireDate(batch.getExpireDate());
+
+    List<ProductHasBatch> batchList = new ArrayList<>();
+    batchList.add(phb);
+    product.setBatches(batchList);
+
+    // Save everything
+    productRepository.save(product);
+
+    return ResponseEntity.ok("Product Added Successfully");
+}
+
 
 //    public ResponseEntity<?> AddNewProduct(Product product)  {
 //
@@ -256,61 +272,58 @@ public class ProductService implements IProductService{
         return ResponseEntity.ok(products);
     }
 
-//    @Override
-//    @Transactional
-//    public ResponseEntity<?> deleteProduct(Integer productId) {
-//        // Authentication and authorization
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//
-//        // Get privileges for the logged-in user
-//        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "PRODUCT");
-//
-//        // Check delete permission
-//        if (!loguserPrivi.get("delete")) {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-//                    .body("Product deletion not allowed: You don't have permission!");
-//        }
-//
-//        // Find the product
-//        Product product = productRepository.findById(productId).orElse(null);
-//        if (product == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                    .body("Product not found with ID: " + productId);
-//        }
-//
-//        // Check if product has associated transactions (orders, invoices, etc.)
-//        // This would require additional repository methods to check references
-//        // Check if the product is associated with any transactions
-//        boolean hasTransactions = customerOrderProductRepository.existsByProductId(productId);
-//
-//        if (hasTransactions) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                    .body("Cannot Delete product as it is associated with transactions.");
-//        }
-//
-//
-//        // Get the batch associated with the product
-//        Batch batch = product.getBatch();
-//        if (batch != null) {
-//            // Calculate the quantity to return to the batch
-//            double quantityToReturn = product.getUnitType() == ProductUnitType.ML ?
-//                    (product.getUnitSize() / 1000) * product.getQuantity() :
-//                    product.getUnitSize() * product.getQuantity();
-//
-//            // Return the quantity to the batch
-//            batch.setAvailableQuantity(batch.getAvailableQuantity() + quantityToReturn);
-//            batchRepository.save(batch);
-//        }
-//
-//        // Soft delete approach (recommended)
-//        product.setProductStatus(Product.ProductStatus.Removed);
-//        productRepository.save(product);
-//
-//        // Alternative: Hard delete (not recommended for ERP systems)
-//        // productRepository.delete(product);
-//
-//        return ResponseEntity.ok("Product deleted successfully");
-//    }
+    @Override
+    @Transactional
+    public ResponseEntity<?> deleteProduct(Integer productId) {
+        // Authentication and authorization
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        // Get privileges for the logged-in user
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "PRODUCT");
+
+        // Check delete permission
+        if (!loguserPrivi.get("delete")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Product deletion not allowed: You don't have permission!");
+        }
+
+        // Find the product
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Product not found with ID: " + productId);
+        }
+
+        // Check if product has associated transactions (orders, invoices, etc.)
+        boolean hasTransactions = customerOrderProductRepository.existsByProductId(productId);
+        if (hasTransactions) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Cannot Delete product as it is associated with transactions.");
+        }
+
+        // For each batch associated with this product, return the quantity to the batch
+        if (product.getBatches() != null) {
+            for (ProductHasBatch phb : product.getBatches()) {
+                Batch batch = phb.getBatch();
+                if (batch != null) {
+                    double quantityToReturn = product.getUnitType() == Product.ProductUnitType.ML ?
+                            (product.getUnitSize() / 1000) * phb.getQuantity() :
+                            product.getUnitSize() * phb.getQuantity();
+                    batch.setAvailableQuantity(batch.getAvailableQuantity() + quantityToReturn);
+                    batchRepository.save(batch);
+                }
+            }
+        }
+
+        // Soft delete approach (recommended)
+        product.setProductStatus(Product.ProductStatus.Removed);
+        productRepository.save(product);
+
+        // Alternative: Hard delete (not recommended for ERP systems)
+        // productRepository.delete(product);
+
+        return ResponseEntity.ok("Product deleted successfully");
+    }
 
     @Override
     public ResponseEntity<?> restockProduct(ProductRestockRequestDTO request) {
@@ -326,7 +339,7 @@ public class ProductService implements IProductService{
 
         // Calculate the required quantity based on unit size and product quantity
         Double unitSize = product.getUnitSize();
-        if (product.getUnitType() == ProductUnitType.ML) {
+        if (product.getUnitType() == Product.ProductUnitType.ML) {
             unitSize = unitSize / 1000;
         }
         Double requiredQty = unitSize * request.getQuantity();

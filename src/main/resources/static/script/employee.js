@@ -89,7 +89,10 @@ const getDesignation = (ob) => {
 };
 
 const getHasUserAccount = (ob) => {
-  if (ob.hasUserAccount) {
+  // Make API call to check if employee has user account
+  const hasUserAccount = ajaxGetRequest(`/user/byempid/${ob.id}`);
+  
+  if (hasUserAccount) {
     return '<i class="fa-solid fa-circle-check fa-2x text-success d-flex justify-content-center"></i>';
   } else {
     return '<i class="fa-solid fa-circle-xmark fa-2x text-center d-flex justify-content-center" style="color: #e54a4a"></i>';
@@ -115,6 +118,43 @@ const employeeFormRefill = (ob, rowIndex) => {
   $("#modalEmployeeAdd").modal('show');
   employee = JSON.parse(JSON.stringify(ob));
   oldemployee = JSON.parse(JSON.stringify(ob));
+
+  let currentDate = new Date();
+  console.log('Date', currentDate);
+  console.log('Year', currentDate.getFullYear());
+  console.log('Month', currentDate.getMonth()); //Month array [0-11]
+  console.log('Day', currentDate.getDate()); //Range 0-31
+
+  let minDate = new Date();
+  let maxDate = new Date();
+
+  let minMonth = minDate.getMonth();
+
+  if(minMonth<10){
+    minMonth = '0' + minMonth;
+  }
+
+  let minDay = minDate.getDate();
+  if(minDay<10){
+    minDay = '0' + minDay;
+  }
+
+  minDate.setFullYear(minDate.getFullYear() -60);
+  dateOfBirth.min = minDate.getFullYear() + '-' + minMonth+ '-'+ minDay;
+
+
+  let maxMonth = maxDate.getMonth();
+
+  if(maxMonth<10){
+    maxMonth = '0' + maxMonth;
+  }
+
+  let maxDay = maxDate.getDate();
+  if(maxDay<10){
+    maxDay = '0' + maxDay;
+  }
+  maxDate.setFullYear(maxDate.getFullYear() -18);
+  dateOfBirth.max = maxDate.getFullYear() + '-' + maxMonth+ '-'+ maxDay;
 
 
   textFullName.value = employee.fullname ;
@@ -471,7 +511,7 @@ const employeeSubmit = () => {
     }).then((result) => {
         let postServiceRequestResponse = ajaxRequestBody("/employee", "POST", employee)
         //Check Backend Service
-        if (new RegExp('^[0-9]{10}$').test(postServiceRequestResponse)) {
+        if (/^EMP-\d{4}$/.test(postServiceRequestResponse)) {
 
           Swal.fire({
             title: "Save Successfully ..! ",

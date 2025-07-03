@@ -103,6 +103,7 @@ window.addEventListener('load', () => {
 //
 //    }
 
+
    const recipes = ajaxGetRequest("/recipe/getAllRecipes").filter((recipe) => recipe.status === "Active");
 
    const RecipeSelectElement = document.getElementById("sel-recipe");
@@ -115,40 +116,121 @@ window.addEventListener('load', () => {
     });
 
     document.getElementById('makeNewBatchForm').onsubmit = function (event) {
-        event.preventDefault()
-                console.log(recipeName)
-                console.log(recipeCode)
-
+        event.preventDefault();
+        
+        // Validate form
+        const form = this;
+        if (!form.checkValidity()) {
+            event.stopPropagation();
+            form.classList.add('was-validated');
+            return;
+        }
+        
+        // Additional validation
+        if (!recipeCode || !recipeName) {
+            Swal.fire({
+                title: "Recipe Error",
+                text: "Please select a valid recipe.",
+                icon: "error"
+            });
+            return;
+        }
+        
+        if (totalCost <= 0) {
+            Swal.fire({
+                title: "Cost Error",
+                text: "Total cost must be greater than zero.",
+                icon: "error"
+            });
+            return;
+        }
+        
+        // Validate dates
+        const mfgDate = new Date(document.getElementById("add-bt-mnf").value);
+        const expDate = new Date(document.getElementById("add-bt-exp").value);
+        
+        if (expDate <= mfgDate) {
+            Swal.fire({
+                title: "Date Error",
+                text: "Expiry date must be after manufacture date.",
+                icon: "error"
+            });
+            return;
+        }
+        
+        // Prepare batch data
         const batch = {
             recipeCode: recipeCode,
-            recipeName:recipeName,
+            recipeName: recipeName,
             totalQuantity: parseFloat(document.getElementById("add-batchSize").value),
             availableQuantity: parseFloat(document.getElementById("add-batchSize").value),
-            manufactureDate: new Date(document.getElementById("add-bt-mnf").value),
-            expireDate: new Date(document.getElementById("add-bt-exp").value),
+            manufactureDate: mfgDate.toISOString(),
+            expireDate: expDate.toISOString(),
             totalCost: totalCost,
             batchStatus: document.getElementById("add-bt-status").value,
-            note: document.getElementById("add-bt-note").value,
-        }
-        let response = ajaxRequestBody("/batch/addNewBatch", "POST", batch);
-        if (response.status === 200) {
-            swal.fire({
-                title: response.responseText,
-                icon: "success",
-            });
-            reloadPITable();
-            $("#modalMakeNewBatch").modal("hide");
-
-        } else {
-            swal.fire({
-                title: "Something Went Wrong",
-                text: response.responseText,
-                icon: "error",
-            });
-        }
-
+            note: document.getElementById("add-bt-note").value || "",
+        };
+        
+        console.log("Submitting batch:", batch);
+        
+        // Show confirmation dialog
+        Swal.fire({
+            title: "Create New Batch?",
+            text: `Are you sure you want to create a new batch for ${recipeName}?`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#28a745",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, Create Batch",
+            cancelButtonText: "Cancel"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading state
+                Swal.fire({
+                    title: "Creating Batch...",
+                    text: "Please wait while we create your batch.",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                let response = ajaxRequestBody("/batch/addNewBatch", "POST", batch);
+                
+                if (response.status === 200) {
+                    Swal.fire({
+                        title: "Success!",
+                        text: response.responseText,
+                        icon: "success",
+                        confirmButtonText: "OK"
+                    });
+                    
+                    // Reset form and close modal
+                    resetBatchForm();
+                    $("#modalMakeNewBatch").modal("hide");
+                    
+                    // Reload tables if they exist
+                    if (typeof reloadPITable === 'function') {
+                        reloadPITable();
+                    }
+                    if (typeof reloadBatchTable === 'function') {
+                        reloadBatchTable();
+                    }
+                    
+                } else {
+                    Swal.fire({
+                        title: "Error",
+                        text: response.responseText || "Failed to create batch. Please try again.",
+                        icon: "error",
+                        confirmButtonText: "OK"
+                    });
+                }
+            }
+        });
     }
 })
+
+
 
 //Define the function to refresh the production item form
 const refreshProductionItemForm = () =>{
@@ -206,6 +288,21 @@ const productionItemValidation =  () =>{
                 selectFieldValidator(addPIStatus,'','productionItem','status')
            });
 }
+
+//Define function to validate the Production form
+function validateBatchSize() {
+    const batchSizeInput = document.getElementById("add-batchSize");
+    const batchSize = parseFloat(batchSizeInput.value);
+
+    if (isNaN(batchSize) || batchSize <= 0 || batchSize > 1000) {
+        batchSizeInput.classList.add('is-invalid');
+        batchSizeInput.classList.remove('is-valid');
+    } else {
+        batchSizeInput.classList.remove('is-invalid');
+        batchSizeInput.classList.add('is-valid');
+    }
+}
+
 
 
 //Define function to reload the Production Item table
@@ -283,165 +380,267 @@ const generatePIDropDown = (element,index) => {
 };
 
 //Define function to Make new batch
-//const makeNewBatch = (pi) => {
-//
-//    $("#modalMakeNewBatch").modal("show");
-//
-//    document.getElementById("check-btn").addEventListener('click', () => {
-//        const batchSize = document.getElementById("add-batchSize").value
-//        const result = ajaxGetRequest(`/productionItem/checkIngAvailability/${pi.recipeCode}/${batchSize}`);
-//
-//        const batchFormDiv = document.getElementById('batch-add-form');
-//        batchFormDiv.style.display = 'none'
-//
-//        const resultDiv = document.getElementById("check-result")
-//        resultDiv.className = "d-flex flex-column align-items-center m-3 mt-5 "
-//        resultDiv.innerHTML = ''
-//        if (!result.isIngAvailable) {
-//            let naMessage = document.createElement('div');
-//            naMessage.style.color = "red";
-//            naMessage.style.fontSize = "20px";
-//            naMessage.innerText = "Some or All Ingredients are not Available";
-//
-//            let viewResBtn = document.createElement('button');
-//            viewResBtn.className = "btn btn-primary mt-3";
-//            viewResBtn.innerText = "View Result";
-//
-//            resultDiv.appendChild(naMessage);
-//            resultDiv.appendChild(viewResBtn);
-//
-//            viewResBtn.addEventListener('click', () => {
-//                displayResult(result.availabilityDTOS,quotationRequests, quotations, purchaseOrders, grns)
-//            })
-//
-//        } else {
-//            selectedPI = pi;
-//            let avaMessage = document.createElement('div');
-//            avaMessage.style.color = "green";
-//            avaMessage.style.fontSize = "20px";
-//            avaMessage.innerText = "All Ingredients are Available";
-//
-//            let continueBtn = document.createElement('button');
-//            continueBtn.className = "btn btn-primary mt-3";
-//            continueBtn.innerText = "Continue";
-//
-//            resultDiv.appendChild(avaMessage);
-//            resultDiv.appendChild(continueBtn);
-//
-//            continueBtn.addEventListener('click', (e) => {
-//                e.preventDefault();
-//                resultDiv.innerHTML = ''
-//                batchFormDiv.style.display = 'block';
-//                document.getElementById('add-bt-ingCost').value = result.totalCost.toLocaleString("en-US", {
-//                    style: "currency",
-//                    currency: "LKR",
-//                });
-//            })
-//
-//
-//            document.getElementById('add-bt-utilCost').addEventListener('change', (event) => {
-//                const labourCost = parseFloat(document.getElementById('add-bt-labourCost').value)
-//                const utilityCost = parseFloat(event.target.value)
-//                totalCost = parseFloat(result.totalCost + labourCost + utilityCost)
-//                document.getElementById('add-bt-total').value = totalCost.toLocaleString("en-US", {
-//                    style: "currency",
-//                    currency: "LKR",
-//                });
-//
-//            })
-//
-//        }
-//    })
-//
-//}
-
-//Define function to Make new batch
 const makeNewProdBatch = () => {
-
+    // Reset form and show modal
+    resetBatchForm();
     $("#modalMakeNewBatch").modal("show");
-
-
-       document.getElementById("sel-recipe").addEventListener("change", function () {
-           let selectedData = this.value.split("|"); // Split back into an array
-              recipeName = selectedData[0];
-              recipeCode = selectedData[1];
-       });
-
-
-
-document.getElementById("check-btn").addEventListener('click', () => {
-
-        const batchSize = document.getElementById("add-batchSize").value;
-        console.log(recipeName)
-        console.log(recipeCode)
-
-        const result = ajaxGetRequest(`/productionItem/checkIngAvailability/${recipeCode}/${batchSize}`);
-        console.log(result)
-
-        const batchFormDiv = document.getElementById('batch-add-form');
-        batchFormDiv.style.display = 'none'
-
-        const resultDiv = document.getElementById("check-result")
-        resultDiv.className = "d-flex flex-column align-items-center m-3 mt-5 "
-        resultDiv.innerHTML = ''
-        if (!result.isIngAvailable) {
-            let naMessage = document.createElement('div');
-            naMessage.style.color = "red";
-            naMessage.style.fontSize = "20px";
-            naMessage.innerText = "Some or All Ingredients are not Available";
-
-            let viewResBtn = document.createElement('button');
-            viewResBtn.className = "btn btn-primary mt-3";
-            viewResBtn.innerText = "View Result";
-
-            resultDiv.appendChild(naMessage);
-            resultDiv.appendChild(viewResBtn);
-
-            viewResBtn.addEventListener('click', () => {
-                displayResult(result.availabilityDTOS,quotationRequests, quotations, purchaseOrders, grns)
-            })
-
-        } else {
-            let avaMessage = document.createElement('div');
-            avaMessage.style.color = "green";
-            avaMessage.style.fontSize = "20px";
-            avaMessage.innerText = "All Ingredients are Available";
-
-            let continueBtn = document.createElement('button');
-            continueBtn.className = "btn btn-primary mt-3";
-            continueBtn.innerText = "Continue";
-
-            resultDiv.appendChild(avaMessage);
-            resultDiv.appendChild(continueBtn);
-
-            continueBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                resultDiv.innerHTML = ''
-                batchFormDiv.style.display = 'block';
-                document.getElementById('add-bt-ingCost').value = result.totalCost.toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "LKR",
-                });
-            })
-
-
-            document.getElementById('add-bt-utilCost').addEventListener('change', (event) => {
-                const labourCost = parseFloat(document.getElementById('add-bt-labourCost').value)
-                const utilityCost = parseFloat(event.target.value)
-                totalCost = parseFloat(result.totalCost + labourCost + utilityCost)
-                document.getElementById('add-bt-total').value = totalCost.toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "LKR",
-                });
-
-            })
-
-        }
-
-})
+    
+    // Set minimum dates
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('add-bt-mnf').setAttribute('min', today);
+    document.getElementById('add-bt-exp').setAttribute('min', today);
+    
+    // Set manufacture date to today by default
+    document.getElementById('add-bt-mnf').value = today;
+    
+    // Add event listeners only once
+    setupBatchFormEventListeners();
 }
 
-////Define function to Display Results
+// Setup event listeners for batch form
+const setupBatchFormEventListeners = () => {
+    // Recipe selection
+    const recipeSelect = document.getElementById("sel-recipe");
+    if (recipeSelect) {
+        // Remove existing listeners to prevent duplicates
+        recipeSelect.removeEventListener('change', handleRecipeChange);
+        recipeSelect.addEventListener('change', handleRecipeChange);
+    }
+    
+    // Batch size input
+    const batchSizeInput = document.getElementById("add-batchSize");
+    if (batchSizeInput) {
+        batchSizeInput.removeEventListener('input', updateCheckButtonState);
+        batchSizeInput.addEventListener('input', updateCheckButtonState);
+    }
+    
+    // Check ingredients button
+    const checkBtn = document.getElementById("check-btn");
+    if (checkBtn) {
+        checkBtn.removeEventListener('click', handleCheckIngredients);
+        checkBtn.addEventListener('click', handleCheckIngredients);
+        // Initially disable the button
+        checkBtn.disabled = true;
+    }
+    
+    // Cost calculation listeners
+    const labourCostInput = document.getElementById('add-bt-labourCost');
+    const utilCostInput = document.getElementById('add-bt-utilCost');
+    
+    if (labourCostInput) {
+        labourCostInput.removeEventListener('input', calculateTotalCost);
+        labourCostInput.addEventListener('input', calculateTotalCost);
+    }
+    
+    if (utilCostInput) {
+        utilCostInput.removeEventListener('input', calculateTotalCost);
+        utilCostInput.addEventListener('input', calculateTotalCost);
+    }
+    
+    // Date validation
+    const mfgDateInput = document.getElementById('add-bt-mnf');
+    const expDateInput = document.getElementById('add-bt-exp');
+    
+    if (mfgDateInput) {
+        mfgDateInput.removeEventListener('change', validateDates);
+        mfgDateInput.addEventListener('change', validateDates);
+    }
+    
+    if (expDateInput) {
+        expDateInput.removeEventListener('change', validateDates);
+        expDateInput.addEventListener('change', validateDates);
+    }
+}
+
+// Update check button state based on form inputs
+const updateCheckButtonState = () => {
+    const batchSize = document.getElementById("add-batchSize").value;
+    const recipeSelect = document.getElementById("sel-recipe");
+    const checkBtn = document.getElementById("check-btn");
+    
+    if (checkBtn) {
+        const isValid = batchSize && batchSize > 0 && recipeSelect && recipeSelect.value;
+        checkBtn.disabled = !isValid;
+        
+        if (isValid) {
+            checkBtn.classList.remove('btn-secondary');
+            checkBtn.classList.add('addPrimaryBtn');
+        } else {
+            checkBtn.classList.remove('addPrimaryBtn');
+            checkBtn.classList.add('btn-secondary');
+        }
+    }
+}
+
+// Handle recipe selection
+const handleRecipeChange = function () {
+    if (this.value) {
+        let selectedData = this.value.split("|");
+        recipeName = selectedData[0];
+        recipeCode = selectedData[1];
+    } else {
+        recipeName = "";
+        recipeCode = "";
+    }
+    
+    // Update check button state
+    updateCheckButtonState();
+}
+
+// Handle check ingredients button
+const handleCheckIngredients = () => {
+    const batchSize = document.getElementById("add-batchSize").value;
+    const recipeSelect = document.getElementById("sel-recipe");
+    
+    // Validate inputs
+    if (!batchSize || !recipeSelect.value) {
+        Swal.fire({
+            title: "Missing Information",
+            text: "Please enter batch size and select a recipe first.",
+            icon: "warning"
+        });
+        return;
+    }
+    
+    if (!recipeCode) {
+        Swal.fire({
+            title: "Recipe Error",
+            text: "Please select a valid recipe.",
+            icon: "error"
+        });
+        return;
+    }
+    
+    console.log("Checking ingredients for:", recipeName, recipeCode, batchSize);
+    
+    // Show loading state
+    const checkBtn = document.getElementById("check-btn");
+    const originalText = checkBtn.innerHTML;
+    checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Checking...';
+    checkBtn.disabled = true;
+    
+    const result = ajaxGetRequest(`/productionItem/checkIngAvailability/${recipeCode}/${batchSize}`);
+    console.log("Check result:", result);
+    
+    // Reset button
+    checkBtn.innerHTML = originalText;
+    checkBtn.disabled = false;
+    
+    const batchFormDiv = document.getElementById('batch-add-form');
+    batchFormDiv.style.display = 'none';
+    
+    const resultDiv = document.getElementById("check-result");
+    resultDiv.className = "d-flex flex-column align-items-center m-3 mt-5";
+    resultDiv.innerHTML = '';
+    
+    if (!result.isIngAvailable) {
+        let naMessage = document.createElement('div');
+        naMessage.style.color = "red";
+        naMessage.style.fontSize = "20px";
+        naMessage.innerText = "Some or All Ingredients are not Available";
+        
+        let viewResBtn = document.createElement('button');
+        viewResBtn.className = "btn btn-primary mt-3";
+        viewResBtn.innerText = "View Details";
+        
+        resultDiv.appendChild(naMessage);
+        resultDiv.appendChild(viewResBtn);
+        
+        viewResBtn.addEventListener('click', () => {
+            displayResult(result.availabilityDTOS, quotationRequests, quotations, purchaseOrders, grns);
+        });
+        
+    } else {
+        let avaMessage = document.createElement('div');
+        avaMessage.style.color = "green";
+        avaMessage.style.fontSize = "20px";
+        avaMessage.innerText = "All Ingredients are Available";
+        
+        let continueBtn = document.createElement('button');
+        continueBtn.className = "btn btn-success mt-3";
+        continueBtn.innerHTML = '<i class="fas fa-check me-2"></i>Continue to Batch Details';
+        
+        resultDiv.appendChild(avaMessage);
+        resultDiv.appendChild(continueBtn);
+        
+        continueBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            resultDiv.innerHTML = '';
+            batchFormDiv.style.display = 'block';
+            
+            // Set ingredient cost
+            document.getElementById('add-bt-ingCost').value = result.totalCost.toLocaleString("en-US", {
+                style: "currency",
+                currency: "LKR",
+            });
+            
+            // Initialize total cost calculation
+            calculateTotalCost();
+        });
+    }
+}
+
+// Calculate total cost
+const calculateTotalCost = () => {
+    const ingredientCost = parseFloat(document.getElementById('add-bt-ingCost').value.replace(/[^0-9.-]+/g, "")) || 0;
+    const labourCost = parseFloat(document.getElementById('add-bt-labourCost').value) || 0;
+    const utilityCost = parseFloat(document.getElementById('add-bt-utilCost').value) || 0;
+    
+    totalCost = ingredientCost + labourCost + utilityCost;
+    
+    document.getElementById('add-bt-total').value = totalCost.toLocaleString("en-US", {
+        style: "currency",
+        currency: "LKR",
+    });
+}
+
+// Validate dates
+const validateDates = () => {
+    const mfgDate = document.getElementById('add-bt-mnf').value;
+    const expDate = document.getElementById('add-bt-exp').value;
+    
+    if (mfgDate && expDate) {
+        if (new Date(expDate) <= new Date(mfgDate)) {
+            document.getElementById('add-bt-exp').setCustomValidity('Expiry date must be after manufacture date');
+        } else {
+            document.getElementById('add-bt-exp').setCustomValidity('');
+        }
+    }
+}
+
+// Reset batch form
+const resetBatchForm = () => {
+    const form = document.getElementById('makeNewBatchForm');
+    if (form) {
+        form.reset();
+        form.classList.remove('was-validated');
+    }
+    
+    // Clear result area
+    const resultDiv = document.getElementById("check-result");
+    if (resultDiv) {
+        resultDiv.innerHTML = '';
+    }
+    
+    // Hide batch form
+    const batchFormDiv = document.getElementById('batch-add-form');
+    if (batchFormDiv) {
+        batchFormDiv.style.display = 'none';
+    }
+    
+    // Reset variables
+    recipeName = "";
+    recipeCode = "";
+    totalCost = 0;
+    
+    // Clear validation classes
+    const inputs = form.querySelectorAll('.form-control, .form-select');
+    inputs.forEach(input => {
+        input.classList.remove('is-valid', 'is-invalid');
+    });
+}
+
+//Define function to Display Results
 //const displayResult = (result) => {
 //    const resultDiv = document.getElementById("check-result")
 //    resultDiv.className = "mt-5"
@@ -542,75 +741,109 @@ const displayResult = (ingredients, quotationRequests, quotations, purchaseOrder
         const btnDiv = document.createElement('div');
         btnDiv.className = 'col-3';
 
+        // if (!res.isAvailable === true) {
+        //     console.log(quotationRequests,res)
+        //     const relatedRequest = quotationRequests.find(
+        //         req => req.ingCode === res.ingredientCode && req.requestStatus === "Send"
+        //     );
+
+        //     const relatedQuotation = quotations.find(
+        //         quo => quo.ingredientCode === res.ingredientCode &&  relatedRequest?.requestNo=== quo.quotationRequestNo
+        //     );
+        //     const relatedOrder = purchaseOrders.find(order => order.ingredientCode === res.ingredientCode && order.purchaseOrderStatus === "Pending");
+
+
+        //     if (relatedOrder) {
+        //         const infoText = document.createElement('span');
+        //         infoText.textContent = `Please add a GRN for po ${relatedOrder.purchaseOrderNo}.`;
+        //         infoText.style.color = 'red';
+
+        //         const viewOrderBtn = document.createElement('button');
+        //         viewOrderBtn.textContent = "Add GRN";
+        //         viewOrderBtn.className = "btn btn-warning ms-2";
+        //         viewOrderBtn.onclick = () => {
+        //             window.location.href = `/purchase-order/${relatedOrder.id}`;
+        //         };
+
+        //         infoDiv.appendChild(infoText);
+        //         btnDiv.appendChild(viewOrderBtn);
+        //     } else if (relatedQuotation) {
+        //         const infoText = document.createElement('span');
+        //         infoText.textContent = `Please Send Purchase Order for ${relatedQuotation.quotationNo} .`;
+        //         infoText.style.color = 'red';
+
+        //         const viewQuotationBtn = document.createElement('button');
+        //         viewQuotationBtn.textContent = "Send Purchase Order";
+        //         viewQuotationBtn.className = "btn btn-warning ms-2";
+        //         viewQuotationBtn.onclick = () => {
+        //             window.location.href = `/quotation/${relatedQuotation.id}`;
+        //         };
+
+        //         infoDiv.appendChild(infoText);
+        //         btnDiv.appendChild(viewQuotationBtn);
+        //     } else if (relatedRequest) {
+        //         const infoText = document.createElement('span');
+        //         infoText.textContent = `Please add a quotation for Quotation Request No: ${relatedRequest.requestNo}.`;
+        //         infoText.style.color = 'red';
+
+        //         const viewRequestBtn = document.createElement('button');
+        //         viewRequestBtn.textContent = "Add Quotation";
+        //         viewRequestBtn.className = "btn btn-warning ms-2";
+        //         viewRequestBtn.onclick = () => {
+        //             window.location.href = `/quotation-request/${relatedRequest.id}`;
+        //         };
+
+        //         infoDiv.appendChild(infoText);
+        //         btnDiv.appendChild(viewRequestBtn);
+        //     } else {
+        //         const infoText = document.createElement('span');
+        //             infoText.textContent = `Please send Quotation Request for ingredient ${res.ingredientCode}.`;
+        //             infoText.style.color = 'red';
+
+        //             const sendQuoBtn = document.createElement('button');
+        //             sendQuoBtn.className = "btn btn-warning ms-2";
+        //             sendQuoBtn.innerHTML = `Send Quotation Request`;
+
+        //             sendQuoBtn.onclick = () => {
+        //             };
+
+        //             infoDiv.appendChild(infoText);
+        //             btnDiv.appendChild(sendQuoBtn);
+        //     }
+        // }
+
         if (!res.isAvailable === true) {
-            console.log(quotationRequests,res)
-            const relatedRequest = quotationRequests.find(
-                req => req.ingCode === res.ingredientCode && req.requestStatus === "Send"
-            );
+            const infoText = document.createElement('span');
+            infoText.textContent = `Insufficient stock for ${res.ingredientName} (${res.ingredientCode}). Please notify Procurement.`;
+            infoText.style.color = 'red';
+            infoDiv.appendChild(infoText);
 
-            const relatedQuotation = quotations.find(
-                quo => quo.ingredientCode === res.ingredientCode &&  relatedRequest?.requestNo=== quo.quotationRequestNo
-            );
-            const relatedOrder = purchaseOrders.find(order => order.ingredientCode === res.ingredientCode && order.purchaseOrderStatus === "Pending");
-
-
-            if (relatedOrder) {
-                const infoText = document.createElement('span');
-                infoText.textContent = `Please add a GRN for po ${relatedOrder.purchaseOrderNo}.`;
-                infoText.style.color = 'red';
-
-                const viewOrderBtn = document.createElement('button');
-                viewOrderBtn.textContent = "Add GRN";
-                viewOrderBtn.className = "btn btn-warning ms-2";
-                viewOrderBtn.onclick = () => {
-                    window.location.href = `/purchase-order/${relatedOrder.id}`;
-                };
-
-                infoDiv.appendChild(infoText);
-                btnDiv.appendChild(viewOrderBtn);
-            } else if (relatedQuotation) {
-                const infoText = document.createElement('span');
-                infoText.textContent = `Please Send Purchase Order for ${relatedQuotation.quotationNo} .`;
-                infoText.style.color = 'red';
-
-                const viewQuotationBtn = document.createElement('button');
-                viewQuotationBtn.textContent = "Send Purchase Order";
-                viewQuotationBtn.className = "btn btn-warning ms-2";
-                viewQuotationBtn.onclick = () => {
-                    window.location.href = `/quotation/${relatedQuotation.id}`;
-                };
-
-                infoDiv.appendChild(infoText);
-                btnDiv.appendChild(viewQuotationBtn);
-            } else if (relatedRequest) {
-                const infoText = document.createElement('span');
-                infoText.textContent = `Please add a quotation for Quotation Request No: ${relatedRequest.requestNo}.`;
-                infoText.style.color = 'red';
-
-                const viewRequestBtn = document.createElement('button');
-                viewRequestBtn.textContent = "Add Quotation";
-                viewRequestBtn.className = "btn btn-warning ms-2";
-                viewRequestBtn.onclick = () => {
-                    window.location.href = `/quotation-request/${relatedRequest.id}`;
-                };
-
-                infoDiv.appendChild(infoText);
-                btnDiv.appendChild(viewRequestBtn);
-            } else {
-                const infoText = document.createElement('span');
-                    infoText.textContent = `Please send Quotation Request for ingredient ${res.ingredientCode}.`;
-                    infoText.style.color = 'red';
-
-                    const sendQuoBtn = document.createElement('button');
-                    sendQuoBtn.className = "btn btn-warning ms-2";
-                    sendQuoBtn.innerHTML = `Send Quotation Request`;
-
-                    sendQuoBtn.onclick = () => {
-                    };
-
-                    infoDiv.appendChild(infoText);
-                    btnDiv.appendChild(sendQuoBtn);
-            }
+            console.log(currentUser)
+            console.log(res)
+        
+            // Add Notify button
+            const notifyBtn = document.createElement('button');
+            notifyBtn.type = "button";
+            notifyBtn.className = "btn btn-warning ms-2";
+            notifyBtn.innerText = "Notify Procurement";
+            notifyBtn.type = "button";
+            notifyBtn.onclick = () => {
+                ajaxRequestBody("/notification/ingredientShortage", "POST", {
+                    ingredientCode: res.ingredientCode,
+                    ingredientName: res.ingredientName,
+                    requiredQty: res.requiredQty, // Make sure this is available in your result
+                    reportedBy: currentUser, // Replace with your user variable/session
+                    recipeName:recipeName,
+                    recipeCode: recipeCode,
+                    unitType: res.unitType
+                });
+                Swal.fire({
+                    title: "Notification Sent",
+                    text: "Procurement has been notified.",
+                    icon: "success"
+                });
+            };
+            btnDiv.appendChild(notifyBtn);
         }
 
         rowDiv.appendChild(infoDiv);
@@ -933,6 +1166,21 @@ const ProductionItemSubmit = () =>{
         }
 }
 
+function validateBatchSize() {
+
+    console.log("uuuuuuuuuuuu")
+    const batchSizeInput = document.getElementById("add-batchSize");
+    const batchSize = parseFloat(batchSizeInput.value);
+
+    if (isNaN(batchSize) || batchSize <= 0 || batchSize > 1000) {
+        batchSizeInput.classList.add('is-invalid');
+        batchSizeInput.classList.remove('is-valid');
+    } else {
+        batchSizeInput.classList.remove('is-invalid');
+        batchSizeInput.classList.add('is-valid');
+    }
+}
+
 //Refill Product form fields
 const productionItemFormRefill = (ob, rowIndex) => {
 
@@ -975,3 +1223,16 @@ const productionItemFormRefill = (ob, rowIndex) => {
               );
 
 };
+
+function setupBatchSizeValidation() {
+    const batchSizeInput = document.getElementById("add-batchSize");
+    if (batchSizeInput) {
+        batchSizeInput.addEventListener("input", validateBatchSize);
+    }
+}
+
+// If using Bootstrap modal:
+$('#modalMakeNewBatch').on('shown.bs.modal', function () {
+    setupBatchSizeValidation();
+});
+

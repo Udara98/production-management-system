@@ -114,22 +114,20 @@ public class PrivilegeService implements IPrivilegeService {
 
     @Override
     public ResponseEntity<String> deletePrivilege(Privilege privilege) {
-        // Check if the privilege exists
         Privilege existingPrivilege = privilegeRepository.findById(privilege.getId()).orElse(null);
         if (existingPrivilege == null) {
             return new ResponseEntity<>("Privilege deletion unsuccessful: This privilege does not exist", HttpStatus.NOT_FOUND);
         }
-
         try {
-            // Soft delete logic
             existingPrivilege.setSel(false);
             existingPrivilege.setIns(false);
             existingPrivilege.setUpd(false);
             existingPrivilege.setDel(false);
             existingPrivilege.setDeleteddatetime(LocalDateTime.now());
-            existingPrivilege.setDeleteduser(1);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Integer userId = userRepository.getUserByUserName(auth.getName()).getId();
+            existingPrivilege.setDeleteduser(userId);
             privilegeRepository.save(existingPrivilege);
-
             return new ResponseEntity<>("Privilege deleted successfully", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("Privilege deletion unsuccessful: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -149,7 +147,7 @@ public class PrivilegeService implements IPrivilegeService {
             existingPrivilege.setIns(privilege.getIns());
             existingPrivilege.setUpd(privilege.getUpd());
             existingPrivilege.setDel(privilege.getDel());
-            existingPrivilege.setLastmodifieddatetime(privilege.getLastmodifieddatetime());
+            existingPrivilege.setLastmodifieddatetime(LocalDateTime.now());
             existingPrivilege.setModifieduser(1);
             privilegeRepository.save(existingPrivilege);
 

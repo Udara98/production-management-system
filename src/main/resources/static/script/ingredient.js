@@ -25,6 +25,9 @@ const reloadIngredientsForm = () =>{
  //Get all products
   let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
 
+  document.getElementById('btnIngredientUpdate').disabled = true;
+  document.getElementById('btnIngredientSubmit').disabled = false;
+
 }
 
 
@@ -78,10 +81,8 @@ const ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
         const buttonList = [
             {name: "Edit", action: ingredientFormRefill, icon: "fa-solid fa-edit me-2"},
             {name: "Delete", action: deleteIngredient, icon: "fa-solid fa-trash me-2"},
+            {name: "Send Quotation Request", action: quoRequestFormRefill, icon: "fa-solid fa-file-lines me-2"}
         ];
-        if (element.ingredientStatus !== "InStock") {
-            buttonList.push({name: "Send Quotation Request", action: quoRequestFormRefill, icon: "fa-solid fa-file-lines me-2"});
-        }
         buttonList.forEach((button) => {
             const buttonElement = document.createElement("button");
             buttonElement.className = "dropdown-item btn";
@@ -116,18 +117,18 @@ const ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
 //Define function for validation and object binding
 const formValidation = () =>{
 
-console.log(ingredientCode)
-ingredientCode.addEventListener('input', () => {
-        validation(ingredientCode, '', 'ingredient', 'ingredientCode');
-});
+// console.log(ingredientCode)
+// ingredientCode.addEventListener('input', () => {
+//         validation(ingredientCode, '', 'ingredient', 'ingredientCode');
+// });
 
 quantity.addEventListener('input', () => {
             validation(quantity, '^(?:[1-9][0-9]?|1[0-9]{2}|200)$', 'ingredient', 'quantity');
 });
 
 ingredientName.addEventListener('input', () => {
-                    validation(ingredientName, '', 'ingredient', 'ingredientName');
-        });
+validation(ingredientName, '[A-Za-z]{2,50}$', 'ingredient', 'ingredientName');
+ });
 
 unitType.addEventListener('change', () => {
 selectFieldValidator(unitType,'','ingredient','unitType')
@@ -185,36 +186,51 @@ note.addEventListener('input', () =>{
 const checkIngredientFormError = () => {
     let errors = '';
 
-    if (ingredient.ingredientCode == null) {
-        errors = errors + "ingredientCode can't be null \n";
-        ingredientCode.classList.add('is-invalid')
+    // Ingredient Name validation
+    if (!ingredientName.value || ingredientName.value.trim() === '') {
+        errors += 'Ingredient name is required.\n';
+        ingredientName.classList.add('is-invalid');
+    } else {
+        ingredientName.classList.remove('is-invalid');
+        ingredientName.classList.add('is-valid');
     }
 
-    if (ingredient.ingredientName == null) {
-        errors = errors + "Ingredient name name can't be null \n";
-        ingredientName.classList.add('is-invalid')
+    // Quantity validation
+    if (!quantity.value || isNaN(quantity.value) || Number(quantity.value) <= 0) {
+        errors += 'Quantity must be a positive number.\n';
+        quantity.classList.add('is-invalid');
+    } else {
+        quantity.classList.remove('is-invalid');
+        quantity.classList.add('is-valid');
     }
 
-    if (ingredient.quantity == null) {
-        errors = errors + "Quantity can't be null \n";
-        quantity.classList.add('is-invalid')
+    // Unit Type validation
+    if (!unitType.value) {
+        errors += 'Unit type is required.\n';
+        unitType.classList.add('is-invalid');
+    } else {
+        unitType.classList.remove('is-invalid');
+        unitType.classList.add('is-valid');
     }
 
-    if (ingredient.unitType == null) {
-        errors = errors + "Unit Type can't be null \n";
-        quantity.classList.add('is-invalid')
-    }
-
-
-    if (ingredient.rop == null) {
-        errors = errors + "ROP can't be null \n";
+    // ROP validation
+    if (!rop.value || isNaN(rop.value) || Number(rop.value) <= 0) {
+        errors += 'ROP (Reorder Point) must be a positive number.\n';
         rop.classList.add('is-invalid');
+    } else {
+        rop.classList.remove('is-invalid');
+        rop.classList.add('is-valid');
     }
 
-    if (ingredient.roq == null) {
-            errors = errors + "ROQ can't be null  \n";
-            roq.classList.add('is-invalid');
-        }
+    // ROQ validation
+    if (!roq.value || isNaN(roq.value) || Number(roq.value) <= 0) {
+        errors += 'ROQ (Reorder Quantity) must be a positive number.\n';
+        roq.classList.add('is-invalid');
+    } else {
+        roq.classList.remove('is-invalid');
+        roq.classList.add('is-valid');
+    }
+
 
     return errors;
 }
@@ -242,7 +258,7 @@ const checkIngredientFormError = () => {
 
                         // Check backend response
                         if (postServiceRequestResponse.status === 200) {
-                            $("#ingredientAddForm").modal('hide');
+                            $("#modelIngredientAdd").modal('hide');
                             ingredientAddForm.reset();
                             ingredientTableRefresh();
                             reloadIngredientsForm();
@@ -388,28 +404,35 @@ const checkIngredientFormError = () => {
 
 //Refill Ingredient form fields
 const ingredientFormRefill = (ob, rowIndex) => {
+    // Set modal title to 'Edit Ingredient'
+    const modalTitle = document.getElementById('ingredientModalTitle');
+    if (modalTitle) {
+        modalTitle.textContent = 'Edit Ingredient';
+    }
+
+    document.getElementById('btnIngredientUpdate').disabled = false;
+    document.getElementById('btnIngredientSubmit').disabled = true;
 
     console.log(ob)
     console.log(rowIndex)
-  $("#modelIngredientAdd").modal('show');
-  ingredient = JSON.parse(JSON.stringify(ob));
-  oldIngredient = JSON.parse(JSON.stringify(ob));
+    $("#modelIngredientAdd").modal('show');
+    ingredient = JSON.parse(JSON.stringify(ob));
+    oldIngredient = JSON.parse(JSON.stringify(ob));
 
+    ingredientName.value = ingredient.ingredientName;
+    quantity.value = ingredient.quantity;
+    rop.value = ingredient.rop;
+    roq.value = ingredient.roq;
+    unitType.value = ingredient.unitType;
 
-  ingredientCode.value = ingredient.ingredientCode ;
-  ingredientName.value = ingredient.ingredientName;
-  quantity.value = ingredient.quantity;
-  rop.value = ingredient.rop;
-  roq.value = ingredient.roq;
-  unitType.value = ingredient.unitType;
-
-  if(product.note !=null){
+    if(product.note !=null){
         note.value = ingredient.note;
-      }else {
+    } else {
         note.value = '';
     }
 
-
+    document.getElementById('btnIngredientUpdate').disabled = false;
+    document.getElementById('btnIngredientSubmit').disabled = true;
 };
 
 const editIngredient = (ingredient) => {
@@ -538,6 +561,13 @@ const sendQuotationRequest=()=>{
                         Array.from(quotationRequestForm.elements).forEach((field) => {
                             field.classList.remove('is-valid', 'is-invalid');
                         });
+                        // sendQuotationRequestEmail(
+                        //     quoRequest.ingredientCode,
+                        //     quoRequest.ingredientName,
+                        //     quoRequest.unitType,
+                        //     quoRequest.deadline,
+                        //     quoRequest.requiredDate
+                        // );
 
                     } else {
                         console.error(postServiceRequestResponse);
@@ -588,3 +618,60 @@ const quoRequestFormRefill = (ob, rowIndex) => {
 //
 //
 //}
+
+
+function openAddIngredientForm() {
+    // Reset the form fields
+    document.getElementById('ingredientAddForm').reset();
+
+    // Clear validation classes
+    Array.from(document.getElementById('ingredientAddForm').elements).forEach((field) => {
+        field.classList.remove('is-valid', 'is-invalid');
+    });
+
+    // Set modal title to 'Add New Ingredient'
+    const modalTitle = document.getElementById('ingredientModalTitle');
+    if (modalTitle) {
+        modalTitle.textContent = 'Add New Ingredient';
+    }
+
+    // Set button states: enable Add, disable Update
+    document.getElementById('btnIngredientUpdate').disabled = true;
+    document.getElementById('btnIngredientSubmit').disabled = false;
+
+    // Optionally, reset your JS ingredient object
+    ingredient = {};
+    oldIngredient = null;
+
+    // Show the modal
+    $('#modelIngredientAdd').modal('show');
+}
+
+const  sendQuotationRequestEmail = (ingredientCode, ingredientName, unit, deadline, deliveryDate) => {
+    const qReq = {
+        ingredientCode,
+        ingredientName,
+        unit,
+        deadline,
+        deliveryDate
+    };
+  
+
+    const postEmailServiceRequestResponse = ajaxRequestBody("/quotation-request/sendToAllSuppliers","POST",qReq);
+    // Check backend response
+    console.log(postEmailServiceRequestResponse)
+    if (postEmailServiceRequestResponse.status === 200) {
+;
+        Swal.fire({
+                title: "Emails Sent Successfully!",
+                icon: "success"
+                    });
+    } else {
+        console.error(postEmailServiceRequestResponse);
+        Swal.fire({
+            title: "Error",
+            text: postEmailServiceRequestResponse.responseText,
+            icon: "error"
+        });
+    }
+}

@@ -1,6 +1,3 @@
-
-
-
 //define function for validate input element
 const inputValidation = (fieldId, pattern, object, property) => {
 
@@ -294,3 +291,4 @@ const selectDynamicFieldValidator= (fieldId, pattern,object,property) => {
     }
   }
 };
+

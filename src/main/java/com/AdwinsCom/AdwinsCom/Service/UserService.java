@@ -102,7 +102,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public ResponseEntity<?>findallwithoutadmin(){
+    public ResponseEntity<?> findallwithoutadmin() {
         try {
             List<User> users = userRepository.findallwithoutadmin();
 
@@ -118,7 +118,6 @@ public class UserService implements IUserService {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred: " + e.getMessage());
         }
-
     }
 
     @Override

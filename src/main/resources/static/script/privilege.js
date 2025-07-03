@@ -107,7 +107,7 @@ const refreshPrivilegeForm = function() {
 
 }
 
-const generatePrivilegeDropDown = (element) => {
+const generatePrivilegeDropDown = (element, rowIndex) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
@@ -115,7 +115,7 @@ const generatePrivilegeDropDown = (element) => {
         {name: "View", action: viewPrivilegeData, icon: "fa-solid fa-eye me-2"},
         {
             name: "Edit",
-            action: editPrivilege,
+            action: PrivilegeFormRefill,
             icon: "fa-solid fa-edit me-2",
         },
         {name: "Delete", action: deletePrivilege, icon: "fa-solid fa-trash me-2"},
@@ -126,7 +126,7 @@ const generatePrivilegeDropDown = (element) => {
         buttonElement.className = "dropdown-item btn";
         buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
         buttonElement.onclick = function () {
-            button.action(element);
+            button.action(element, rowIndex);
         };
         const liElement = document.createElement("li");
         liElement.appendChild(buttonElement);
@@ -135,28 +135,25 @@ const generatePrivilegeDropDown = (element) => {
     return dropdownMenu;
 };
 const checkPrivilegeUpdates = function () {
-
     let updates = '';
-
     if (privilege.role_id.name != oldPrivilege.role_id.name) {
-        updates = updates + 'Role change into ' + privilege.role_id.name;
+        updates += `Role changed from <b>${oldPrivilege.role_id.name}</b> to <b>${privilege.role_id.name}</b>.<br>`;
     }
     if (privilege.module_id.name != oldPrivilege.module_id.name) {
-        updates = updates + 'Module change into ' + privilege.module_id.name;
+        updates += `Module changed from <b>${oldPrivilege.module_id.name}</b> to <b>${privilege.module_id.name}</b>.<br>`;
     }
     if (privilege.sel != oldPrivilege.sel) {
-        updates = updates + 'Select Privilege change into ' + privilege.sel;
+        updates += `Select Privilege changed from <b>${oldPrivilege.sel ? 'Granted' : 'Not Granted'}</b> to <b>${privilege.sel ? 'Granted' : 'Not Granted'}</b>.<br>`;
     }
     if (privilege.ins != oldPrivilege.ins) {
-        updates = updates + 'Insert Privilege change into ' + privilege.ins;
+        updates += `Insert Privilege changed from <b>${oldPrivilege.ins ? 'Granted' : 'Not Granted'}</b> to <b>${privilege.ins ? 'Granted' : 'Not Granted'}</b>.<br>`;
     }
     if (privilege.upd != oldPrivilege.upd) {
-        updates = updates + 'Update Privilege change into ' + privilege.upd;
+        updates += `Update Privilege changed from <b>${oldPrivilege.upd ? 'Granted' : 'Not Granted'}</b> to <b>${privilege.upd ? 'Granted' : 'Not Granted'}</b>.<br>`;
     }
     if (privilege.del != oldPrivilege.del) {
-        updates = updates + 'Delete Privilege change into ' + privilege.del;
+        updates += `Delete Privilege changed from <b>${oldPrivilege.del ? 'Granted' : 'Not Granted'}</b> to <b>${privilege.del ? 'Granted' : 'Not Granted'}</b>.<br>`;
     }
-
     return updates;
 }
 
@@ -202,37 +199,28 @@ const getFormErrors = function () {
     return formSubmitErrors;
 };
 
-const editPrivilege = () =>{
-    console.log('Modal Privilege Update button');
-
-    let formErrors = getFormErrors();
-    if (formErrors === '') {
-
-    let updates = checkPrivilegeUpdates();
-    if (updates !== '') {
-
-        let confirmMessage = confirm('Are you sure you want to do this update? \n \n' + updates + '\n');
-        if (confirmMessage) {
-
-            let updateResponse = bodyRequest('/privilege', 'PUT', privilege);
-
-            if (updateResponse == '200') {
-                // if (new RegExp('^[0-9]{7}$').test(updateResponse)) {
-                alert('updated successfully');
-                refresPrivilegeTable();
-                reloadPrivilegeForm();
-                $('#modalPrivilege').modal('hide');
-            } else {
-                alert('Not updated \n Following errors are occured. \n' + updateResponse);
-            }
-        }
-    }else {
-        alert('There\'s nothing updated on privilege form')
-    }
-
-} else {
-    alert('There are multiple errors on the form \n' + formErrors);
-}
+const editPrivilege = (privilegeObj) => {
+    privilege = JSON.parse(JSON.stringify(privilegeObj));
+    oldPrivilege = JSON.parse(JSON.stringify(privilegeObj));
+    // Fill the form fields
+    // Role
+    roles = ajaxGetRequest('/role/list');
+    fillDataIntoSelect(selectRole, 'Select Role', roles, 'name', privilege.role_id.name);
+    selectRole.disabled = true;
+    // Module
+    modules = ajaxGetRequest('/module/list');
+    fillDataIntoSelect(selectModule, 'Select Module', modules, 'name', privilege.module_id.name);
+    selectModule.disabled = true;
+    // Privileges
+    checkSelect.checked = privilege.sel;
+    labelSelect.innerHTML = privilege.sel ? '<b>Select</b> Privilege is GRANTED.' : '<b>Select</b> Privilege is NOT-GRANTED.';
+    checkInsert.checked = privilege.ins;
+    labelInsert.innerHTML = privilege.ins ? '<b>Insert</b> Privilege is GRANTED.' : '<b>Insert</b> Privilege is NOT-GRANTED.';
+    checkUpdate.checked = privilege.upd;
+    labelUpdate.innerHTML = privilege.upd ? '<b>Update</b> Privilege is GRANTED.' : '<b>Update</b> Privilege is NOT-GRANTED.';
+    checkDelete.checked = privilege.del;
+    labelDelete.innerHTML = privilege.del ? '<b>Delete</b> Privilege is GRANTED.' : '<b>Delete</b> Privilege is NOT-GRANTED.';
+    // Show the modal
 }
 
 
@@ -248,45 +236,45 @@ const getRoleInPri = (ob) => {
 
 const getSelect = (ob) => {
     if (ob.sel == true) {
-        return 'Not-Granted';
-    } else {
         return 'Granted';
+    } else {
+        return 'Not-Granted';
     }
 }
 
 const getInsert = (ob) => {
-    if (ob.inst == true) {
-        return 'Not-Granted';
-    } else {
+    if (ob.ins == true) {
         return 'Granted';
+    } else {
+        return 'Not-Granted';
     }
 }
 
 const getUpdate = (ob) => {
     if (ob.upd == true) {
-        return 'Not-Granted';
-    } else {
         return 'Granted';
+    } else {
+        return 'Not-Granted';
     }
 }
 
 const getDelete = (ob) => {
     if (ob.del == true) {
-        return 'Not-Granted';
-    } else {
         return 'Granted';
+    } else {
+        return 'Not-Granted';
     }
 }
 
 
 
 const PrivilegeFormRefill = (ob, rowIndex) => {
-    console.log("refil");
-    $("#modalPrivilegeAddForm").modal('show');
+    $("#modalPrivilegeAdd").modal('show');
 
     privilege = JSON.parse(JSON.stringify(ob));
     oldPrivilege = JSON.parse(JSON.stringify(ob));
 
+    // Fill Role
     roles = ajaxGetRequest("/role/list");
     fillDataIntoSelect(
         selectRole,
@@ -297,7 +285,8 @@ const PrivilegeFormRefill = (ob, rowIndex) => {
     );
     selectRole.disabled = true;
 
-    modules = ajaxGetRequest("/module/list")
+    // Fill Module
+    modules = ajaxGetRequest("/module/list");
     fillDataIntoSelect(
         selectModule,
         "Select Module",
@@ -305,20 +294,60 @@ const PrivilegeFormRefill = (ob, rowIndex) => {
         "name",
         privilege.module_id.name
     );
-
     selectModule.disabled = true;
 
+    // Fill Privileges
+    checkSelect.checked = privilege.sel;
+    labelSelect.innerHTML = privilege.sel ? '<b>Select</b> Privilege is GRANTED.' : '<b>Select</b> Privilege is NOT-GRANTED.';
 
+    checkInsert.checked = privilege.ins;
+    labelInsert.innerHTML = privilege.ins ? '<b>Insert</b> Privilege is GRANTED.' : '<b>Insert</b> Privilege is NOT-GRANTED.';
 
+    checkUpdate.checked = privilege.upd;
+    labelUpdate.innerHTML = privilege.upd ? '<b>Update</b> Privilege is GRANTED.' : '<b>Update</b> Privilege is NOT-GRANTED.';
+
+    checkDelete.checked = privilege.del;
+    labelDelete.innerHTML = privilege.del ? '<b>Delete</b> Privilege is GRANTED.' : '<b>Delete</b> Privilege is NOT-GRANTED.';
+
+    // Disable Add button, enable Update button
+    document.getElementById('btnPrivAdd').disabled = true;
+    document.getElementById('btnPrivUpdate').disabled = false;
 };
 
 const viewPrivilegeData = () => {
 
 }
 
-const deletePrivilege  = () => {
-  
-}
+const deletePrivilege = (privilegeObj) => {
+    Swal.fire({
+        title: "Delete Privilege",
+        text: "Are you sure you want to delete this privilege?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#E11D48",
+        cancelButtonColor: "#3f3f44",
+        confirmButtonText: "Yes, Delete"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Call backend
+            let response = ajaxRequestBody("/privilege", "DELETE", privilegeObj);
+            if (response.status === 200) {
+                Swal.fire({
+                    title: "Privilege deleted successfully!",
+                    icon: "success"
+                });
+                refresPrivilegeTable();
+                refreshPrivilegeForm();
+            } else {
+                Swal.fire({
+                    title: "Delete Not Successful",
+                    text: response.responseText || response,
+                    icon: "error"
+                });
+            }
+        }
+    });
+};
 
 const formValidation = function () {
 
@@ -352,67 +381,94 @@ const formValidation = function () {
 
 
 const addPrivilege = function () {
-
-    // console.log('modal privilege add button');
     let formErrors = getFormErrors();
-    // console.log(privilege);
     if (formErrors == '') {
-        // alert('successfull');
-    //     let confirmMessage = confirm('Privilege Details :- \n' + 'Role - ' + privilege.role_id.name + '\n' + 'Module - ' + privilege.module_id.name + '\n' + '\n' + 'Are you sure you want to add this privilege');
-    //     if (confirmMessage) {
-    //
-    //         let postResponse = bodyRequest('/privilege', 'POST', privilege);
-    //
-    //         if (postResponse == '200') {
-    //             alert('Saved successfully');
-    //             reloadPrivilegeTable();
-    //             reloadPrivilegeForm();
-    //             $('#modalPrivilege').modal('hide');
-    //             console.log('after privileges saved in database ' + privilege);
-    //         } else {
-    //             alert('Not saved \n Following errors are occured \n' + postResponse);
-    //         }
-    //     }
-    // } else {
-    //     alert('There are multiple errors on the form \n' + formErrors);
-    // }
         Swal.fire({
             title: "Are you sure?",
-            // text: "Do you want to Add Privilege " +
-            //     "" + (employee.gender === "Male" ? "Mr. " : "Mrs. ") + employee.fullname + "?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#E11D48",
             cancelButtonColor: "#3f3f44",
             confirmButtonText: "Yes, Add"
         }).then((result) => {
-            let postServiceRequestResponse = ajaxRequestBody("/privilege", "POST", privilege)
-            //Check Backend Service
-            if (postResponse === '200') {
-
+            if (result.isConfirmed) {
+                let postServiceRequestResponse = ajaxRequestBody("/privilege", "POST", privilege);
+                // Check Backend Service
+                if (postServiceRequestResponse === '201' || postServiceRequestResponse.status === 201) {
                 Swal.fire({
-                    title: "Save Successfully ..! ",
-                    html: postServiceRequestResponse,
+                        title: "Privilege Added Successfully!",
+                        text: "The privilege has been granted and saved.",
                     icon: "success"
                 });
-
-                //need to hide modal
-                $("#modalEmployeeAdd").modal('hide');
-                formEmployee.classList.add('was-validated')
-                formEmployee.reset();
-                refreshEmployeeTable();
-                refreshEmployeeForm();
-                formEmployee.classList.add('needs-validated')
+                    // Hide modal
+                    $('#modalPrivilegeAdd').modal('hide');
+                    // Refresh privilege table and form
+                    refresPrivilegeTable();
+                    refreshPrivilegeForm();
 
             } else {
-                // alert("Form has error\n" + postServiceRequestResponse)
-                swal.fire({
-                    title: "Form has error",
-                    text: postServiceRequestResponse,
+                    Swal.fire({
+                        title: "Failed to Add Privilege",
+                        text: postServiceRequestResponse.responseText || postServiceRequestResponse,
                     icon: "error"
                 });
-
+                }
             }
+        });
+    } else {
+        Swal.fire({
+            title: "Form has errors",
+            text: formErrors,
+            icon: "error"
+        });
+    }
+}
+
+const buttonPrivilegeUpdate = () => {
+    let formErrors = getFormErrors();
+    if (formErrors === '') {
+        let updates = checkPrivilegeUpdates();
+        if (updates !== '') {
+            Swal.fire({
+                title: "Do you want to update this privilege?",
+                html: updates,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#cb421a",
+                cancelButtonColor: "#3f3f44",
+                confirmButtonText: "Yes, Update"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let updateResponse = ajaxRequestBody('/privilege', 'PUT', privilege);
+                    if (updateResponse === '200' || updateResponse.status === 200) {
+                        Swal.fire({
+                            title: "Privilege updated successfully!",
+                            icon: "success"
+                        });
+                        refresPrivilegeTable();
+                        refreshPrivilegeForm();
+                        $('#modalPrivilegeAdd').modal('hide');
+                    } else {
+                        Swal.fire({
+                            title: "Update Not Successful",
+                            text: updateResponse.responseText || updateResponse,
+                            icon: "error"
+                        });
+                    }
+                }
+            });
+        } else {
+            $('#modalPrivilegeAdd').modal('hide');
+            Swal.fire({
+                title: "No updates found.",
+                icon: "question"
+            });
+        }
+    } else {
+        Swal.fire({
+            title: "Form has errors!",
+            text: formErrors,
+            icon: "error"
         });
     }
 }

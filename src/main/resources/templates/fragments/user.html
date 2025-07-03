@@ -106,7 +106,7 @@
                                             type="text"
                                             id="UserName"
                                             placeholder="Enter User Name"
-                                            onkeyup="validation(this,'\\b[A-Z][a-zA-Z]','user','username')"
+                                            oninput ="validation(this,'\\b[A-Z][a-zA-Z]','user','username')"
                                             required
                                     />
                                     <div class="valid-feedback"></div>
@@ -127,7 +127,7 @@
                                             type="password"
                                             id="userPassword"
                                             placeholder="Enter Password"
-                                            onkeyup="validation(this,'^[a-zA-Z0-9]{5,16}$','user','password')"
+                                            oninput ="validation(this,'^[a-zA-Z0-9]{5,16}$','user','password')"
                                             required
                                     />
                                     <div class="valid-feedback"></div>
@@ -148,7 +148,7 @@
                                             type="password"
                                             placeholder="Enter Re-Password"
                                             id="inputRePassword"
-                                            onkeyup="passwordRTValidator(this,'userPassword');"
+                                            oninput ="passwordRTValidator(this,'userPassword');"
                                             required
                                     />
                                     <div class="valid-feedback"></div>
@@ -168,7 +168,7 @@
                                             class="form-control"
                                             type="text"
                                             id="inputEmail"
-                                            onkeyup="validation(this,'^[a-zA-Z0-9]{5,16}[@][a-z]{3,10}[.][a-z]{2,3}$','user','email')"
+                                            oninput ="validation(this,'^[a-zA-Z0-9]{5,16}[@][a-z]{3,10}[.][a-z]{2,3}$','user','email')"
                                             placeholder="Enter Email Address"
                                             required
                                     />

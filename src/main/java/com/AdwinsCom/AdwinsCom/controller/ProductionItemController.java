@@ -21,9 +21,7 @@ public class ProductionItemController {
     @GetMapping
     public ModelAndView productionItemModel() {
 
-        ModelAndView productionItemMV = new ModelAndView();
-        productionItemMV.setViewName("ProductionManagement.html");
-        return productionItemMV;
+        return productionItemService.GetProductionItemUI();
     }
 
     @PostMapping()

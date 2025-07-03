@@ -10,14 +10,14 @@
                     <div class="col">
                         <label class="form-label fw-medium" for="edit-bt-mnf">Manufacture Date<span
                                 class="text-danger"> * </span></label>
-                        <input class="form-control" id="edit-bt-mnf" type="date"/>
+                        <input class="form-control" id="edit-bt-mnf" type="date" disabled/>
                         <div class="valid-feedback"></div>
                         <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
                     </div>
                     <div class="col">
                         <label class="form-label fw-medium" for="edit-bt-exp">Expire Date<span
                                 class="text-danger"> * </span></label>
-                        <input class="form-control" id="edit-bt-exp" type="date"/>
+                        <input class="form-control" id="edit-bt-exp" type="date" disabled/>
                         <div class="valid-feedback"></div>
                         <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
                     </div>
@@ -34,10 +34,11 @@
                     <div class="col">
                         <label class="form-label fw-medium" for="edit-bt-dmg">Damaged Quantity<span
                                 class="text-danger"> * </span></label>
-                        <input class="form-control" id="edit-bt-dmg" type="number"
-                               placeholder="Enter Damaged Quantity"/>
-                        <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        <input class="form-control" id="edit-bt-dmg" type="number" 
+                               placeholder="Enter Damaged Quantity" min="0"
+                               pattern="^[0-9]*$"/>
+                        <div class="valid-feedback">Valid damaged quantity</div>
+                        <div class="invalid-feedback">Please enter a valid damaged quantity (must be 0 or positive)</div>
                     </div>
                     <div class="col">
                         <label class="form-label fw-medium" for="edit-bt-avb">Available Quantity<span
@@ -48,8 +49,7 @@
                     </div>
                     <div class="col">
                         <label class="form-label fw-medium" for="edit-bt-total">Total Cost<span class="text-danger"> * </span></label>
-                        <input class="form-control" id="edit-bt-total" type="text" placeholder="Total Cost"
-                               disabled/>
+                        <input class="form-control" id="edit-bt-total" type="text" placeholder="Total Cost" disabled/>
                         <div class="valid-feedback"></div>
                         <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
                     </div>
@@ -66,7 +66,7 @@
                                 data-bs-dismiss="modal"
                                 type="button">Cancel
                         </button>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="button" class="btn btn-primary" onClick="productionBatchUpdate(event)">Submit</button>
                     </div>
                 </div>
             </form>

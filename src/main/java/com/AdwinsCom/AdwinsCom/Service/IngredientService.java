@@ -48,14 +48,13 @@ public class IngredientService implements IIngredientService {
         // If user doesn't have "insert" permission, return 403 Forbidden
         if (!loguserPrivi.get("insert")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Payment Adds not Completed: You don't have permission!");
+                    .body("Ingredient Adds not Completed: You don't have permission!");
         }
 
-        Ingredient ingredient = ingredientRepository.getIngredientByIngredientCode(ingredientDTO.getIngredientCode());
-        if (ingredient != null) {
-            return ResponseEntity.badRequest().body("Duplicate entry for Ingredient Code : " + ingredientDTO.getIngredientCode());
-        }
         Ingredient newIngredient = new Ingredient().mapDTO(null, ingredientDTO, auth.getName());
+        if (newIngredient.getIngredientCode() == null || newIngredient.getIngredientCode().isEmpty()) {
+            newIngredient.setIngredientCode(getNextIngredientCode());
+        }
         ingredientRepository.save(newIngredient);
         return ResponseEntity.ok("Ingredient Added Successfully");
     }
@@ -116,5 +115,14 @@ public class IngredientService implements IIngredientService {
 
     public Ingredient GetIngredient(Integer id) {
         return ingredientRepository.findById(id).get();
+    }
+
+    public String getNextIngredientCode() {
+        String maxCode = ingredientRepository.getMaxIngredientCode(); // e.g. "ING-0023"
+        int nextNumber = 1;
+        if (maxCode != null && maxCode.startsWith("ING-")) {
+            nextNumber = Integer.parseInt(maxCode.substring(4)) + 1;
+        }
+        return String.format("ING-%04d", nextNumber);
     }
 }

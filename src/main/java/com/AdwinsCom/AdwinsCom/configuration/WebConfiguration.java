@@ -24,7 +24,8 @@ public class WebConfiguration {
                             .requestMatchers("/privilege/**").hasAnyAuthority("Admin")
                             .requestMatchers("/ingredient/**").hasAnyAuthority("Admin")
                             .requestMatchers("/supplier/**").hasAnyAuthority("Admin")
-                            .requestMatchers("/product/**").permitAll()
+                            .requestMatchers("/customerOrder/**").hasAnyAuthority("Admin","Procurement Officer")
+                            .requestMatchers("/customerOrder/**").permitAll()
                             .requestMatchers("/quotation-request/**").hasAnyAuthority("Admin")
                             .requestMatchers("/quotation/**").hasAnyAuthority("Admin")
                             .requestMatchers("/user/**").hasAnyAuthority("Admin", "Manager")
@@ -45,7 +46,7 @@ public class WebConfiguration {
                             .logoutSuccessUrl("/login");
                 })
                 .csrf(csrf -> csrf.disable())
-                .exceptionHandling(exp -> exp.accessDeniedPage("/error"));
+                .exceptionHandling(exp -> exp.accessDeniedPage("/errors"));
 
         return http.build();
     }

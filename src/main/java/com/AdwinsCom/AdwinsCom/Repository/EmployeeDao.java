@@ -10,7 +10,7 @@ import java.util.List;
 public interface EmployeeDao extends JpaRepository<Employee, Integer> {
 
     //Define query for get next employee number
-    @Query(value = "SELECT lpad(max(e.empnumber) + 1, 10, 0) as empno FROM bitprojecttue.employee as e;" , nativeQuery = true)
+    @Query(value = "SELECT CONCAT('EMP-', LPAD(COALESCE(MAX(CAST(SUBSTRING(e.empnumber, 5) AS UNSIGNED)), 0) + 1, 4, '0')) AS empno FROM employee e", nativeQuery = true)
     public String getNextEmpNo();
 
     //Define query for get employee by given nic

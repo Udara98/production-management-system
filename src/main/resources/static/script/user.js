@@ -1,4 +1,3 @@
-
 let UserTableInstance;
 //Browser Load Option
 window.addEventListener('DOMContentLoaded', ()=>{
@@ -23,7 +22,8 @@ const refreshUserTable = () => {
 
     user = new Object();
     //Define array for store data
-    users = ajaxGetRequest("/user/findallwithoutadmin")
+    let users = ajaxGetRequest("/user/findallwithoutadmin");
+    if (!Array.isArray(users)) users = [];
 
 
     const displayProperty = [
@@ -112,6 +112,7 @@ const getEmployee = (ob) =>{
 
 //Define function for get user status
 const getUserStatus = (ob) => {
+    //Check user status
    if(ob.status){
        return ' <p class="align-middle userActive mx-auto">Active</p>'
    }else {
@@ -280,7 +281,7 @@ const buttonUserUpdate = () => {
                 if(result.isConfirmed){
                     let updateServiceResponse = ajaxRequestBody("/user", "PUT", user);
 
-                    if (updateServiceResponse.status === 200) {
+                    if (updateServiceResponse.status === 201) {
                         // alert("Update successfully ...! \n");
                         Swal.fire({
                             title: "Update successfully ..! ",
@@ -474,7 +475,7 @@ const UserSubmit = () => {
         Swal.fire({
             title: "Are you sure?",
             text: "Do you want to Add User " +
-                "" + (employee.gender === "Male" ? "Mr. " : "Mrs. ") + user.fullname + "?",
+                "" + (employee.gender === "Male" ? "Mr. " : "Mrs. ") + user.username + "?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#E11D48",
@@ -483,7 +484,7 @@ const UserSubmit = () => {
         }).then((result) => {
             let postServiceRequestResponse = ajaxRequestBody("/user", "POST", user)
             //Check Backend Service
-            if (postServiceRequestResponse==="OK") {
+            if (postServiceRequestResponse.status===201) {
                 //need to hide modal
                 $("#modalUser").modal('hide');
                 userForm.reset();
@@ -568,6 +569,7 @@ const checkUserUpdate = () =>{
 
     return updates;
 }
+
 
 
 

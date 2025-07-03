@@ -25,8 +25,8 @@ public class CustomerOrderController {
         return customerOrderMV;
     }
 
-    @PostMapping("/addNewCustomerOrder")
-    public ResponseEntity<?> AddNewCustomerOrder(@RequestBody CustomerOrderDTO customerOrderDTO) {
+    @PostMapping(value = "/addNewCustomerOrder")
+    public ResponseEntity<?> addNewCustomerOrder(@RequestBody CustomerOrderDTO customerOrderDTO) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             return customerOrderService.AddNewCustomerOrder(customerOrderDTO, auth.getName());

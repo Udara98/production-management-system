@@ -1,35 +1,63 @@
 let OrderProductsTableInstance;
 let cusOrderTableInstance;
 
-window.addEventListener('load', () => {
-    reloadOrderDetails()
-    let orderProducts = []
-    let totalAmount = 0
-    const customers = ajaxGetRequest("/customer/getAllCustomers").filter((cus) => cus.customerStatus === "Active");
-    const products = ajaxGetRequest("/product/getAllProducts").filter((p) => p.productStatus !== "OutOfStock");
+
+window.addEventListener('DOMContentLoaded', () => {
 
     const customerSelectElement = document.getElementById("add-co-cus");
     const productSelectElement = document.getElementById("add-co-product");
+    const requiredDateElement = document.getElementById("add-co-reqDate");
+    const orderStatusElement = document.getElementById("add-co-status");
+    const quantityElement = document.getElementById("add-co-qty");
 
-    customers.forEach(cus => {
-        const option = document.createElement('option');
-        option.value = cus.id;
-        option.textContent = cus.regNo;
-        customerSelectElement.appendChild(option);
-    });
-    products.forEach(product => {
-        const option = document.createElement('option');
-        option.value = product.id;
-        option.textContent = product.productCode;
-        productSelectElement.appendChild(option);
-    });
+    const customers = ajaxGetRequest("/customer/getAllCustomers").filter((cus) => cus.customerStatus === "Active");
+    const products = ajaxGetRequest("/product/getAllProducts").filter((p) => p.productStatus !== "OutOfStock");
+
+
+    //Call function for validation
+    // customerOrderFormValidation();
+
+    //call function for Customer order form refill
+    customerOrderFormRefill();
+
+    //Call function for reload order table
+    reloadOrderTable();
+
+    //Call function for validation
+    customerOrderFormValidation();
+
+
+
+  
+
+    let orderProducts = []
+    let totalAmount = 0
+
+
+    // const produtAdd = (customerOrderValidation) => {
+
+    // }
+    
+
     document.getElementById('product-add-btn').addEventListener('click', (event) => {
-       event.preventDefault();
+
+               event.preventDefault();
+
+
+        let errors = checkCusOrderFormEroor();
+        console.log(errors);
+        if(errors === ""){
         const selectedProduct = products.filter((p) => p.id === parseInt(document.getElementById('add-co-product').value))[0]
         const quantity = parseInt(document.getElementById('add-co-qty').value)
 
-        document.getElementById('add-co-product').value = ''
-        document.getElementById('add-co-qty').value = ''
+        // document.getElementById('add-co-product').value = ''
+        // document.getElementById('add-co-qty').value = ''
+        // document.getElementById('add-co-reqDate').value = ''
+        // document.getElementById('add-co-status').value = 'Pending'
+        // document.getElementById('add-co-cus').value = ''
+
+
+    
 
         if (selectedProduct.quantity < quantity) {
             swal.fire({
@@ -46,6 +74,8 @@ window.addEventListener('load', () => {
                 }
             });
         } else {
+
+
             const orderProduct = {
                 product: selectedProduct,
                 quantity: quantity,
@@ -68,19 +98,23 @@ window.addEventListener('load', () => {
             })}</h5>`
 
             orderProducts.push(orderProduct)
-        }
+        }}
     })
+
 
     document.getElementById('COAddForm').onsubmit = function (event) {
         event.preventDefault();
         const selectedCustomer = customers.filter((cus) => cus.id === parseInt(document.getElementById('add-co-cus').value))[0];
         const customerOrder = {
             customer: selectedCustomer,
-            requiredDate:new Date(document.getElementById('add-co-cus').value),
+            requiredDate:new Date(document.getElementById('add-co-reqDate').value).toISOString(),
             totalAmount:totalAmount,
             customerOrderProducts: orderProducts,
             orderStatus:document.getElementById('add-co-status').value
         }
+
+        console.log(customerOrder);
+
         let response = ajaxRequestBody("/customerOrder/addNewCustomerOrder", "POST", customerOrder);
         if (response.status === 200) {
             swal.fire({
@@ -99,6 +133,54 @@ window.addEventListener('load', () => {
         }
     }
 })
+
+
+const customerOrderFormRefill = () => {
+
+    const customers = ajaxGetRequest("/customer/getAllCustomers").filter((cus) => cus.customerStatus === "Active");
+    const products = ajaxGetRequest("/product/getAllProducts").filter((p) => p.productStatus !== "OutOfStock");
+
+    customerOrderValidation = new Object();
+    olDcustomerOrderValidation = null;
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const minDate = `${yyyy}-${mm}-${dd}`;
+
+    const customerSelectElement = document.getElementById("add-co-cus");
+    const productSelectElement = document.getElementById("add-co-product");
+    const requiredDateElement = document.getElementById("add-co-reqDate");
+    const orderStatusElement = document.getElementById("add-co-status");
+    const quantityElement = document.getElementById("add-co-qty");
+
+
+      // For Add form
+      const addCOReqDate = document.getElementById('add-co-reqDate');
+      if (addCOReqDate) {
+          addCOReqDate.setAttribute('min', minDate);
+      }
+  
+      // For Edit form
+      const editCOReqDate = document.getElementById('edit-co-reqDate');
+      if (editCOReqDate) {
+          editCOReqDate.setAttribute('min', minDate);
+      }
+
+    customers.forEach(cus => {
+        const option = document.createElement('option');
+        option.value = cus.id;
+        option.textContent = cus.regNo;
+        customerSelectElement.appendChild(option);
+    });
+    products.forEach(product => {
+        const option = document.createElement('option');
+        option.value = product.id;
+        option.textContent = product.productCode;
+        productSelectElement.appendChild(option);
+    });
+}
 
 const displayOrderProducts = (products) => {
     const getProdCode = (ob) => ob.product.productCode
@@ -130,6 +212,7 @@ const displayOrderProducts = (products) => {
         info: false,
     });
 }
+
 const generateDropDown = (element) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
@@ -151,7 +234,7 @@ const generateDropDown = (element) => {
     return dropdownMenu;
 };
 
-const reloadOrderDetails=()=>{
+const reloadOrderTable=()=>{
     const cusOrders = ajaxGetRequest("/customerOrder/getAllCustomerOrders")
     let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
 
@@ -184,6 +267,7 @@ const reloadOrderDetails=()=>{
         info: true,
     });
 }
+
 const generateCODropDown = (element) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
@@ -212,5 +296,65 @@ const generateCODropDown = (element) => {
     });
     return dropdownMenu;
 };
+
+//Call function for validation and object binding
+const customerOrderFormValidation = () =>{
+
+    const customerSelectElement = document.getElementById("add-co-cus");
+    const productSelectElement = document.getElementById("add-co-product");
+    const requiredDateElement = document.getElementById("add-co-reqDate");
+    const orderStatusElement = document.getElementById("add-co-status");
+    const quantityElement = document.getElementById("add-co-qty");
+
+    customerSelectElement.addEventListener('change',  () => {
+        DynamicSelectValidation(customerSelectElement, 'customerOrderValidation', 'customerName');
+    });
+
+    requiredDateElement.addEventListener('change',  () => {
+        dateFeildValidator(requiredDateElement,'', 'customerOrderValidation', 'requiredDate');
+    });
+
+    orderStatusElement.addEventListener('change',  () => {
+        selectFieldValidator(orderStatusElement,'', 'customerOrderValidation', 'orderStatus');
+    });
+
+     productSelectElement.addEventListener('change',  () => {
+        selectFieldValidator(productSelectElement, '', 'customerOrderValidation', 'selectedProduct');
+    });
+
+    quantityElement.addEventListener('input',  () => {
+                validation(quantityElement, '^[1-9][0-9]{0,2}$', 'customerOrderValidation', 'orderQuantity');
+    });
+
+}
+
+const checkCusOrderFormEroor = () => {
+    let errors = '';
+  
+    if (customerOrderValidation.selectedProduct == null) {
+      errors = errors + "Product Must be selected \n";
+    //   textFullName.classList.add('is-invalid')
+    }
+  
+    if (customerOrderValidation.orderQuantity == null) {
+      errors = errors + "quantity can't be null \n";
+    //   txtCallingName.classList.add('is-invalid')
+    }
+  
+  
+    // if (customerOrderValidation.productPrice == null) {
+    //   errors = errors + "Prodcut Price can't be null \n";
+    // //   textFullName.classList.add('is-invalid')
+    // }
+  
+    // if (orderProduct.productLinePrice == null) {
+    //   errors = errors + "Product Price can't be null \n";
+    // //   txtNic.classList.add('is-invalid')
+    // }
+  
+  
+  
+    return errors;
+  }
 
 

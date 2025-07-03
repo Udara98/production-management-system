@@ -1,4 +1,3 @@
-
 const getTransferList = (left = [], right = [], getIng, prefix = 'default') => {
     const leftList = document.getElementById(`${prefix}-left-list`);
     const rightList = document.getElementById(`${prefix}-right-list`);
@@ -12,24 +11,29 @@ const getTransferList = (left = [], right = [], getIng, prefix = 'default') => {
     let rightItems = [...right];
     let checked = [];
 
-    function updateList(list, items) {
-
+    function updateList(list, items, showCheckbox) {
+        list.innerHTML = '';
         items.forEach(item => {
-            console.log(item)
             const listItem = document.createElement("li");
             listItem.className = "list-item";
-            listItem.innerHTML = `
-                <input type="checkbox" value="${item}" />
-                ${item.ingredientName} (${item.ingredientCode})
-            `;
+            if (showCheckbox) {
+                listItem.innerHTML = `
+                    <input type="checkbox" value="${item}" style="width:18px;height:18px;margin-right:8px;vertical-align:middle;" />
+                    <span style="display:inline-block; min-width:180px;">${item.ingredientName} (${item.ingredientCode})</span>
+                `;
+                listItem.style.display = 'flex';
+                listItem.style.alignItems = 'center';
+                listItem.addEventListener("click", (e) => {
+                    if (e.target.tagName !== "INPUT") {
+                        const checkbox = listItem.querySelector("input[type='checkbox']");
+                        checkbox.checked = !checkbox.checked;
+                    }
+                    handleToggle(item);
+                });
+            } else {
+                listItem.textContent = `${item.ingredientName} (${item.ingredientCode})`;
+            }
             list.appendChild(listItem);
-            listItem.addEventListener("click", (e) => {
-                if (e.target.tagName !== "INPUT") {
-                    const checkbox = listItem.querySelector("input[type='checkbox']");
-                    checkbox.checked = !checkbox.checked;
-                }
-                handleToggle(item);
-            });
         });
     }
 
@@ -82,8 +86,8 @@ const getTransferList = (left = [], right = [], getIng, prefix = 'default') => {
     }
 
     function updateUI() {
-        updateList(leftList, leftItems);
-        updateList(rightList, rightItems);
+        updateList(leftList, leftItems, true);
+        updateList(rightList, rightItems, false);
         updateButtons();
         getIng(rightItems);
     }
@@ -101,5 +105,4 @@ const getTransferList = (left = [], right = [], getIng, prefix = 'default') => {
     moveAllLeftButton.addEventListener("click", moveAllLeft);
 
     updateUI();
-
 };

@@ -19,6 +19,8 @@ import java.util.List;
 @AllArgsConstructor
 public class Product {
 
+    // public static final String ProductUnitType = null;
+
     public enum ProductStatus{
         InStock,
         LowStock,
@@ -42,6 +44,10 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<ProductHasBatch> batches = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<CustomerOrderProduct> customerOrderProducts = new ArrayList<>();
 
 //    @ManyToOne
 //    @JoinColumn(name = "batch_id" ,referencedColumnName = "id")
@@ -90,4 +96,12 @@ public class Product {
 
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
+
+    public enum ProductUnitType {
+    ML,
+    L,
+    KG,
+    G
 }
+}
+

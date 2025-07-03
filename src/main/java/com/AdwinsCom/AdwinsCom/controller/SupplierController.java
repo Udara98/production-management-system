@@ -58,7 +58,7 @@ public class SupplierController {
         }
     }
 
-    @DeleteMapping
+    @DeleteMapping()
     public ResponseEntity<?> DeleteSupplier(@RequestBody Supplier supplier){
         try{
             return supplierService.DeleteSupplier(supplier);

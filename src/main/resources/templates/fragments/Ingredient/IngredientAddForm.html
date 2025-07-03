@@ -1,7 +1,7 @@
 <div class="modal-dialog modal-lg">
   <div class="modal-content">
     <div class="modal-header">
-      <h4 class="modal-title">Add New Ingredient</h4>
+      <h4 class="modal-title" id="ingredientModalTitle">Add New Ingredient</h4>
       <button
               class="btn-close"
               data-bs-dismiss="modal"
@@ -13,13 +13,16 @@
       <form id="ingredientAddForm">
         <div>
           <div class="row mb-3">
-            <div class="col">
+            <!-- <div class="col">
               <label for="ingredientCode" class="form-label fw-medium">Ingredient Code</label><span class="text-danger"> * </span>
               <input type="text" class="form-control" id="ingredientCode" placeholder="Ex. ING1234567" required>
-            </div>
+            </div> -->
             <div class="col">
               <label for="ingredientName" class="form-label fw-medium">Ingredient Name</label><span class="text-danger"> * </span>
               <input type="text" class="form-control" id="ingredientName" placeholder="Enter Ingredient Name" required>
+              <div class="invalid-feedback">
+                Please enter a valid ingredient name.
+              </div>
             </div>
           </div>
 
@@ -27,6 +30,9 @@
             <div class="col">
               <label for="quantity" class="form-label fw-medium">Quantity</label><span class="text-danger"> * </span>
               <input type="text" class="form-control" id="quantity" required placeholder="Enter the Quantity">
+              <div class="invalid-feedback">
+                Please Enter a valid quantity.
+              </div>
             </div>
             <div class="col">
               <label for="unitType" class="form-label fw-medium">Unit Type</label><span class="text-danger"> * </span>
@@ -37,6 +43,9 @@
                 <option value="L">L</option>
                 <option value="MG">MG</option>
               </select>
+              <div class="invalid-feedback">
+                Please select unit type.
+              </div>
             </div>
           </div>
 
@@ -44,10 +53,16 @@
             <div class="col">
               <label for="rop" class="form-label fw-medium">ROP</label><span class="text-danger"> * </span>
               <input type="text" class="form-control" id="rop" placeholder=" Enter Re-Order Point" required>
+              <div class="invalid-feedback">
+                Please Enter a valid ROP.
+              </div>
             </div>
             <div class="col">
               <label for="roq" class="form-label fw-medium">ROQ</label><span class="text-danger"> * </span>
               <input type="text" class="form-control" id="roq" placeholder="Enter Re-Order Quantity" required>
+              <div class="invalid-feedback">
+                Please Enter a valid ROQ.
+              </div>
             </div>
           </div>
           <div class="mb-3">
@@ -70,12 +85,14 @@
               <button
                       class="btn cusbutton btn-update"
                       onclick="ingredientUpdate();"
+                      id="btnIngredientUpdate"
               >
                 <i class="fa-solid fa-edit me-2"></i>Update
               </button>
               <button
                       class="btn cusbutton ms-4 btn-submit"
                       onclick="ingredientSubmit();"
+                      id="btnIngredientSubmit"
               >
                 <i class="fa-solid fa-plus me-2"></i>Add
               </button>

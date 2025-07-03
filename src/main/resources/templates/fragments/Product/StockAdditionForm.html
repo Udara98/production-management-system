@@ -9,7 +9,9 @@
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <label class="form-label fw-medium" for="stockProductName">Product<span class="text-danger"> * </span></label>
-                        <input id="stockProductName" class="form-control" required>
+                        <input id="stockProductName" class="form-control" required readonly>
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">Product is required</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-medium" for="currentStock">Current Quantity</label>
@@ -24,25 +26,30 @@
                             <option selected disabled value="">Select Batch</option>
                             <!-- Options will be populated via JavaScript -->
                         </select>
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">Please select a batch</div>
                         <div class="form-text">Available quantity: <span id="batchAvailableQty">0</span> <span id="batchUnitType"></span></div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-medium" for="addStockQty">Quantity to Add<span class="text-danger"> * </span></label>
                         <div class="input-group">
-                            <input class="form-control" id="addStockQty" type="text" min="1" step="1" placeholder="Enter quantity" required>
+                            <input class="form-control" id="addStockQty" type="text" min="1" step="1" placeholder="Enter quantity" required pattern="^(?:[1-9][0-9]?|1[0-9]{2}|200)$">
                             <span class="input-group-text" id="productUnitTypeDisplay">units</span>
                         </div>
-                        <div class="invalid-feedback">Please enter a valid quantity</div>
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">Please enter a valid quantity (1-200)</div>
                     </div>
                 </div>
 
                 <div class="row mb-4">
                     <div class="col-md-6">
-                        <label class="form-label fw-medium" for="stockUnitCost">Sales Price(Optional)</label>
+                        <label class="form-label fw-medium" for="stockUnitCost">Sales Price<span class="text-danger"> * </span></label>
                         <div class="input-group">
                             <span class="input-group-text">LKR</span>
-                            <input class="form-control" id="stockUnitCost" type="text">
+                            <input class="form-control" id="stockUnitCost" type="text" required pattern="^(?:[1-9]|[1-9][0-9]|[1-9][0-9]{3}|[1-9][0-9]{2})$">
                         </div>
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">Please enter a valid sales price</div>
                     </div>
 <!--                    <div class="col-md-6">-->
 <!--                        <label class="form-label fw-medium" for="stockExpiryDate">Expiry Date (Optional)</label>-->
@@ -58,6 +65,8 @@
                                 Notes <span class="text-cus-red">(optional)</span>
                             </label>
                         </div>
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">Please enter valid notes</div>
                     </div>
                 </div>
 
