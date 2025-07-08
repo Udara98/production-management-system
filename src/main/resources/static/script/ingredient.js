@@ -12,6 +12,9 @@ window.addEventListener("load", () => {
      //Call Ingredient Refresh function
       ingredientTableRefresh();
 
+    // Call this function on modal open or page load for quotation request form
+    quotationRequestFormValidation();
+
 
 
 });
@@ -114,7 +117,54 @@ const ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
 
 
 
-//Define function for validation and object binding
+// Reset validation states for quotation request form
+function resetQuotationRequestValidation() {
+    const form = document.getElementById('quotationRequestForm');
+    if (!form) return;
+    Array.from(form.elements).forEach(field => {
+        if (field.classList) {
+            field.classList.remove('is-valid', 'is-invalid');
+        }
+    });
+}
+
+// Modular validation for Quotation Request form (quotationRequest.html)
+const quotationRequestFormValidation = () => {
+    // Get all relevant fields
+    const quoIngredientCode = document.getElementById('quoIngredientCode');
+    const quoIngredientName = document.getElementById('quoIngredientName');
+    const quoQuantity = document.getElementById('quoQuantity');
+    const quoUnitType = document.getElementById('quoUnitType');
+    const requiredDeliveryDate = document.getElementById('requiredDeliveryDate');
+    const quoDeadline = document.getElementById('QuoDeadline');
+    const quoNote = document.getElementById('Quonote');
+
+    // Ingredient Code validation (alphanumeric, required)
+    quoIngredientCode.addEventListener('input', () => {
+        validation(quoIngredientCode, '^[A-Za-z0-9]{3,20}$', 'quoRequest', 'ingredientCode');
+    });
+    // Ingredient Name validation (letters, min 2)
+    quoIngredientName.addEventListener('input', () => {
+        validation(quoIngredientName, '^[A-Za-z ]{2,50}$', 'quoRequest', 'ingredientName');
+    });
+    // Quantity validation (positive number)
+    quoQuantity.addEventListener('input', () => {
+        validation(quoQuantity, '^(?:[1-9][0-9]?|1[0-9]{2}|200)$', 'quoRequest', 'quantity');
+    });
+    // Unit Type validation (select)
+    quoUnitType.addEventListener('change', () => {
+        selectFieldValidator(quoUnitType, '', 'quoRequest', 'unitType');
+    });
+
+    // Note is optional, but could add length validation if needed
+    // quoNote.addEventListener('input', () => {
+    //     validation(quoNote, '^.{0,255}$', 'quoRequest', 'note');
+    // });
+};
+
+
+
+// Existing ingredient form validation
 const formValidation = () =>{
 
 // console.log(ingredientCode)
@@ -146,7 +196,14 @@ roq.addEventListener('input', () =>{
 note.addEventListener('input', () =>{
              validation(note,'','ingredient','note')
      })
+     
+     requiredDeliveryDate.addEventListener('change', () => {
+    dateFeildValidator(requiredDeliveryDate, '', 'quoRequest', 'requiredDeliveryDate');
+});
 
+QuoDeadline.addEventListener('change', () => {
+    dateFeildValidator(QuoDeadline, '', 'quoRequest', 'deadline');
+});
 
 }
 
@@ -521,9 +578,9 @@ const checkQRFormError = () =>{
        quoQuantity.classList.add('is-invalid');
     }
 
-    if (quoRequest.requiredDate == null) {
+    if (quoRequest.requiredDeliveryDate == null) {
          errors = errors + "Required Date can't be null \n";
-         QuoRequiredDate.classList.add('is-invalid');
+         requiredDeliveryDate.classList.add('is-invalid');
     }
 
     return errors;
@@ -607,6 +664,10 @@ const quoRequestFormRefill = (ob, rowIndex) => {
   quoRequest.unitType = quoUnitType.value = quoRequestIng.unitType;
   quoUnitType.disabled = true;
 
+  const todayStr = new Date().toISOString().split('T')[0];
+  document.getElementById('requiredDeliveryDate').setAttribute('min', todayStr);
+document.getElementById('QuoDeadline').setAttribute('min', todayStr);
+
 
 };
 
@@ -646,6 +707,7 @@ function openAddIngredientForm() {
     // Show the modal
     $('#modelIngredientAdd').modal('show');
 }
+
 
 const  sendQuotationRequestEmail = (ingredientCode, ingredientName, unit, deadline, deliveryDate) => {
     const qReq = {

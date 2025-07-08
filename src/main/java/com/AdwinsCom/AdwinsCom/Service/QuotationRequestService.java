@@ -35,11 +35,13 @@ public class QuotationRequestService implements IQuotationRequestService {
     final SupplierRepository supplierRepository;
     final SupplierIngredientService supplierIngredientService;
     final IngredientRepository ingredientRepository;
-    public QuotationRequestService(QuotationRequestRepository quotationRequestRepository, SupplierRepository supplierRepository, SupplierIngredientService supplierIngredientService, IngredientRepository ingredientRepository) {
+    final SupplierQuotationTokenService supplierQuotationTokenService;
+    public QuotationRequestService(QuotationRequestRepository quotationRequestRepository, SupplierRepository supplierRepository, SupplierIngredientService supplierIngredientService, IngredientRepository ingredientRepository, SupplierQuotationTokenService supplierQuotationTokenService) {
         this.quotationRequestRepository = quotationRequestRepository;
         this.supplierRepository = supplierRepository;
         this.supplierIngredientService = supplierIngredientService;
         this.ingredientRepository = ingredientRepository;
+        this.supplierQuotationTokenService = supplierQuotationTokenService;
     }
 
     @Override
@@ -76,10 +78,11 @@ public class QuotationRequestService implements IQuotationRequestService {
         quotationRequest.setSuppliers(supplierIngredientService.GetSuppliersByIngredientId(ingId));
         quotationRequest.setAddedUser(auth.getName());
         quotationRequest.setAddedDate(LocalDateTime.now());
+        quotationRequest.setUnitType(request.getUnitType());
 
         // Set additional fields from QRequestGetDTO
         quotationRequest.setQuantity(request.getQuantity());
-        quotationRequest.setRequiredDate(request.getRequiredDate());
+        quotationRequest.setRequiredDeliveryDate(request.getRequiredDeliveryDate());
         quotationRequest.setNote(request.getNote());
 
         // Save the quotation request
@@ -91,7 +94,7 @@ public class QuotationRequestService implements IQuotationRequestService {
         emailDTO.setIngredientId(ingId);
         emailDTO.setIngredientName(ingredient != null ? ingredient.getIngredientName() : "");
         emailDTO.setUnit(ingredient != null ? ingredient.getUnitType().toString() : "");
-        emailDTO.setRequiredDate(request.getRequiredDate());
+        emailDTO.setRequiredDeliveryDate(request.getRequiredDeliveryDate());
         emailDTO.setRequestNo(quotationRequest.getRequestNo());
         emailDTO.setQuantity(request.getQuantity());
         emailDTO.setNote(request.getNote());
@@ -109,17 +112,22 @@ public class QuotationRequestService implements IQuotationRequestService {
         List<QuotationRequest> quotationRequests = quotationRequestRepository.findAllByRequestStatusNotRemoved();
         List<QRequestGetDTO> requestGetDTOS = new ArrayList<>();
 
-        for (QuotationRequest qr: quotationRequests
-             ) {
-            Ingredient ingredient = ingredientRepository.findById(qr.getIngredientId()).get();
+        for (QuotationRequest qr : quotationRequests) {
+            Ingredient ingredient = ingredientRepository.findById(qr.getIngredientId()).orElse(null);
             QRequestGetDTO requestGetDTO = new QRequestGetDTO();
             requestGetDTO.setId(qr.getId());
             requestGetDTO.setRequestNo(qr.getRequestNo());
-            requestGetDTO.setIngCode(ingredient.getIngredientCode());
+            requestGetDTO.setIngCode(ingredient != null ? ingredient.getIngredientCode() : null);
             requestGetDTO.setRequestDate(qr.getRequestDate());
             requestGetDTO.setSuppliers(qr.getSuppliers());
             requestGetDTO.setRequestStatus(qr.getRequestStatus());
-
+            requestGetDTO.setRequiredDeliveryDate(qr.getRequiredDeliveryDate());
+            requestGetDTO.setDeadline(qr.getDeadline());
+            requestGetDTO.setQuantity(qr.getQuantity());
+            requestGetDTO.setNote(qr.getNote());
+            // Set ingredient name and unit for frontend
+            requestGetDTO.setIngredientName(ingredient != null ? ingredient.getIngredientName() : null);
+            requestGetDTO.setUnit(ingredient != null ? ingredient.getUnitType().toString() : null);
             requestGetDTOS.add(requestGetDTO);
         }
 
@@ -154,23 +162,26 @@ public class QuotationRequestService implements IQuotationRequestService {
 
         System.out.println("sendQuotationRequestToAllSuppliers called with: " + emailDTO);
 
-        // For each supplier, send an email
+        // For each supplier, generate a unique token and send an email
         for (Supplier supplier : suppliers) {
             String email = supplier.getEmail();
+            // Generate a token valid for 7 days (customize as needed)
+            var tokenObj = supplierQuotationTokenService.generateToken(email, emailDTO.getRequestNo(), 7);
+            String token = tokenObj.getToken();
             String subject = "Quotation Request for " + emailDTO.getIngredientName();
-            String link = "http://localhost:8080/supplier-quotation-form.html?requestId=" + emailDTO.getRequestNo();
+            String link = "http://localhost:8080/supplier-quotation-form.html?token=" + token;
             String body = String.format(
                 "Dear %s,\n\n" +
                 "We request a quotation for the following ingredient/product:\n" +
                 "Name: %s\n" +
                 "Quantity: %s %s\n" +
-                "Required Date: %s\n" +
+                "Required Delivery Date: %s\n" +
                 "Please submit your quotation here: %s\n\nThank you.",
                 supplier.getSupplierName(),
                 emailDTO.getIngredientName(),
-                emailDTO.getUnit(),
                 emailDTO.getQuantity(),
-                emailDTO.getRequiredDate(),
+                emailDTO.getUnit(),
+                emailDTO.getRequiredDeliveryDate(),
                 link
             );
             emailService.sendEmail(email, subject, body);

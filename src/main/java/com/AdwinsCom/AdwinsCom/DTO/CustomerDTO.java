@@ -12,16 +12,18 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class CustomerDTO {
     private Integer id;
-    private String firstName;
-    private String surname;
-    private String nic;
+    private String businessType; // "COMPANY" or "INDIVIDUAL"
+    private String companyName; // Business Name (Company)
+    private String brn; // Business Registration Number (Company)
+    private String contactPerson; // Contact Person Name (Company)
+    private String firstName; // First Name (Individual)
+    private String secondName; // Second Name (Individual)
+    private String nic; // NIC (Individual)
     private String mobile;
     private String landNo;
     private String email;
     private String address;
-    private String companyName;
-    private String brn;
-    private Double point;
+    private Double creditLimit;
     private Customer.CustomerStatus customerStatus;
-
+    private java.util.List<BankAccountDTO> bankAccounts;
 }

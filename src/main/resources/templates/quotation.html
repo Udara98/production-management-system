@@ -13,6 +13,7 @@
                         data-bs-target="#modalQuotationAdd"
                         data-bs-toggle="modal"
                         type="button"
+                        onclick="openAddQuotationForm();"
                 >
                     <i class="fa-solid fa-plus me-2"></i>
                     Add Quotation
@@ -27,10 +28,14 @@
                 <th>Quotation No</th>
                 <th>Request No</th>
                 <th>Ingredient Code</th>
-                <th>Supplier Reg No</th>
+                <!-- <th>Quantity</th> -->
+                <th>Sup Reg No</th>
+                <!-- <th>Total Price</th> -->
+                <th>Advance %</th>
+                <th>Credit Days</th>
+                <th>Proposed Delivery Date</th>
                 <th>Price Per Unit</th>
-                <th>Received Date</th>
-                <th>Deadline</th>
+                <!-- <th>Received Date</th> -->
                 <th>Status</th>
                 <th>Modify</th>
                 </thead>
@@ -45,6 +50,7 @@
             >
                 <div th:replace="~{fragments/Quotation/QuotationAddForm.html}"  ></div>
             </div>
+            <!-- <div th:replace="~{fragments/Quotation/QuotationDetailsView.html}" ></div> -->
 
             <div
                     class="modal fade"

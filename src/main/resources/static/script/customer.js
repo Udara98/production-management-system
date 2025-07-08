@@ -1,528 +1,626 @@
-let OrderProductsEditTableInstance;
-let OrderProductsViewTableInstance;
-let orderProducts = []
-let totalAmount = 0
-let selectedCO;
-const products = ajaxGetRequest("/product/getAllProducts").filter((p) => p.productStatus !== "OutOfStock");
-const customers = ajaxGetRequest("/customer/getAllCustomers").filter((cus) => cus.customerStatus === "Active");
+// =============================
+// Customer Management JS
+// =============================
 
-window.addEventListener('load', () => {
-    reloadOrderDetails()
+// Reset and prepare the customer add form for new entry
+function reloadCustomerForm() {
+    const form = document.getElementById('customerAddForm');
+    if (!form) return;
 
+    // Input fields
+    const companyName = document.getElementById('add-cus-comName');
+    const brn = document.getElementById('add-cus-brn');
+    const contactPerson = document.getElementById('add-cus-contactPerson');
+    const firstName = document.getElementById('add-cus-fName');
+    const secondName = document.getElementById('add-cus-sName');
+    const nic = document.getElementById('add-cus-nic');
+    const mobile = document.getElementById('add-cus-mobNo');
+    const landNo = document.getElementById('add-cus-landNo');
+    const address = document.getElementById('add-cus-address');
+    const creditLimit = document.getElementById('add-cus-creditLimit');
+    const email = document.getElementById('add-cus-email');
+    const status = document.getElementById('add-cus-status');
+    const businessTypeSelect = document.getElementById('add-cus-businessType');
 
-    const customerSelectElement = document.getElementById("add-co-cus");
-    const productSelectElement = document.getElementById("add-co-product");
+    // Reset all input fields
+    if (companyName) companyName.value = '';
+    if (brn) brn.value = '';
+    if (contactPerson) contactPerson.value = '';
+    if (firstName) firstName.value = '';
+    if (secondName) secondName.value = '';
+    if (nic) nic.value = '';
+    if (mobile) mobile.value = '';
+    if (landNo) landNo.value = '';
+    if (address) address.value = '';
+    if (creditLimit) creditLimit.value = '';
+    if (email) email.value = '';
+    if (status) status.selectedIndex = 0;
+    if (businessTypeSelect) businessTypeSelect.selectedIndex = 0;
 
-    customers.forEach(cus => {
-        const option = document.createElement('option');
-        option.value = cus.id;
-        option.textContent = cus.regNo;
-        customerSelectElement.appendChild(option);
+    // Remove validation classes
+    [companyName, brn, contactPerson, firstName, secondName, nic, mobile, landNo, address, creditLimit, email, status].forEach(f => {
+        if (f) f.classList.remove('is-invalid', 'is-valid');
     });
-    products.forEach(product => {
-        const option = document.createElement('option');
-        option.value = product.id;
-        option.textContent = product.productCode;
-        productSelectElement.appendChild(option);
-    });
-    document.getElementById('product-add-btn').addEventListener('click', (event) => {
-        event.preventDefault();
-        const selectedProduct = products.filter((p) => p.id === parseInt(document.getElementById('add-co-product').value))[0]
-        const quantity = parseInt(document.getElementById('add-co-qty').value)
 
-        document.getElementById('add-co-product').value = ''
-        document.getElementById('add-co-qty').value = ''
-
-        if (selectedProduct.quantity < quantity) {
-            swal.fire({
-                title: "Insufficient Quantity ",
-                text: 'Would You like to add more products?',
-                icon: "question",
-                showCancelButton: true,
-                confirmButtonColor: "#cb421a",
-                cancelButtonColor: "#3f3f44",
-                confirmButtonText: "Yes"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location = "/product"
-                }
-            });
+    // Hide/show fields based on business type
+    if (businessTypeSelect) {
+        const companyFields = [companyName, brn, contactPerson];
+        const individualFields = [firstName, secondName, nic];
+        if (businessTypeSelect.value === 'COMPANY') {
+            companyFields.forEach(f => { if (f) f.parentElement.parentElement.style.display = ''; });
+            individualFields.forEach(f => { if (f) f.parentElement.parentElement.style.display = 'none'; });
         } else {
-            let orderProduct = {
-                product: selectedProduct,
-                quantity: quantity,
-                productPrice: selectedProduct.salePrice,
-                productLinePrice: (selectedProduct.salePrice * quantity)
-            }
-
-            let newOrderProducts = [...orderProducts]
-            if (orderProducts.length !== 0) {
-                orderProducts.map((op) => {
-                    if (op.product.id === selectedProduct.id) {
-                        orderProduct.quantity = op.quantity + orderProduct.quantity;
-                        orderProduct.productPrice = op.productPrice + orderProduct.productPrice;
-                        orderProduct.productLinePrice = op.productLinePrice + orderProduct.productLinePrice;
-                        console.log(orderProduct)
-                        newOrderProducts = newOrderProducts.filter((o) => o.product.id !== selectedProduct.id);
-                        console.log(newOrderProducts)
-
-                    }
-                    newOrderProducts.push(orderProduct)
-                })
-            }else {
-                newOrderProducts.push(orderProduct)
-            }
-
-            products.map((prod) => {
-                if (prod.id === selectedProduct.id) {
-                    prod.quantity = prod.quantity - quantity
-                }
-            })
-            displayOrderProducts(newOrderProducts);
-            totalAmount = totalAmount + (selectedProduct.salePrice * quantity)
-            document.getElementById('tot-amount').innerHTML = ''
-            document.getElementById('tot-amount').innerHTML = `<h5>Total Amount : ${(totalAmount).toLocaleString("en-US", {
-                style: "currency",
-                currency: "LKR",
-            })}</h5>`
-
-            orderProducts = newOrderProducts
-        }
-    })
-    document.getElementById('product-edit-btn').addEventListener('click', (event) => {
-        event.preventDefault();
-        const selectedProduct = products.filter((p) => p.id === parseInt(document.getElementById('edit-co-product').value))[0]
-        const quantity = parseInt(document.getElementById('edit-co-qty').value)
-
-        document.getElementById('edit-co-product').value = ''
-        document.getElementById('edit-co-qty').value = ''
-
-        if (selectedProduct.quantity < quantity) {
-            swal.fire({
-                title: "Insufficient Quantity ",
-                text: 'Would You like to add more products?',
-                icon: "question",
-                showCancelButton: true,
-                confirmButtonColor: "#cb421a",
-                cancelButtonColor: "#3f3f44",
-                confirmButtonText: "Yes"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location = "/product"
-                }
-            });
-        } else {
-            let orderProduct = {
-                product: selectedProduct,
-                quantity: quantity,
-                productPrice: selectedProduct.salePrice,
-                productLinePrice: (selectedProduct.salePrice * quantity)
-            }
-
-            let newOrderProducts = [...orderProducts]
-            if (orderProducts.length !== 0) {
-                orderProducts.map((op) => {
-                    if (op.product.id === selectedProduct.id) {
-                        orderProduct.quantity = op.quantity + orderProduct.quantity;
-                        orderProduct.productPrice = op.productPrice + orderProduct.productPrice;
-                        orderProduct.productLinePrice = op.productLinePrice + orderProduct.productLinePrice;
-                        console.log(orderProduct)
-                        newOrderProducts = newOrderProducts.filter((o) => o.product.id !== selectedProduct.id);
-                        console.log(newOrderProducts)
-
-                    }
-                    newOrderProducts.push(orderProduct)
-                })
-            }else {
-                newOrderProducts.push(orderProduct)
-            }
-
-            products.map((prod) => {
-                if (prod.id === selectedProduct.id) {
-                    prod.quantity = prod.quantity - quantity
-                }
-            })
-            displayEditOrderProducts(newOrderProducts);
-            totalAmount = totalAmount + (selectedProduct.salePrice * quantity)
-            document.getElementById('edit-tot-amount').innerHTML = ''
-            document.getElementById('edit-tot-amount').innerHTML = `<h5>Total Amount : ${(totalAmount).toLocaleString("en-US", {
-                style: "currency",
-                currency: "LKR",
-            })}</h5>`
-
-            orderProducts = newOrderProducts
-        }
-    })
-
-    document.getElementById('COAddForm').onsubmit = function (event) {
-        event.preventDefault();
-        const selectedCustomer = customers.filter((cus) => cus.id === parseInt(document.getElementById('add-co-cus').value))[0];
-        const customerOrder = {
-            customer: selectedCustomer,
-            requiredDate: new Date(document.getElementById('add-co-reqDate').value),
-            totalAmount: totalAmount,
-            customerOrderProducts: orderProducts,
-            orderStatus: document.getElementById('add-co-status').value
-        }
-        let response = ajaxRequestBody("/customerOrder/addNewCustomerOrder", "POST", customerOrder);
-        if (response.status === 200) {
-            swal.fire({
-                title: response.responseText,
-                icon: "success",
-            });
-            reloadOrderDetails();
-            $("#modalAddCO").modal("hide");
-
-        } else {
-            swal.fire({
-                title: "Something Went Wrong",
-                text: response.responseText,
-                icon: "error",
-            });
+            companyFields.forEach(f => { if (f) f.parentElement.parentElement.style.display = 'none'; });
+            individualFields.forEach(f => { if (f) f.parentElement.parentElement.style.display = ''; });
         }
     }
-    document.getElementById('COEditForm').onsubmit = function (event) {
-        event.preventDefault();
-        const selectedCustomer = customers.filter((cus) => cus.id === parseInt(document.getElementById('edit-co-cus').value))[0];
-        const customerOrder = {
-            customer: selectedCustomer,
-            requiredDate: new Date(document.getElementById('add-co-reqDate').value),
-            totalAmount: totalAmount,
-            customerOrderProducts: orderProducts,
-            orderStatus: document.getElementById('add-co-status').value
-        }
-        selectedCO.customer = selectedCustomer
-        selectedCO.requiredDate = new Date(document.getElementById('edit-co-reqDate').value)
-        selectedCO.totalAmount = totalAmount
-        selectedCO.customerOrderProducts = orderProducts
-        selectedCO.orderStatus = document.getElementById('edit-co-status').value
 
-        let response = ajaxRequestBody("/customerOrder/", "PUT", customerOrder);
-        if (response.status === 200) {
-            swal.fire({
-                title: response.responseText,
-                icon: "success",
-            });
-            reloadOrderDetails();
-            $("#modalAddCO").modal("hide");
+    // Clear selected customer state
+    selectedCustomer = null;
+}
 
-        } else {
-            swal.fire({
-                title: "Something Went Wrong",
-                text: response.responseText,
-                icon: "error",
-            });
+
+let customerTableInstance;
+let selectedCustomer;
+
+window.addEventListener('load', () => {
+    customerTableRefresh();
+    reloadCustomerForm();
+    customerFormValidation();
+
+    let userCustomerPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/CUSTOMER");
+
+    // --- Dynamic Business Type and Credit Limit Logic ---
+    const form = document.getElementById('customerAddForm');
+    if(form) {
+        const firstRow = form.querySelector('.row.mt-2');
+        // Add business type selector if not present
+        if (!document.getElementById('add-cus-businessType')) {
+            const businessTypeDiv = document.createElement('div');
+            businessTypeDiv.className = 'col-12 mb-3';
+            businessTypeDiv.innerHTML = `
+                <label class="form-label fw-medium" for="add-cus-businessType">Business Type<span class="text-danger"> * </span></label>
+                <select class="form-select" id="add-cus-businessType">
+                    <option value="COMPANY" selected>Company</option>
+                    <option value="INDIVIDUAL">Individual</option>
+                </select>
+            `;
+            firstRow.parentNode.insertBefore(businessTypeDiv, firstRow);
         }
+
+        function setCompanyFieldsVisible(isCompany) {
+            document.getElementById('add-cus-comName').closest('.col').style.display = isCompany ? '' : 'none';
+            document.getElementById('add-cus-contactPerson').closest('.col').style.display = isCompany ? '' : 'none';
+            document.getElementById('add-cus-brn').closest('.col').style.display = isCompany ? '' : 'none';
+            document.getElementById('add-cus-fName').closest('.col').style.display = isCompany ? 'none' : '';
+            document.getElementById('add-cus-sName').closest('.col').style.display = isCompany ? 'none' : '';
+            document.getElementById('add-cus-nic').closest('.col').style.display = isCompany ? 'none' : '';
+        }
+        // Initial state
+        setCompanyFieldsVisible(true);
+        document.getElementById('add-cus-businessType').addEventListener('change', function (e) {
+            setCompanyFieldsVisible(e.target.value === 'COMPANY');
+        });
     }
 })
 
-//const displayOrderProducts = (products) => {
-//    const getProdCode = (ob) => ob.product.productCode
-//    const getProdName = (ob) => ob.product.productName
-//    const displayProperty = [
-//        {dataType: "function", propertyName: getProdCode},
-//        {dataType: "function", propertyName: getProdName},
-//        {dataType: "text", propertyName: "quantity"},
-//        {dataType: "price", propertyName: "productPrice"},
-//        {dataType: "price", propertyName: "productLinePrice"},
-//    ];
-//    if (OrderProductsTableInstance) {
-//        OrderProductsTableInstance.destroy();
-//    }
-//    $('#tableOPs tbody').empty();
-//
-//    tableDataBinder(
-//        tableOPs,
-//        products,
-//        displayProperty,
-//        true,
-//        generateDropDown,
-//        null
-//    );
-//    OrderProductsTableInstance = $('#tableOPs').DataTable({
-//        searching: false,
-//        ordering: false,
-//        paging: false,
-//        info: false,
-//    });
-//}
-const generateDropDown = (element) => {
-    const dropdownMenu = document.createElement("ul");
-    dropdownMenu.className = "dropdown-menu";
-
-    const buttonList = [
-        {name: "Delete", action: deleteOrderItem, icon: "fa-solid fa-trash me-2"},
-    ];
-    buttonList.forEach((button) => {
-        const buttonElement = document.createElement("button");
-        buttonElement.className = "dropdown-item btn";
-        buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
-        buttonElement.onclick = function () {
-            button.action(element);
-        };
-        const liElement = document.createElement("li");
-        liElement.appendChild(buttonElement);
-        dropdownMenu.appendChild(liElement);
-    });
-    return dropdownMenu;
-};
-const deleteOrderItem =(item)=>{
-    let upOIs = orderProducts.filter((i)=> i.product.id !== item.product.id)
-    totalAmount = totalAmount - (item.productLinePrice)
-    document.getElementById('tot-amount').innerHTML = ''
-    document.getElementById('tot-amount').innerHTML = `<h5>Total Amount : ${(totalAmount).toLocaleString("en-US", {
-        style: "currency",
-        currency: "LKR",
-    })}</h5>`
-    products.map((prod) => {
-        if (prod.id === item.product.id) {
-            prod.quantity = prod.quantity + item.quantity
-        }
-    })
-    orderProducts = upOIs
-    displayOrderProducts(upOIs)
-}
-
-
-const reloadOrderDetails = () => {
-    const cusOrders = ajaxGetRequest("/customerOrder/getAllCustomerOrders")
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
-
-    const getCustomer = (ob) => ob.customer.regNo;
-    const getStatus = (ob) => {
-        if (ob.orderStatus === "Pending") {
-            return '<p class="align-middle yellowLabel mx-auto" style="width: 90px">Pending</p>';
-        }
-        if (ob.orderStatus === "Completed") {
-            return '<p class="align-middle greenLabel mx-auto" style="width: 90px">Completed </p>';
-        }
-        if (ob.orderStatus === "Canceled") {
-            return '<p class="align-middle redLabel mx-auto" style="width: 90px">Canceled</p>';
-        }
-    };
-    const displayProperty = [
-        {dataType: "text", propertyName: "orderNo"},
-        {dataType: "function", propertyName: getCustomer},
-        {dataType: "date", propertyName: "requiredDate"},
-        {dataType: "price", propertyName: "totalAmount"},
-        {dataType: "button", propertyName: viewCO, btnName:`<i class="fa-solid fa-eye mx-2"></i> View Order`},
-        {dataType: "function", propertyName: getStatus},
-    ];
-    if (cusOrderTableInstance) {
-        cusOrderTableInstance.destroy();
-    }
-    $("#tableCusOrder tbody").empty();
-    tableDataBinder(
-        tableCusOrder,
-        cusOrders,
-        displayProperty,
-        true,
-        generateCODropDown,
-        getPrivilege
-    );
-    cusOrderTableInstance = $("#tableCusOrder").DataTable({
-        responsive: true,
-        autoWidth: false,
-        searching: true,
-        ordering: true,
-        paging: true,
-        info: true,
-    });
-}
-const generateCODropDown = (element) => {
+const generateCustomerDropDown = (element,index) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
         {
             name: "Edit",
-            action:editCO,
+            action:customerFormRefill,
             icon: "fa-solid fa-edit me-2",
         },
-        {name: "Delete", action: deleteCO, icon: "fa-solid fa-trash me-2"},
+        {   name: "Delete",
+            action: deleteCustomer,
+            icon: "fa-solid fa-trash me-2",
+         },
     ];
-
+    
     buttonList.forEach((button) => {
         const buttonElement = document.createElement("button");
         buttonElement.className = "dropdown-item btn";
         buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
         buttonElement.onclick = function () {
-            button.action(element);
+            button.action(element,index);
         };
         const liElement = document.createElement("li");
         liElement.appendChild(buttonElement);
         dropdownMenu.appendChild(liElement);
     });
     return dropdownMenu;
-};
-
-const viewCO = (co)=>{
-    const getProdCode = (ob) => ob.product.productCode
-    const getProdName = (ob) => ob.product.productName
-    const displayProperty = [
-        {dataType: "function", propertyName: getProdCode},
-        {dataType: "function", propertyName: getProdName},
-        {dataType: "text", propertyName: "quantity"},
-        {dataType: "price", propertyName: "productPrice"},
-        {dataType: "price", propertyName: "productLinePrice"},
-    ];
-    if (OrderProductsViewTableInstance) {
-        OrderProductsViewTableInstance.destroy();
-    }
-    $('#tableViewOPs tbody').empty();
-
-    tableDataBinder(
-        tableViewOPs,
-        co.customerOrderProducts,
-        displayProperty,
-        false,
-        null,
-        null
-    );
-    OrderProductsViewTableInstance = $('#tableViewOPs').DataTable({
-        responsive: true,
-        autoWidth: false,
-        searching: false,
-        ordering: false,
-        paging: false,
-        info: false,
-    });
-
-    document.getElementById('view-tot-amount').innerHTML = ''
-    document.getElementById('view-tot-amount').innerHTML = `<h5>Total Amount : ${(co.totalAmount).toLocaleString("en-US", {
-        style: "currency",
-        currency: "LKR",
-    })}</h5>`
-    $("#modalViewCO").modal("show");
-
 }
-const editCO = (co)=>{
-    selectedCO = co
-    const customerSelectElement = document.getElementById("edit-co-cus");
-    const productSelectElement = document.getElementById("edit-co-product");
 
-    customers.forEach(cus => {
-        const option = document.createElement('option');
-        option.value = cus.id;
-        option.textContent = cus.regNo;
-        if(co.customer.id === cus.id) option.selected=true;
-        customerSelectElement.appendChild(option);
-    });
-    products.forEach(product => {
-        const option = document.createElement('option');
-        option.value = product.id;
-        option.textContent = product.productCode;
-        productSelectElement.appendChild(option);
-    });
-    document.getElementById('edit-co-reqDate').value = convertDateTimeToDate(co.requiredDate)
-    orderProducts = co.customerOrderProducts
-    totalAmount = co.totalAmount
-    displayEditOrderProducts(co.customerOrderProducts)
-    document.getElementById('edit-co-status').value = co.orderStatus
+// Refresh Customer Table
+function customerTableRefresh() {
+    const customerTable = document.getElementById('tableCustomer');
+    const customers = ajaxGetRequest('/customer/getAllCustomers');
+    let userCustomerPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/CUSTOMER");
 
-    document.getElementById('edit-tot-amount').innerHTML = ''
-    document.getElementById('edit-tot-amount').innerHTML = `<h5>Total Amount : ${(totalAmount).toLocaleString("en-US", {
-        style: "currency",
-        currency: "LKR",
-    })}</h5>`
-    $("#modalEditCO").modal("show");
-
-}
-const displayEditOrderProducts = (products) => {
-    const getProdCode = (ob) => ob.product.productCode
-    const getProdName = (ob) => ob.product.productName
-    const displayProperty = [
-        {dataType: "function", propertyName: getProdCode},
-        {dataType: "function", propertyName: getProdName},
-        {dataType: "text", propertyName: "quantity"},
-        {dataType: "price", propertyName: "productPrice"},
-        {dataType: "price", propertyName: "productLinePrice"},
-    ];
-    if (OrderProductsEditTableInstance) {
-        OrderProductsEditTableInstance.destroy();
-    }
-    $('#tableEditOPs tbody').empty();
-
-    tableDataBinder(
-        tableEditOPs,
-        products,
-        displayProperty,
-        true,
-        generateEditDropDown,
-        null
-    );
-    OrderProductsEditTableInstance = $('#tableEditOPs').DataTable({
-        responsive: true,
-        autoWidth: false,
-        searching: false,
-        ordering: false,
-        paging: false,
-        info: false,
-    });
-}
-const generateEditDropDown = (element) => {
-    const dropdownMenu = document.createElement("ul");
-    dropdownMenu.className = "dropdown-menu";
-
-    const buttonList = [
-        {name: "Delete", action: deleteEditOrderItem, icon: "fa-solid fa-trash me-2"},
-    ];
-    buttonList.forEach((button) => {
-        const buttonElement = document.createElement("button");
-        buttonElement.className = "dropdown-item btn";
-        buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
-        buttonElement.onclick = function () {
-            button.action(element);
-        };
-        const liElement = document.createElement("li");
-        liElement.appendChild(buttonElement);
-        dropdownMenu.appendChild(liElement);
-    });
-    return dropdownMenu;
-};
-const deleteEditOrderItem =(item)=>{
-    let upOIs = orderProducts.filter((i)=> i.product.id !== item.product.id)
-    totalAmount = totalAmount - (item.productLinePrice)
-    document.getElementById('edit-tot-amount').innerHTML = ''
-    document.getElementById('edit-tot-amount').innerHTML = `<h5>Total Amount : ${(totalAmount).toLocaleString("en-US", {
-        style: "currency",
-        currency: "LKR",
-    })}</h5>`
-    products.map((prod) => {
-        if (prod.id === item.product.id) {
-            prod.quantity = prod.quantity + item.quantity
+    const getCustomerStatus = (ob) => {
+        if (ob.status === "ACTIVE") {
+            return '<p class="align-middle greenLabel mx-auto" style="width: 100px">Active</p>';
+        } else {
+            return '<p class="align-middle redLabel mx-auto" style="width: 100px">Inactive</p>';
         }
-    })
-    orderProducts = upOIs
-    displayEditOrderProducts(upOIs)
+    };
+    
+    const displayProperty = [
+        { dataType: 'text', propertyName: 'regNo' },
+        { dataType: 'text', propertyName: 'companyName' },
+        { dataType: 'text', propertyName: 'nic' },
+        { dataType: 'text', propertyName: 'mobile' },
+        { dataType: 'text', propertyName: 'address' },
+        { dataType: 'text', propertyName: 'companyName' },
+        { dataType: 'function', propertyName: getCustomerStatus }
+
+
+    ];
+    // const actionButtons = [
+    //     { label: 'Edit', class: 'btn btn-sm btn-primary', onClick: editCustomer },
+    //     { label: 'Delete', class: 'btn btn-sm btn-danger', onClick: deleteCustomer }
+    // ];
+
+    tableDataBinder(customerTable, customers, displayProperty, true, generateCustomerDropDown, userCustomerPrivilege);
+}
+
+// Refill Customer Form
+function customerFormRefill(customer, rowIndex) {
+
+    document.getElementById('customer-modal-title').textContent = 'Update Customer';
+    document.getElementById('customer-submit-btn').disabled = true;
+    document.getElementById('customer-update-btn').disabled = false;
+    // Deep copy for update checks
+    selectedCustomer = JSON.parse(JSON.stringify(customer));
+    const form = document.getElementById('customerAddForm');
+    if (!form) return;
+
+    console.log("udara")
+
+    // Field mapping (add-... IDs)
+    const businessTypeSelect = document.getElementById('add-cus-businessType');
+    const companyName = document.getElementById('add-cus-comName');
+    const brn = document.getElementById('add-cus-brn');
+    const contactPerson = document.getElementById('add-cus-contactPerson');
+    const firstName = document.getElementById('add-cus-fName');
+    const secondName = document.getElementById('add-cus-sName');
+    const nic = document.getElementById('add-cus-nic');
+    const mobile = document.getElementById('add-cus-mobNo');
+    const landNo = document.getElementById('add-cus-landNo');
+    const address = document.getElementById('add-cus-address');
+    const creditLimit = document.getElementById('add-cus-creditLimit');
+    const email = document.getElementById('add-cus-email');
+    const status = document.getElementById('add-cus-status');
+
+    businessTypeSelect.disabled = true;
+    // Set business type and show/hide fields using robust class targeting
+    if (businessTypeSelect && customer.businessType) {
+        businessTypeSelect.value = customer.businessType;
+        // Hide/show by group class for robust logic
+        document.querySelectorAll('.company-fields').forEach(div => {
+            div.style.display = customer.businessType === 'COMPANY' ? '' : 'none';
+        });
+        document.querySelectorAll('.individual-fields').forEach(div => {
+            div.style.display = customer.businessType === 'INDIVIDUAL' ? '' : 'none';
+        });
+    }
+
+    // Fill fields
+    if (companyName) companyName.value = customer.companyName || '';
+    if (brn) brn.value = customer.brn || '';
+    if (contactPerson) contactPerson.value = customer.contactPerson || '';
+    if (firstName) firstName.value = customer.firstName || '';
+    if (secondName) secondName.value = customer.secondName || '';
+    if (nic) nic.value = customer.nic || '';
+    if (mobile) mobile.value = customer.mobile || '';
+    if (landNo) landNo.value = customer.landNo || '';
+    if (address) address.value = customer.address || '';
+    if (creditLimit) {
+        creditLimit.value = customer.creditLimit != null ? customer.creditLimit : '';
+        creditLimit.disabled = true; // Disable for update
+    }
+    if (email) email.value = customer.email || '';
+    if (status) status.value = customer.customerStatus || 'Active';
+
+    // Remove validation classes
+    [companyName, brn, contactPerson, firstName, secondName, nic, mobile, landNo, address, creditLimit, email, status].forEach(f => {
+        if (f) f.classList.remove('is-invalid', 'is-valid');
+    });
+
+    // Switch modal UI for update
+    document.getElementById('customer-modal-title').textContent = 'Update Customer';
+
+    // Show the add/edit modal
+    if (typeof $ !== 'undefined') {
+        $('#modalAddCustomer').modal('show');
+    }
+}
+
+// Prepare modal for Add New Customer
+function prepareCustomerAddModal() {
+    document.getElementById('customer-modal-title').textContent = 'Add New Customer';
+    document.getElementById('customer-submit-btn').disabled = false;
+    document.getElementById('customer-update-btn').disabled = true;
+    // Enable business type select for new
+    const businessTypeSelect = document.getElementById('add-cus-businessType');
+    if (businessTypeSelect) businessTypeSelect.disabled = false;
+    // Clear form fields and validation
+    document.getElementById('customerAddForm').reset();
+    document.querySelectorAll('#customerAddForm .is-invalid, #customerAddForm .is-valid').forEach(el => {
+        el.classList.remove('is-invalid', 'is-valid');
+    });
+}
+
+// Reload Customer Form (clear fields)
+function reloadCustomerForm() {
+    document.getElementById('customerAddForm').reset();
+    selectedCustomer = null;
+}
+
+// Form Validation and object binding
+function customerFormValidation() {
+    // Business Type logic already handled on load
+    // Validation for all relevant fields
+    const businessTypeSelect = document.getElementById('add-cus-businessType');
+    const companyName = document.getElementById('add-cus-comName');
+    const brn = document.getElementById('add-cus-brn');
+    const contactPerson = document.getElementById('add-cus-contactPerson');
+    const firstName = document.getElementById('add-cus-fName');
+    const secondName = document.getElementById('add-cus-sName');
+    const nic = document.getElementById('add-cus-nic');
+    const mobile = document.getElementById('add-cus-mobNo');
+    const landNo = document.getElementById('add-cus-landNo');
+    const address = document.getElementById('add-cus-address');
+    const creditLimit = document.getElementById('add-cus-creditLimit');
+    const email = document.getElementById('add-cus-email');
+    const status = document.getElementById('add-cus-status');
+
+    // Modular event-driven validation (like supplierPayment.js)
+    // Company fields
+    if (companyName) companyName.addEventListener('input', () => validation(companyName, '^.{4,}$', 'customer', 'companyName'));
+    if (brn) brn.addEventListener('input', () => validation(brn, '^[A-Za-z0-9]{5,}$', 'customer', 'brn'));
+    if (contactPerson) contactPerson.addEventListener('input', () => validation(contactPerson, '^.{4,}$', 'customer', 'contactPerson'));
+    // Individual fields
+    if (firstName) firstName.addEventListener('input', () => validation(firstName, '^.{4,}$', 'customer', 'firstName'));
+    if (secondName) secondName.addEventListener('input', () => validation(secondName, '^.{4,}$', 'customer', 'secondName'));
+    if (nic) nic.addEventListener('input', () => validation(nic, '(^[0-9]{9}[VvXx]$)|(^[0-9]{12}$)', 'customer', 'nic'));
+    // Common fields
+    if (mobile) mobile.addEventListener('input', () => validation(mobile, '^[0][7][01245678][0-9]{7}$', 'customer', 'mobile'));
+    if (landNo) landNo.addEventListener('input', () => validation(landNo, '^[0][1][01245678][0-9]{7}$', 'customer', 'landNo'));
+    if (address) address.addEventListener('input', () => validation(address, '^.{5,}$', 'customer', 'address'));
+    if (creditLimit) creditLimit.addEventListener('input', () => validation(creditLimit, '^[0-9]{3,20}$', 'customer', 'creditLimit'));
+    if (email) email.addEventListener('input', () => validation(email, '^[A-Za-z0-9\-_]{6,20}[@][a-z]{3,10}[.][a-z]{2,3}$', 'customer', 'email'));
+    if (status) status.addEventListener('change', () => selectFieldValidator(status, '', 'customer', 'customerStatus'));
+
+    // Business type change: clear errors and update visible fields
+    if (businessTypeSelect) {
+        businessTypeSelect.addEventListener('change', () => {
+            [companyName, brn, contactPerson, firstName, secondName, nic].forEach(f => {
+                if (f) f.classList.remove('is-invalid', 'is-valid');
+            });
+        });
+    }
+
+    // Helper to validate email
+    function isValidEmail(val) {
+        return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val);
+    }
+
+    // Helper to validate mobile number (basic)
+    function isValidMobile(val) {
+        return /^\d{10,15}$/.test(val);
+    }
+
+    // Validate and bind form to customer object
+    // (kept as helper for submit/update, main validation is now event-driven)
+    window.getCustomerFormObject = function() {
+        let errors = '';
+        let customer = {};
+        const businessType = businessTypeSelect.value;
+        customer.businessType = businessType;
+
+        // Company fields
+        if (businessType === 'COMPANY') {
+            if (!companyName.value.trim()) {
+                errors += 'Business Name is required.\n';
+                companyName.classList.add('is-invalid');
+            } else {
+                companyName.classList.remove('is-invalid');
+                customer.companyName = companyName.value.trim();
+            }
+            if (!brn.value.trim()) {
+                errors += 'Business Registration Number is required.\n';
+                brn.classList.add('is-invalid');
+            } else if (!/^[A-Za-z0-9]{5,}$/.test(brn.value.trim())) {
+                errors += 'BRN must be at least 5 letters and numbers.\n';
+                brn.classList.add('is-invalid');
+            } else {
+                brn.classList.remove('is-invalid');
+                customer.brn = brn.value.trim();
+            }
+            if (!contactPerson.value.trim()) {
+                errors += 'Contact Person Name is required.\n';
+                contactPerson.classList.add('is-invalid');
+            } else {
+                contactPerson.classList.remove('is-invalid');
+                customer.contactPerson = contactPerson.value.trim();
+            }
+        } else {
+            // Individual fields
+            if (!firstName.value.trim()) {
+                errors += 'First Name is required.\n';
+                firstName.classList.add('is-invalid');
+            } else {
+                firstName.classList.remove('is-invalid');
+                customer.firstName = firstName.value.trim();
+            }
+            if (!secondName.value.trim()) {
+                errors += 'secondName is required.\n';
+                secondName.classList.add('is-invalid');
+            } else {
+                secondName.classList.remove('is-invalid');
+                customer.secondName = secondName.value.trim();
+            }
+            if (!nic.value.trim()) {
+                errors += 'NIC is required.\n';
+                nic.classList.add('is-invalid');
+            } else if (!/(^[0-9]{9}[VvXx]$)|(^[0-9]{12}$)/.test(nic.value.trim())) {
+                errors += 'NIC must be 9 digits followed by V/v/X/x or 12 digits.\n';
+                nic.classList.add('is-invalid');
+            } else {
+                nic.classList.remove('is-invalid');
+                customer.nic = nic.value.trim();
+            }
+        }
+
+        // Common fields
+        if (!mobile.value.trim() || !/^[0][7][01245678][0-9]{7}$/.test(mobile.value.trim())) {
+            errors += 'Valid Mobile Number is required.\n';
+            mobile.classList.add('is-invalid');
+        } else {
+            mobile.classList.remove('is-invalid');
+            customer.mobile = mobile.value.trim();
+        }
+        if (landNo.value.trim() && !/^[0][1][01245678][0-9]{7}$/.test(landNo.value.trim())) {
+            errors += 'Valid Land Number is required (optional field).\n';
+            landNo.classList.add('is-invalid');
+        } else {
+            landNo.classList.remove('is-invalid');
+            customer.landNo = landNo.value.trim();
+        }
+        if (!address.value.trim()) {
+            errors += 'Address is required.\n';
+            address.classList.add('is-invalid');
+        } else {
+            address.classList.remove('is-invalid');
+            customer.address = address.value.trim();
+        }
+        if (!creditLimit.value || !/^[0-9]{3,20}$/.test(creditLimit.value)) {
+            errors += 'Credit Limit must be at least 3 digits and at most 20 digits.\n';
+            creditLimit.classList.add('is-invalid');
+        } else {
+            creditLimit.classList.remove('is-invalid');
+            customer.creditLimit = Number(creditLimit.value);
+        }
+        if (!email.value.trim() || !/^[A-Za-z0-9\-_]{6,20}[@][a-z]{3,10}[.][a-z]{2,3}$/.test(email.value.trim())) {
+            errors += 'Valid Email is required.\n';
+            email.classList.add('is-invalid');
+        } else {
+            email.classList.remove('is-invalid');
+            customer.email = email.value.trim();
+        }
+        customer.customerStatus = status.value;
+
+        return {customer, errors};
+    }
+
+    // Form submit event
+    const form = document.getElementById('customerAddForm');
+    if(form) {
+        form.onsubmit = function(e) {
+            e.preventDefault();
+            addCustomer();
+        }
+    }
 }
 
 
-const deleteCO = (co)=>{
-    swal.fire({
-        title: "Delete Customer Order",
-        text: "Are you sure, you want to delete this?",
-        icon: "warning",
+// CRUD Skeletons
+function addCustomer() {
+    const {customer, errors} = getCustomerFormObject();
+    if(errors === '') {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to add this customer?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#E11D48',
+            cancelButtonColor: '#3f3f44',
+            confirmButtonText: 'Yes, Add'
+        }).then((result) => {
+            if(result.isConfirmed) {
+                // POST to backend
+                let response = ajaxRequestBody('/customer/addNewCustomer', 'POST', customer);
+                if(response.status === 200 || response.status === 201) {
+                    Swal.fire({
+                        title: 'Customer Added Successfully!',
+                        icon: 'success'
+                    });
+                    reloadCustomerForm();
+                    customerTableRefresh();
+                    $('#customerAddModal').modal('hide');
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.responseText,
+                        icon: 'error'
+                    });
+                }
+            }
+        });
+    } else {
+        Swal.fire({
+            title: 'Form has errors!',
+            text: errors,
+            icon: 'error'
+        });
+    }
+}
+
+
+function editCustomer(customer, rowIndex) {
+    customerFormRefill(customer, rowIndex);
+}
+
+// Check for changes between customer and oldCustomer (for update summary)
+const checkCustomerUpdates = () => {
+    let updates = "";
+    if (!selectedCustomer) return updates;
+    const form = document.getElementById('customerAddForm');
+    const businessTypeSelect = document.getElementById('add-cus-businessType');
+    const companyName = document.getElementById('add-cus-comName');
+    const brn = document.getElementById('add-cus-brn');
+    const contactPerson = document.getElementById('add-cus-contactPerson');
+    const firstName = document.getElementById('add-cus-fName');
+    const secondName = document.getElementById('add-cus-sName');
+    const nic = document.getElementById('add-cus-nic');
+    const mobile = document.getElementById('add-cus-mobNo');
+    const landNo = document.getElementById('add-cus-landNo');
+    const address = document.getElementById('add-cus-address');
+    const email = document.getElementById('add-cus-email');
+    const status = document.getElementById('add-cus-status');
+    // Credit limit is not updatable
+    if (businessTypeSelect.value !== selectedCustomer.businessType) updates += `Business Type changed from <b>${selectedCustomer.businessType}</b> to <b>${businessTypeSelect.value}</b>.<br>`;
+    if (companyName && companyName.value !== (selectedCustomer.companyName || "")) updates += `Business Name changed from <b>${selectedCustomer.companyName || ""}</b> to <b>${companyName.value}</b>.<br>`;
+    if (brn && brn.value !== (selectedCustomer.brn || "")) updates += `BRN changed from <b>${selectedCustomer.brn || ""}</b> to <b>${brn.value}</b>.<br>`;
+    if (contactPerson && contactPerson.value !== (selectedCustomer.contactPerson || "")) updates += `Contact Person changed from <b>${selectedCustomer.contactPerson || ""}</b> to <b>${contactPerson.value}</b>.<br>`;
+    if (firstName && firstName.value !== (selectedCustomer.firstName || "")) updates += `First Name changed from <b>${selectedCustomer.firstName || ""}</b> to <b>${firstName.value}</b>.<br>`;
+    if (secondName && secondName.value !== (selectedCustomer.secondName || "")) updates += `secondName changed from <b>${selectedCustomer.secondName || ""}</b> to <b>${secondName.value}</b>.<br>`;
+    if (nic && nic.value !== (selectedCustomer.nic || "")) updates += `NIC changed from <b>${selectedCustomer.nic || ""}</b> to <b>${nic.value}</b>.<br>`;
+    if (mobile && mobile.value !== (selectedCustomer.mobile || "")) updates += `Mobile changed from <b>${selectedCustomer.mobile || ""}</b> to <b>${mobile.value}</b>.<br>`;
+    if (landNo && landNo.value !== (selectedCustomer.landNo || "")) updates += `Land No changed from <b>${selectedCustomer.landNo || ""}</b> to <b>${landNo.value}</b>.<br>`;
+    if (address && address.value !== (selectedCustomer.address || "")) updates += `Address changed from <b>${selectedCustomer.address || ""}</b> to <b>${address.value}</b>.<br>`;
+    if (email && email.value !== (selectedCustomer.email || "")) updates += `Email changed from <b>${selectedCustomer.email || ""}</b> to <b>${email.value}</b>.<br>`;
+    if (status && status.value !== (selectedCustomer.customerStatus || "")) updates += `Status changed from <b>${selectedCustomer.customerStatus || ""}</b> to <b>${status.value}</b>.<br>`;
+    return updates;
+}
+
+// Check for form errors (reuse getCustomerFormObject for validation)
+function checkCustomerFormErrorForUpdate() {
+    // Temporarily enable creditLimit for validation, but do not update it
+    const creditLimit = document.getElementById('add-cus-creditLimit');
+    if (creditLimit) creditLimit.disabled = false;
+    const { errors } = getCustomerFormObject();
+    if (creditLimit) creditLimit.disabled = true;
+    return errors;
+}
+
+// Main update function for customer
+const customerUpdate = () => {
+    event.preventDefault();
+    const form = document.getElementById('customerAddForm');
+    form.classList.add('needs-validation');
+    // Disable credit limit field for update
+    const creditLimit = document.getElementById('add-cus-creditLimit');
+    if (creditLimit) creditLimit.disabled = true;
+    let errors = checkCustomerFormErrorForUpdate();
+    if (errors === "") {
+        let updates = checkCustomerUpdates();
+        form.classList.remove('was-validated');
+        $('#modalCustomerAdd').modal("hide");
+        if (updates !== "") {
+            swal.fire({
+                title: "Do you want to update this customer?",
+                html: updates,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#E11D48",
+                cancelButtonColor: "#3f3f44",
+                confirmButtonText: "Yes, Update"
+            }).then((result) => {
+                if (result.isConfirmed && selectedCustomer) {
+                    // Prepare customer object for update (exclude creditLimit)
+                    const { customer } = getCustomerFormObject();
+                    customer.id = selectedCustomer.id;
+                    customer.creditLimit = selectedCustomer.creditLimit; // Do not update
+                    let response = ajaxRequestBody("/customer/updateCustomer", "PUT", customer);
+                    if (response.status === 200) {
+                        Swal.fire({
+                            title: "Customer updated successfully!",
+                            icon: "success"
+                        });
+                        reloadCustomerForm();
+                        customerTableRefresh();
+                    } else {
+                        Swal.fire({
+                            title: "Error",
+                            text: response.responseText,
+                            icon: "error"
+                        });
+                    }
+                }
+            });
+        } else {
+            $('#modalCustomerAdd').modal("hide");
+            Swal.fire({
+                title: "No updates found!",
+                text: '',
+                icon: "question"
+            });
+        }
+    } else {
+        $('#modalCustomerAdd').modal("hide");
+        Swal.fire({
+            title: "Form has following errors!",
+            text: errors,
+            icon: "error"
+        });
+    }
+}
+
+function deleteCustomer(customer, rowIndex) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to delete this customer?',
+        icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: "#cb421a",
-        cancelButtonColor: "#3f3f44",
-        confirmButtonText: "Yes, Delete"
+        confirmButtonColor: '#E11D48',
+        cancelButtonColor: '#3f3f44',
+        confirmButtonText: 'Yes, Delete'
     }).then((result) => {
-        if (result.isConfirmed) {
-            let response = ajaxDeleteRequest(`/recipe/deleteRecipe/${recipe.recipeCode}`);
-            if (response.status === 200) {
-                swal.fire({
-                    title: response.responseText,
-                    icon: "success"
+        if(result.isConfirmed) {
+            let response = ajaxDeleteRequest(`/customer/${customer.id}`);
+            if(response.status === 200) {
+                Swal.fire({
+                    title: 'Deleted!',
+                    text: 'Customer has been deleted.',
+                    icon: 'success'
                 });
-                reloadRecipes();
+                reloadCustomerForm();
+                customerTableRefresh();
             } else {
-                swal.fire({
-                    title: "Something Went Wrong",
+                Swal.fire({
+                    title: 'Delete Not Successful',
                     text: response.responseText,
-                    icon: "error"
+                    icon: 'error'
                 });
             }
         }
     });
 }
+
+
+function viewCustomerDetails(customer, rowIndex) {
+    // Show customer details in a modal or side panel
+    // Example:
+    document.getElementById('detailCustomerName').innerText = customer.name;
+    document.getElementById('detailCustomerEmail').innerText = customer.email;
+    document.getElementById('detailCustomerPhone').innerText = customer.phone;
+    document.getElementById('detailCustomerAddress').innerText = customer.address;
+    $('#modalViewCustomer').modal('show');
+}
+
+

@@ -1,6 +1,7 @@
 let quotationTableInstance;
 let selectedQuotation;
 
+
 window.addEventListener("load", function () {
 
     //Call function to reload the quotation table
@@ -68,6 +69,13 @@ const refreshQuotationForm = () =>{
     const qrnSelectElement = document.getElementById("qRequest_no");
     const supIdSelectElement = document.getElementById("quo-supId");
 
+    const todayStr = new Date().toISOString().split('T')[0];
+    document.getElementById('add-receivedDate').setAttribute('max', todayStr);
+    document.getElementById('add-proposedDeliveryDate').setAttribute('min', todayStr);
+
+    document.getElementById('btnQuotationUpdate').disabled = true;
+    document.getElementById('btnQuotationSubmit').disabled = false;
+
     // Function to fill data into a quotation request select element
     fillDataIntoSelect(
            qrnSelectElement,
@@ -81,25 +89,25 @@ const refreshQuotationForm = () =>{
      qrnSelectElement.addEventListener('change', (event) => {
          const selectedValue = JSON.parse(event.target.value);
 
-         const request = qRequests.filter((r) => r.requestNo === selectedValue.requestNo);
+    const request = qRequests.filter((r) => r.requestNo === selectedValue.requestNo);
 
-         //fill data to Ingredient ID field
-         document.getElementById("quo-ingId").value = request[0].ingCode;
+    //fill data to Ingredient ID field
+    document.getElementById("quo-ingId").value = request[0].ingCode;
 
-         //Bind values into quotation object and validate
-         quotation.ingredientCode = request[0].ingCode;
-         document.getElementById("quo-ingId").classList.add('is-valid');
+    //Bind values into quotation object and validate
+    quotation.ingredientCode = request[0].ingCode;
+    document.getElementById("quo-ingId").classList.add('is-valid');
 
 
-         //fill data to supplier id select element
-         supIdSelectElement.innerHTML = '';
-         supIdSelectElement.innerHTML = '<option value="" selected>Select Supplier ID</option>';
-         request[0].suppliers.forEach((sup) => {
-             const option = document.createElement('option');
-             option.value = sup;
-             option.textContent = sup;
-             supIdSelectElement.appendChild(option);
-         });
+    //fill data to supplier id select element
+    supIdSelectElement.innerHTML = '';
+    supIdSelectElement.innerHTML = '<option value="" selected>Select Supplier ID</option>';
+    request[0].suppliers.forEach((sup) => {
+        const option = document.createElement('option');
+        option.value = sup;
+        option.textContent = sup;
+        supIdSelectElement.appendChild(option);
+    });
      });
 
 }
@@ -123,13 +131,23 @@ const quotationValidation = () =>{
     addReceivedDate.addEventListener('change', () =>{
         dateFeildValidator(addReceivedDate,'','quotation','receivedDate')
     })
-    const addDeadline = document.getElementById('add-deadline');
-    addDeadline.addEventListener('change', () =>{
-        dateFeildValidator(addDeadline,'','quotation','deadline')
-    })
+    const addAdvancePercentage = document.getElementById('add-advancePercentage');
+    addAdvancePercentage.addEventListener('input', () => {
+        validation(addAdvancePercentage, '^(100|[1-9][0-9]?)$', 'quotation', 'advancePercentage');
+    });
+
+    const addCreditDays = document.getElementById('add-creditDays');
+    addCreditDays.addEventListener('input', () => {
+        validation(addCreditDays, '^[1-9][0-9]{0,3}$', 'quotation', 'creditDays');
+    });
+
+    const addProposedDeliveryDate = document.getElementById('add-proposedDeliveryDate');
+    addProposedDeliveryDate.addEventListener('change', () => {
+        dateFeildValidator(addProposedDeliveryDate, '', 'quotation', 'proposedDeliveryDate');
+    });
 
     const addPriceUnit = document.getElementById('add-pricePerUnit');
-    addPriceUnit.addEventListener('keyup', () =>{
+    addPriceUnit.addEventListener('input', () =>{
             validation(addPriceUnit,'^(?:[1-9]|[1-9][0-9]|[1-9][0-9]{3}|[1-9][0-9]{2})$','quotation','pricePerUnit')
     })
 
@@ -143,39 +161,65 @@ const quotationValidation = () =>{
 //Check Quotation form errors
 const checkQuotationFormError = () => {
     let errors = '';
+    const qRequestNo = document.getElementById('qRequest_no');
+    const qSupId = document.getElementById('quo-supId');
+    const addReceivedDate = document.getElementById('add-receivedDate');
+    const addAdvancePercentage = document.getElementById('add-advancePercentage');
+    const addCreditDays = document.getElementById('add-creditDays');
+    const addProposedDeliveryDate = document.getElementById('add-proposedDeliveryDate');
+    const addPriceUnit = document.getElementById('add-pricePerUnit');
+    const addQuotationStatus = document.getElementById('add-quotationStatus');
 
     if (quotation.quotationRequestNo == null) {
-        errors = errors + "QReQ No can't be null \n";
-        qRequestNo.classList.add('is-invalid')
+        errors += "QReQ No can't be null \n";
+        qRequestNo.classList.add('is-invalid');
     }
 
     if (quotation.ingredientCode == null) {
-        errors = errors + "Ingredient Code can't be null \n";
-        document.getElementById("quo-ingId").classList.add('is-invalid')
+        errors += "Ingredient Code can't be null \n";
+        document.getElementById("quo-ingId").classList.add('is-invalid');
     }
-
 
     if (quotation.supplierRegNo == null) {
-        errors = errors + "Please Select Supplier \n";
-        qSupId.classList.add('is-invalid')
+        errors += "Please Select Supplier \n";
+        qSupId.classList.add('is-invalid');
     }
-
 
     if (quotation.receivedDate == null) {
-        errors = errors + "Received Date can't be null\n";
-        addReceivedDate.classList.add('is-invalid')
+        errors += "Received Date can't be null\n";
+        addReceivedDate.classList.add('is-invalid');
     }
 
+    if (quotation.advancePercentage == null || quotation.advancePercentage === "") {
+        errors += "Advance Percentage can't be null\n";
+        addAdvancePercentage.classList.add('is-invalid');
+    } else if (isNaN(quotation.advancePercentage) || quotation.advancePercentage < 0 || quotation.advancePercentage > 100) {
+        errors += "Advance Percentage must be between 0 and 100\n";
+        addAdvancePercentage.classList.add('is-invalid');
+    }
 
-    if (quotation.deadline == null) {
-        errors = errors + "Please Select the deadline \n";
-        addDeadline.classList.add('is-invalid');
+    if (quotation.creditDays == null || quotation.creditDays === "") {
+        errors += "Credit Days can't be null\n";
+        addCreditDays.classList.add('is-invalid');
+    } else if (isNaN(quotation.creditDays) || quotation.creditDays < 0) {
+        errors += "Credit Days must be a positive number\n";
+        addCreditDays.classList.add('is-invalid');
+    }
+
+    if (quotation.proposedDeliveryDate == null || quotation.proposedDeliveryDate === "") {
+        errors += "Proposed Delivery Date can't be null\n";
+        addProposedDeliveryDate.classList.add('is-invalid');
+    }
+
+    if (quotation.pricePerUnit == null || quotation.pricePerUnit === "") {
+        errors += "Price Per Unit can't be null\n";
+        addPriceUnit.classList.add('is-invalid');
     }
 
     if (quotation.quotationStatus == null) {
-            errors = errors + "Please Select the status \n";
-            addQuotationStatus.classList.add('is-invalid');
-        }
+        errors += "Please Select the status \n";
+        addQuotationStatus.classList.add('is-invalid');
+    }
 
     return errors;
 }
@@ -272,16 +316,25 @@ const checkQuotationFormError = () => {
 const quotationFormRefill = (ob, rowIndex) => {
 
 
-  $("#modalQuotationAdd").modal('show');
   quotation = JSON.parse(JSON.stringify(ob));
   oldQuotation = JSON.parse(JSON.stringify(ob));
+
+  const modalTitle = document.getElementById('quotationModalTitle');
+    if (modalTitle) {
+        modalTitle.textContent = 'Edit Quotation';
+    }
+
+    document.getElementById('btnQuotationUpdate').disabled = false;
+    document.getElementById('btnQuotationSubmit').disabled = true;
 
 
   document.getElementById("quo-ingId").value = quotation.ingredientCode ;
   document.getElementById("add-receivedDate").value = convertDateTimeToDate(quotation.receivedDate);
-  document.getElementById("add-deadline").value= convertDateTimeToDate(quotation.deadline);
   document.getElementById("add-pricePerUnit").value = quotation.pricePerUnit;
   document.getElementById("add-quotationStatus").value = quotation.quotationStatus;
+  document.getElementById("add-advancePercentage").value = quotation.advancePercentage;
+  document.getElementById("add-creditDays").value = quotation.creditDays;
+  document.getElementById("add-proposedDeliveryDate").value = convertDateTimeToDate(quotation.proposedDeliveryDate);
 
   // Get the select element by its ID
   const qReqNo = document.getElementById("qRequest_no");
@@ -322,7 +375,7 @@ const quotationFormRefill = (ob, rowIndex) => {
   // Disable the select element
 
     //refill Quotation No
-    //  const qRequests = ajaxGetRequest("/quotation-request/getAllRequests");
+     const qRequests = ajaxGetRequest("/quotation-request/getAllRequests");
     //
     //    const quoSupID = document.getElementById("quo-supId");
 
@@ -335,7 +388,7 @@ const quotationFormRefill = (ob, rowIndex) => {
          quotation.supplierRegNo
     );
 
-
+    $("#modalQuotationAdd").modal('show');
 
 };
 
@@ -424,19 +477,27 @@ const checkQuotationUpdates = () =>{
   let updates = "";
 
   if(quotation.receivedDate !== oldQuotation.receivedDate){
-    updates = updates + "Received Date is changed " + oldQuotation.receivedDate + " into " + quotation.receivedDate +"<br>";
+    updates += `Received Date is changed ${oldQuotation.receivedDate} into ${quotation.receivedDate}<br>`;
   }
 
-  if(quotation.deadline !== oldQuotation.deadline){
-    updates = updates + "Deadline is changed " + oldIngredient.deadline + " into " + quotation.deadline + "<br>";
+  if(quotation.advancePercentage !== oldQuotation.advancePercentage){
+    updates += `Advance Percentage is changed ${oldQuotation.advancePercentage} into ${quotation.advancePercentage}<br>`;
+  }
+
+  if(quotation.creditDays !== oldQuotation.creditDays){
+    updates += `Credit Days is changed ${oldQuotation.creditDays} into ${quotation.creditDays}<br>`;
+  }
+
+  if(quotation.proposedDeliveryDate !== oldQuotation.proposedDeliveryDate){
+    updates += `Proposed Delivery Date is changed ${oldQuotation.proposedDeliveryDate} into ${quotation.proposedDeliveryDate}<br>`;
   }
 
   if(quotation.pricePerUnit !== oldQuotation.pricePerUnit){
-    updates = updates + "Price Per Unit is changed " + oldQuotation.pricePerUnit + " into " + quotation.pricePerUnit + "<br>";
+    updates += `Price Per Unit is changed ${oldQuotation.pricePerUnit} into ${quotation.pricePerUnit}<br>`;
   }
 
   if(quotation.quotationStatus !== oldQuotation.quotationStatus){
-    updates = updates + "Quotation Status is changed " + oldQuotation.quotationStatus + " into " + quotation.quotationStatus  + "<br>";
+    updates += `Quotation Status is changed ${oldQuotation.quotationStatus} into ${quotation.quotationStatus}<br>`;
   }
 
   return updates;
@@ -475,33 +536,58 @@ document.getElementById("purchaseOrderAddForm").onsubmit = function (event) {
         })
     }
 }
+
+// Helper function to display quantity with unit
+function getQuantityWithUnit(ob) {
+    return `${ob.quantity} ${ob.unitType || ''}`.trim();
+}
+
+function getAdvancePercentage(ob) {
+    return ob.advancePercentage != null ? ob.advancePercentage + '%' : '-';
+}
+
+function getCreditDays(ob) {
+    return ob.creditDays != null ? ob.creditDays : '-';
+}
+
+function getProposedDeliveryDate(ob) {
+    return ob.proposedDeliveryDate != null ? ob.proposedDeliveryDate : '-';
+}
+
+function getStatus(ob) {
+    if (ob.quotationStatus === "Accepted") {
+        return '<p class="align-middle greenLabel mx-auto" style="width: 100px">Accepted</p>';
+    }
+    if (ob.quotationStatus === "Pending") {
+        return '<p class="align-middle yellowLabel mx-auto" style="width: 100px">Pending</p>';
+    }
+    if (ob.quotationStatus === "Rejected") {
+        return '<p class="align-middle redLabel mx-auto" style="width: 100px">Rejected</p>';
+    }
+    if (ob.quotationStatus === "Closed") {
+        return '<p class="align-middle GrayLabel mx-auto" style="width: 100px">Closed</p>';
+    }
+    return '-';
+}
+
 const reloadQuotationTable = function () {
     const quotations = ajaxGetRequest("/quotation/getAllQuotations");
     let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
 
-    const getStatus = (ob) => {
-        if (ob.quotationStatus === "Accepted") {
-            return '<p class="align-middle greenLabel mx-auto" style="width: 100px">Accepted</p>';
-        }
-        if (ob.quotationStatus === "Pending") {
-            return '<p class="align-middle yellowLabel mx-auto" style="width: 100px">Pending</p>';
-        }
-        if (ob.quotationStatus === "Rejected") {
-            return '<p class="align-middle redLabel mx-auto" style="width: 100px">Rejected</p>';
-        }
-        if (ob.quotationStatus === "Closed") {
-            return '<p class="align-middle GrayLabel mx-auto" style="width: 100px">Closed</p>';
-        }
-    };
+        
 
     const displayProperty = [
         {dataType: "text", propertyName: "quotationNo"},
         {dataType: "text", propertyName: "quotationRequestNo"},
         {dataType: "text", propertyName: "ingredientCode"},
+        // {dataType: "function", propertyName: getQuantityWithUnit},
         {dataType: "text", propertyName: "supplierRegNo"},
+        // {dataType: "price", propertyName: "totalPrice"},
+        {dataType: "function", propertyName: getAdvancePercentage},
+        {dataType: "function", propertyName: getCreditDays},
+        {dataType: "function", propertyName: getProposedDeliveryDate},
         {dataType: "price", propertyName: "pricePerUnit"},
-        {dataType: "date", propertyName: "receivedDate"},
-        {dataType: "date", propertyName: "deadline"},
+        // {dataType: "date", propertyName: "receivedDate"},
         {dataType: "function", propertyName: getStatus},
     ];
 
@@ -520,11 +606,12 @@ const reloadQuotationTable = function () {
     quotationTableInstance = $("#tableQuotations").DataTable();
 };
 
-const generateQuotationDropDown = (element,index) => {
+const generateQuotationDropDown = (element, index) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
+        {name: "Details", action: showQuotationDetails, icon: "fa-solid fa-circle-info me-2"},
         {name: "Delete", action: deleteQuotation, icon: "fa-solid fa-trash me-2"},
     ];
     if (element.quotationStatus !== "Closed") {
@@ -548,7 +635,7 @@ const generateQuotationDropDown = (element,index) => {
         buttonElement.className = "dropdown-item btn";
         buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
         buttonElement.onclick = function () {
-            button.action(element,index);
+            button.action(element, index);
         };
         const liElement = document.createElement("li");
         liElement.appendChild(buttonElement);
@@ -556,6 +643,24 @@ const generateQuotationDropDown = (element,index) => {
     });
     return dropdownMenu;
 };
+
+// Show Quotation Details in Modal
+function showQuotationDetails(quotation) {
+    document.getElementById("detailQuotationNo").textContent = quotation.quotationNo || '-';
+    document.getElementById("detailQuotationRequestNo").textContent = quotation.quotationRequestNo || '-';
+    document.getElementById("detailIngredientCode").textContent = quotation.ingredientCode || '-';
+    document.getElementById("detailQuantityWithUnit").textContent = getQuantityWithUnit(quotation);
+    document.getElementById("detailSupplierRegNo").textContent = quotation.supplierRegNo || '-';
+    document.getElementById("detailAdvancePercentage").textContent = quotation.advancePercentage != null ? quotation.advancePercentage + '%' : '-';
+    document.getElementById("detailCreditDays").textContent = quotation.creditDays != null ? quotation.creditDays : '-';
+    document.getElementById("detailProposedDeliveryDate").textContent = quotation.proposedDeliveryDate || '-';
+    document.getElementById("detailPricePerUnit").textContent = quotation.pricePerUnit != null ? quotation.pricePerUnit : '-';
+    document.getElementById("detailTotalPrice").textContent = quotation.totalPrice != null ? quotation.totalPrice : '-';
+    document.getElementById("detailStatus").textContent = quotation.quotationStatus || '-';
+    document.getElementById("detailReceivedDate").textContent = quotation.receivedDate || '-';
+    $("#modalViewQuotation").modal("show");
+}
+
 
 //const editQuotation = (quotation) => {
 //    selectedQuotation = quotation;
@@ -599,19 +704,56 @@ const deleteQuotation = (quotation) => {
         }
     });
 }
+
 const sendPerchesOrder = (quotation) => {
-    selectedQuotation = quotation;
-    $("#modalSendPurchaseOrder").modal("show");
-    document.getElementById("add-po-qno").value = quotation.quotationNo;
-    document.getElementById("add-po-ingId").value = quotation.ingredientCode;
-    document.getElementById("add-po-supId").value = quotation.supplierRegNo;
-    document.getElementById("add-po-pricePerUnit").value = quotation.pricePerUnit.toLocaleString("en-US", {
-        style: "currency",
-        currency: "LKR",
+    Swal.fire({
+        title: 'Send Purchase Order',
+        text: `Are you sure you want to send a purchase order for Quotation No: ${quotation.quotationNo}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Send',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Construct purchase order object from quotation
+            const purchaseOrder = {
+                quotationNo: quotation.quotationNo,
+                ingredientCode: quotation.ingredientCode,
+                supplierRegNo: quotation.supplierRegNo,
+                pricePerUnit: quotation.pricePerUnit,
+                qty: quotation.quantity,
+                totalPrice: quotation.totalPrice,
+                proposedDeliveryDate: quotation.proposedDeliveryDate,
+                notes: quotation.quotationNo,
+                purchaseOrderStatus: 'Pending',
+            };
+            console.log(purchaseOrder);
+            console.log(quotation);
+            // Send AJAX POST request
+            const response = ajaxRequestBody('/purchaseOrder/addNewPurchaseOrder', 'POST', purchaseOrder);
+            if (response.status === 200) {
+                Swal.fire({
+                    title: 'Purchase Order Sent!',
+                    text: response.responseText,
+                    icon: 'success'
+                });
+                // Try to reload purchase order table if function exists
+                if (typeof reloadPOTable === 'function') {
+                    reloadPOTable();
+                }
+            } else {
+                Swal.fire({
+                    title: 'Something Went Wrong',
+                    text: response.responseText,
+                    icon: 'error'
+                });
+            }
+        }
     });
-
-
 }
+
 document.getElementById("add-po-qty").addEventListener('change', (event) => {
     const total = selectedQuotation.pricePerUnit * parseInt(event.target.value);
     document.getElementById("add-po-total").value = total.toLocaleString("en-US", {
@@ -619,3 +761,20 @@ document.getElementById("add-po-qty").addEventListener('change', (event) => {
         currency: "LKR",
     })
 })
+
+const openAddQuotationForm = () => {
+    
+    document.getElementById('quotationAddForm').reset();
+    Array.from(document.getElementById('quotationAddForm').elements).forEach((field) => {
+        field.classList.remove('is-valid', 'is-invalid');
+    });
+    const modalTitle = document.getElementById('quotationModalTitle');
+    if (modalTitle) {
+        modalTitle.textContent = 'Add New Quotation';
+    }
+    document.getElementById('btnQuotationUpdate').disabled = true;
+    document.getElementById('btnQuotationSubmit').disabled = false;
+    quotation = {};
+    oldQuotation = null;
+    $('#modelQuotationAdd').modal('show');
+}

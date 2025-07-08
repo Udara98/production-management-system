@@ -23,10 +23,12 @@
                     <div class="col">
                         <label class="form-label fw-medium" for="add-co-status">Order Status<span class="text-danger"> * </span></label>
                         <select id="add-co-status" class="form-select" required>
-                            <option selected value="Pending">Pending</option>
+                            <option disabled selected value>Select Status</option>
+                            <option value="Pending">Pending</option>
                             <option value="Completed">Completed</option>
                             <option value="Canceled">Canceled</option>
                         </select>
+                        <div class="invalid-feedback">Please select a Status.</div>
                     </div>
                 </div>
                 <div class="row mt-4 d-flex align-items-center">
@@ -68,7 +70,7 @@
                             <button  class="btn btn-secondary mx-2"
                                      data-bs-dismiss="modal"
                                      type="button">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Place Order</button>
+                            <button type="button" id="place-order-btn" class="btn btn-primary">Place Order</button>
                         </div>
                     </div>
                 </div>

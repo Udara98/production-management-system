@@ -35,6 +35,21 @@ public class ProductHasBatch {
 
     @Column(name = "expire_date")
     private LocalDateTime expireDate;
+
+    @Column(name = "added_user")
+    private Integer addedUser;
+
+    @Column(name = "added_date")
+    private LocalDateTime addedDate;
+
+    @Column(name = "updated_user")
+    private Integer updatedUser;
+
+    @Column(name = "updated_date")
+    private LocalDateTime updatedDate;
+
+    @Column(name = "manufacturing_date")
+    private LocalDateTime manufacturingDate;
 }
 
 

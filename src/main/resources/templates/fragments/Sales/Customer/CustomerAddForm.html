@@ -1,49 +1,77 @@
  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title">Add New Customer</h5>
+            <h5 class="modal-title" id="customer-modal-title">Add New Customer</h5>
             <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
         </div>
         <div class="modal-body">
             <form id="customerAddForm" class="needs-validation">
                 <div class="row mt-2">
+                    <div class="col-12 mb-3">
+                        <label class="form-label fw-medium" for="add-cus-businessType">Business Type<span class="text-danger"> * </span></label>
+                        <select class="form-select" id="add-cus-businessType">
+                            <option value="COMPANY" selected>Company</option>
+                            <option value="INDIVIDUAL">Individual</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-2 company-fields">
                     <div class="col">
-                        <label class="form-label fw-medium" for="add-cus-fName">First Name<span
+                        <label class="form-label fw-medium" for="add-cus-comName">Business Name<span class="text-danger"> * </span></label>
+                        <input class="form-control" id="add-cus-comName" type="text" placeholder="Enter Business Name"/>
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">Please Enter Business Name</div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label fw-medium" for="add-cus-brn">Business Registration Number<span class="text-danger"> * </span></label>
+                        <input class="form-control" id="add-cus-brn" type="text" placeholder="Enter Business Registration Number"/>
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">Please Enter Business Registration Number</div>
+                    </div>
+                </div>
+                <div class="row mt-2 ">
+                    <div class="col individual-fields">
+                        <label class="form-label fw-medium individual-fields" for="add-cus-fName">First Name<span
                                 class="text-danger"> * </span></label>
                         <input class="form-control" id="add-cus-fName" type="text" placeholder="Enter First Name"/>
                         <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        <div class="invalid-feedback">Please Enter Full name ex:Udara</div>
                     </div>
-                    <div class="col">
-                        <label class="form-label fw-medium" for="add-cus-sName">Surname<span
+                    <div class="col individual-fields">
+                        <label class="form-label fw-medium " for="add-cus-sName">Second Name<span
                                 class="text-danger"> * </span></label>
-                        <input class="form-control" id="add-cus-sName" type="text" placeholder="Enter Surname"/>
+                        <input class="form-control" id="add-cus-sName" type="text" placeholder="Enter Second Name"/>
                         <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        <div class="invalid-feedback">Please Enter Second name ex:Deshan</div>
                     </div>
 
                 </div>
                 <div class="row mt-4">
-                    <div class="col">
+                    <div class="col individual-fields">
                         <label class="form-label fw-medium" for="add-cus-nic">NIC<span
                                 class="text-danger"> * </span></label>
                         <input class="form-control" id="add-cus-nic" type="text" placeholder="Enter NIC"/>
                         <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        <div class="invalid-feedback">Please enter a valid NIC.</div>
+                    </div>
+                    <div class="col company-fields">
+                        <label class="form-label fw-medium" for="add-cus-contactPerson">Contact Person Name<span class="text-danger"> * </span></label>
+                        <input class="form-control" id="add-cus-contactPerson" type="text" placeholder="Enter Contact Person Name"/>
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">Please enter a valid contact person name.</div>
                     </div>
                     <div class="col">
                         <label class="form-label fw-medium" for="add-cus-mobNo">Mobile No<span
                                 class="text-danger"> * </span></label>
                         <input class="form-control" id="add-cus-mobNo" type="text" placeholder="Enter Mobile No"/>
                         <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        <div class="invalid-feedback">Please enter a valid mobile number.</div>
                     </div>
                     <div class="col">
                         <label class="form-label fw-medium" for="add-cus-landNo">Land No<span
                                 class="text-danger"> * </span></label>
                         <input class="form-control" id="add-cus-landNo" type="text" placeholder="Enter Land No"/>
                         <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
                     </div>
 
                 </div>
@@ -51,23 +79,17 @@
                     <div class="col">
                         <label class="form-label fw-medium" for="add-cus-address">Address<span
                                 class="text-danger"> * </span></label>
-                        <input class="form-control" id="add-cus-address" type="text" placeholder="Enter Address"/>
+                        <input class="form-control" id="add-cus-address" type="text" placeholder="Enter Business Address"/>
                         <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        <div class="invalid-feedback">Please Enter Business Address</div>
                     </div>
-                    <div class="col">
-                        <label class="form-label fw-medium" for="add-cus-comName">Company Name<span class="text-danger"> * </span></label>
-                        <input class="form-control" id="add-cus-comName" type="text" placeholder="Enter Mobile No"/>
+                </div>
+                <div class="row mt-4" id="creditLimitRow">
+                    <div class="col-6">
+                        <label class="form-label fw-medium" for="add-cus-creditLimit">Credit Limit (Rs.)</label>
+                        <input class="form-control" id="add-cus-creditLimit" type="number" min="0" step="0.01" placeholder="Enter Credit Limit" />
                         <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
-                    </div>
-                    <div class="col">
-                        <label class="form-label fw-medium" for="add-cus-brn">BRN<span
-                                class="text-danger"> * </span></label>
-                        <input class="form-control" id="add-cus-brn" type="text"
-                               placeholder="Enter Business Registration No"/>
-                        <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
+                        <div class="invalid-feedback">Please enter a valid credit limit.</div>
                     </div>
                 </div>
                 <div class="row mt-4">
@@ -82,24 +104,22 @@
                         <label class="form-label fw-medium" for="add-cus-status">Customer Status<span
                                 class="text-danger"> * </span></label>
                         <select id="add-cus-status" class="form-select">
-                            <option selected value="Active">Active</option>
+                            <option selected disabled>Select Status</option>
+                            <option value="Active">Active</option>
                             <option value="InActive">InActive</option>
                         </select>
                     </div>
-                    <div class="col">
-                        <label class="form-label fw-medium" for="add-cus-point">Customer Point<span class="text-danger"> * </span></label>
-                        <input class="form-control" id="add-cus-point" type="text" placeholder="Enter Customer Point"/>
-                        <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>
-                    </div>
+
                 </div>
                 <div class="d-flex justify-content-end mt-5">
                     <div>
-                        <button class="btn btn-secondary mx-2 "
-                                data-bs-dismiss="modal"
-                                type="button">Cancel
+                       
+                        <button id="customer-update-btn" type="button" class="btn cusbutton ms-4 btn-update" onclick="customerUpdate()">
+                            <i class="fa-solid fa-edit me-2"></i>Update
                         </button>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button id="customer-submit-btn" type="button" class="btn cusbutton ms-4 btn-submit" onclick="customerSubmit()">
+                            <i class="fa-solid fa-plus me-2"></i>Add
+                        </button>
                     </div>
                 </div>
             </form>

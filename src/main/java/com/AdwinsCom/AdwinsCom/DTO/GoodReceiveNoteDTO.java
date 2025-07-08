@@ -20,5 +20,7 @@ public class GoodReceiveNoteDTO {
     private LocalDate receivedDate;
     private Integer supplierId;
     private GoodReceiveNote.PaymentStatus paymentStatus;
-
+    private Integer acceptedQuantity;
+    private Integer rejectedQuantity;
+    private String rejectReason;
 }

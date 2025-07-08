@@ -2,6 +2,8 @@ package com.AdwinsCom.AdwinsCom.controller;
 
 import com.AdwinsCom.AdwinsCom.DTO.CustomerOrderDTO;
 import com.AdwinsCom.AdwinsCom.Service.ICustomerOrderService;
+import com.AdwinsCom.AdwinsCom.entity.CustomerOrder;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,6 +46,15 @@ public class CustomerOrderController {
         }
     }
 
+    @GetMapping("/unpaid")
+    public ResponseEntity<?> getUnpaidOrdersByCustomer(@RequestParam("customerId") Integer customerId) {
+        try {
+            return customerOrderService.getUnpaidOrdersByCustomer(customerId);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
     @GetMapping("/unpaidCustomerOrders")
     public ResponseEntity<?> unpaidCustomerOrders() {
         try {
@@ -52,6 +63,19 @@ public class CustomerOrderController {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
-
+    @GetMapping("/invoice/{orderId}")
+    public ModelAndView printInvoice(@PathVariable Integer orderId) {
+        // Fetch order by ID (using repository directly for now)
+        // You can move this logic to the service layer if preferred
+        CustomerOrder order = null;
+        try {
+            order = customerOrderService.getOrderEntityById(orderId);
+        } catch (Exception e) {
+            return new ModelAndView("error").addObject("message", "Order not found");
+        }
+        ModelAndView mv = new ModelAndView("fragments/Sales/CustomerOrder/CustomerOrderInvoice");
+        mv.addObject("order", order);
+        return mv;
+    }
 
 }

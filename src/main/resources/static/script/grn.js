@@ -1,15 +1,16 @@
 let grnTableInstance;
 let selectedGRN;
+let purchaseOrders;
 
 window.addEventListener('load', () => {
+
+    purchaseOrders = ajaxGetRequest("/purchaseOrder/getAllPurchaseOrders").filter((po) => po.purchaseOrderStatus === 'Pending');
 
     //Call function to reload the GRN table
     reloadGRN()
 
     //Call function to refresh the Add Grn form
     reloadGRNForm();
-
-    let selectedPO;
 
     //Call function to validate
     grnFormValidation();
@@ -85,20 +86,95 @@ window.addEventListener('load', () => {
 })
 
 //Call function for validation and object binding
-const grnFormValidation = () =>{
+const grnFormValidation = () => {
+    // Validate and bind PO selection
+    addGrnPoNo.addEventListener('change', () => {
+        // DynamicSelectValidation(addGrnPoNo, 'grn', 'purchaseOrder');
+        // Bind selected PO object to grn.purchaseOrder
+        const selectedPONo = addGrnPoNo.value;
+        grn.purchaseOrder = purchaseOrders.find(po => po.purchaseOrderNo === selectedPONo) || null;
+        addGrnPoNo.classList.remove('is-invalid')
+        addGrnPoNo.classList.add('is-valid')
 
-    addGrnPoNo.addEventListener('change',() => {
-               DynamicSelectValidation(addGrnPoNo, 'grn', 'purchaseOrder');
+        addOrderedQty.value = grn.purchaseOrder ? grn.purchaseOrder.qty : '';
+
+        // Fetch and display remaining quantity for selected PO
+        const remainingQtyField = document.getElementById('addRemainingQty');
+        if (grn.purchaseOrder) {
+            fetch(`/grn/remaining-qty/${encodeURIComponent(grn.purchaseOrder.purchaseOrderNo)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.remainingQuantity !== undefined) {
+                        addOrderedQty.value = data.remainingQuantity;
+                    } else {
+                        addOrderedQty.value = '';
+                    }
+                })
+                .catch(() => {
+                    addOrderedQty.value = '';
+                });
+        } else {
+            addOrderedQty.value = '';
+        }
     });
 
-    //Bind value to object in line 250 in reloadGRNForm
+    // Validate and bind accepted/rejected qty
+    const addAcceptedQty = document.getElementById('addAcceptedQty');
+    addAcceptedQty.addEventListener('input', () => {
+        const acceptedQty = parseFloat(addAcceptedQty.value) || 0;
+        const rejectedQty = parseFloat(addRejectedQty.value) || 0;
+        const orderedQty = grn.purchaseOrder ? grn.purchaseOrder.qty : 0;
+        if (acceptedQty <= orderedQty) {
+            addAcceptedQty.classList.remove('is-invalid');
+            addAcceptedQty.classList.add('is-valid');
+            grn.acceptedQuantity = acceptedQty;
 
-    addGrnRecDate.addEventListener('change',  () => {
-                selectFieldValidator(addGrnRecDate, '', 'grn', 'receivedDate');
+            if (grn.purchaseOrder && grn.purchaseOrder.pricePerUnit) {
+                grn.totalAmount = (parseFloat(addAcceptedQty.value) || 0) * grn.purchaseOrder.pricePerUnit;
+                addGrnTot.value = grn.totalAmount.toFixed(2);
+            }
+        } else {
+            addAcceptedQty.classList.remove('is-valid');
+            addAcceptedQty.classList.add('is-invalid');
+        }
+    });
+    
+    const addRejectedQty = document.getElementById('addRejectedQty');
+    addRejectedQty.addEventListener('input', () => {
+        const acceptedQty = parseFloat(addAcceptedQty.value) || 0;
+        const rejectedQty = parseFloat(addRejectedQty.value) || 0;
+        const orderedQty = grn.purchaseOrder ? grn.purchaseOrder.qty : 0;
+        if (acceptedQty + rejectedQty > orderedQty) {
+            addRejectedQty.classList.add('is-invalid');
+            addRejectedQty.classList.remove('is-valid');
+        }else{
+            addRejectedQty.classList.remove('is-invalid');
+            addRejectedQty.classList.add('is-valid');
+            grn.rejectedQuantity = rejectedQty;
+        }
+    });
+
+    addRejectReason.addEventListener('input', () => {
+        addRejectReason.classList.remove('is-invalid');
+        addRejectReason.classList.add('is-valid');
+        grn.rejectReason = addRejectReason.value.trim();
+    });
+
+    // // Bind total amount (auto-calculated)
+    // addAcceptedQty.addEventListener('input', () => {
+    //     if (grn.purchaseOrder && grn.purchaseOrder.pricePerUnit) {
+    //         grn.totalAmount = (parseFloat(addAcceptedQty.value) || 0) * grn.purchaseOrder.pricePerUnit;
+    //         addGrnTot.value = grn.totalAmount.toFixed(2);
+    //     }
+    // });
+
+    // Bind received date
+    addGrnRecDate.addEventListener('change', () => {
+        dateFeildValidator(addGrnRecDate, '', 'grn', 'receivedDate');
     });
 
     addGrnStatus.addEventListener('change', () => {
-                 selectFieldValidator(addGrnStatus, '', 'grn', 'grnStatus');
+        selectFieldValidator(addGrnStatus, '', 'grn', 'grnStatus');
     });
 
 
@@ -119,6 +195,10 @@ const checkGrnFormError = () =>{
         addGrnTot.classList.add('is-invalid')
     }
 
+    if (grn.acceptedQuantity == null) {
+        errors = errors + "Accepted Quantity can't be null \n";
+        addAcceptedQty.classList.add('is-invalid')
+    }
 
     if (grn.receivedDate == null) {
         errors = errors + "Received Date can't be null \n";
@@ -204,27 +284,27 @@ const reloadGRNForm = () =>{
     const purchaseOrders = ajaxGetRequest("/purchaseOrder/getAllPurchaseOrders").filter((po) => po.purchaseOrderStatus === 'Pending');
 
     //Function to fill data into PO select element
-        fillDataIntoSelect(
-             addGrnPoNo,
-             "Select Purchase Order",
-             purchaseOrders,
-             "purchaseOrderNo",
-        );
+    purchaseOrders.forEach(po => {
+        const option = document.createElement('option');
+        option.value = po.purchaseOrderNo; // Only the PO number
+        option.textContent = po.purchaseOrderNo;
+        addGrnPoNo.appendChild(option);
+      });
 
     //Fill Total Amount field on changing PO
-    addGrnPoNo.addEventListener('change', (event) => {
-            const val = event.target.value;
-            const SelectedValue = JSON.parse(val)
-            console.log(SelectedValue.purchaseOrderNo)
-            selectedPO = purchaseOrders.filter((po) => po.purchaseOrderNo === SelectedValue.purchaseOrderNo)[0];
-            addGrnTot.value = parseInt(selectedPO.totalPrice).toLocaleString("en-US", {
-                style: "currency",
-                currency: "LKR",
-            });
-            //Add Total amount to GRN object
-            grn.totalAmount = parseInt(selectedPO.totalPrice);
-            addGrnTot.classList.add('is-valid');
-        });
+    // addGrnPoNo.addEventListener('change', (event) => {
+    //         const val = event.target.value;
+    //         const SelectedValue = JSON.parse(val)
+    //         console.log(SelectedValue.purchaseOrderNo)
+    //         selectedPO = purchaseOrders.filter((po) => po.purchaseOrderNo === SelectedValue.purchaseOrderNo)[0];
+    //         addGrnTot.value = parseInt(selectedPO.totalPrice).toLocaleString("en-US", {
+    //             style: "currency",
+    //             currency: "LKR",
+    //         });
+    //         //Add Total amount to GRN object
+    //         grn.totalAmount = parseInt(selectedPO.totalPrice);
+    //         addGrnTot.classList.add('is-valid');
+    //     });
 
 }
 
@@ -251,20 +331,37 @@ const reloadGRN = () => {
     };
 
     const getPaymentStatus = (ob) => {
-            if (ob.PaymentStatus === "Pending") {
-                return '<p class="align-middle GrayLabel mx-auto" style="width: 100px">Closed</p>';
-            }
-            if (ob.grnStatus === "Paid") {
-                return '<p class="align-middle greenLabel mx-auto" style="width: 100px">Paid</p>';
-            }
-            if (ob.grnStatus === "Partially_Paid") {
-                return '<p class="align-middle yellowLabel mx-auto" style="width: 100px">Rejected</p>';
-            }
-        };
+        if (ob.paymentStatus === "Pending") {
+            return '<p class="align-middle GrayLabel mx-auto" style="width: 100px">Pending</p>';
+        }
+        if (ob.paymentStatus === "Paid") {
+            return '<p class="align-middle greenLabel mx-auto" style="width: 100px">Paid</p>';
+        }
+        if (ob.paymentStatus === "Partially_Paid") {
+            return '<p class="align-middle yellowLabel mx-auto" style="width: 100px">Partially Paid</p>';
+        }
+        return '';
+    };
+
+    // Helper functions to show quantity with unit
+    const getAcceptedQtyWithUnit = (ob) => {
+        if (ob.acceptedQuantity !== undefined && ob.unitType) {
+            return ob.acceptedQuantity + ' ' + ob.unitType;
+        }
+        return ob.acceptedQuantity !== undefined ? ob.acceptedQuantity : '';
+    };
+    const getRejectedQtyWithUnit = (ob) => {
+        if (ob.rejectedQuantity !== undefined && ob.unitType) {
+            return ob.rejectedQuantity + ' ' + ob.unitType;
+        }
+        return ob.rejectedQuantity !== undefined ? ob.rejectedQuantity : '';
+    };
 
     const displayProperty = [
         {dataType: "text", propertyName: "grnNo"},
         {dataType: "function", propertyName: getPONo},
+        {dataType: "function", propertyName: getAcceptedQtyWithUnit},
+        {dataType: "function", propertyName: getRejectedQtyWithUnit},
         {dataType: "price", propertyName: "totalAmount"},
         {dataType: "date", propertyName: "receivedDate"},
         {dataType: "function", propertyName: getStatus},
@@ -403,35 +500,64 @@ const deleteGRN= (ob, rowIndex) => {
 //}
 
 //Function for refill the supplier form
-const grNFormRefill = (ob, rowIndex) =>{
+const grNFormRefill = (ob, rowIndex) => {
 
-$("#modalGRNAdd").modal('show');
+    grnUpdateBtn.disabled = false;
+    grnSubmitBtn.disabled = true;
+
+    document.getElementById("modalTitleGrn").textContent = "Update GRN";
+    
+    // Disable all fields except status for edit mode
+    addGrnPoNo.disabled = true;
+    addOrderedQty.disabled = true;
+    addAcceptedQty.disabled = true;
+    addRejectedQty.disabled = true;
+    addRejectReason.disabled = true;
+    addGrnTot.disabled = true;
+    addGrnRecDate.disabled = true;
+    // Only enable status
+    addGrnStatus.disabled = false;
+    $("#modalGRNAdd").modal('show');
 
     grn = JSON.parse(JSON.stringify(ob));
     oldGrn = JSON.parse(JSON.stringify(ob));
 
-    // Clear the Element
+    // Clear and set PO dropdown for edit mode
     addGrnPoNo.innerHTML = '';
-
-    // Create a new option element
-    const PoElement = document.createElement("option");
-
-    // Set the value and text content of the new option
-    PoElement.value = grn.purchaseOrder.purchaseOrderNo;
-    PoElement.textContent = grn.purchaseOrder.purchaseOrderNo;
-
-    // Append the new option to the select element
-    addGrnPoNo.appendChild(PoElement);
-
+    const poOption = document.createElement("option");
+    poOption.value = grn.purchaseOrder.purchaseOrderNo;
+    poOption.textContent = grn.purchaseOrder.purchaseOrderNo;
+    addGrnPoNo.appendChild(poOption);
     addGrnPoNo.disabled = true;
-
-
     addGrnPoNo.value = grn.purchaseOrder.purchaseOrderNo;
-    addGrnTot.value = grn.totalAmount;
+
+    // Fill ordered quantity (remaining or original)
+    // Optionally, fetch latest remaining quantity and display
+    fetch(`/grn/remaining-qty/${encodeURIComponent(grn.purchaseOrder.purchaseOrderNo)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.remainingQuantity !== undefined) {
+                addOrderedQty.value = data.remainingQuantity;
+            } else {
+                addOrderedQty.value = grn.purchaseOrder.qty;
+            }
+        })
+        .catch(() => {
+            addOrderedQty.value = grn.purchaseOrder.qty;
+        });
+
+    // Fill accepted/rejected qty and reject reason
+    addAcceptedQty.value = grn.acceptedQuantity !== undefined ? grn.acceptedQuantity : '';
+    addRejectedQty.value = grn.rejectedQuantity !== undefined ? grn.rejectedQuantity : '';
+    addRejectReason.value = grn.rejectReason !== undefined ? grn.rejectReason : '';
+
+    // Fill other fields
+    addGrnTot.value = grn.totalAmount !== undefined ? grn.totalAmount : '';
     addGrnRecDate.value = convertDateTimeToDate(grn.receivedDate);
     addGrnStatus.value = grn.grnStatus;
+};
 
-}
+
 
 //Define function for GRN update
 const grnUpdate = () => {

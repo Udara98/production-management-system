@@ -10,5 +10,7 @@ public interface ICustomerOrderService {
     ResponseEntity<?> UpdateCustomerOrder(CustomerOrderDTO customerOrderDTO, String userName);
     ResponseEntity<?> GetAllCustomerOrders();
     ResponseEntity<?> DeleteCustomerOrder(Integer id);
-    ResponseEntity<?>gtAllUnpaidCustomerOrders();
+    ResponseEntity<?> gtAllUnpaidCustomerOrders();
+    ResponseEntity<?> getUnpaidOrdersByCustomer(Integer customerId);
+    com.AdwinsCom.AdwinsCom.entity.CustomerOrder getOrderEntityById(Integer id);
 }

@@ -66,8 +66,14 @@ public class QuotationRequest {
     @Column(name = "quantity")
     private Double quantity;
 
-    @Column(name = "required_date")
-    private LocalDate requiredDate;
+    @Column(name = "unit_type")
+    private String unitType;
+
+    @Column(name = "required_delivery_date")
+    private LocalDate requiredDeliveryDate;
+
+    @Column(name = "deadline")
+    private LocalDate deadline;
 
     @Column(name = "note")
     private String note;

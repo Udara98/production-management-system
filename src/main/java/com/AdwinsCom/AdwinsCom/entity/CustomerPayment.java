@@ -1,15 +1,16 @@
 package com.AdwinsCom.AdwinsCom.entity;
 
-import com.AdwinsCom.AdwinsCom.DTO.CustomerPaymentDTO;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "customer_payment")
@@ -27,12 +28,12 @@ public class CustomerPayment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "invoice_no")
-    private String invoiceNo;
+    @Column(name = "receipt_no")
+    private String receiptNo;
 
-    @OneToOne
-    @JoinColumn(name = "order_id" ,referencedColumnName = "id")
-    private CustomerOrder order;
+    @OneToMany(mappedBy = "customerPayment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private java.util.List<CustomerPaymentHasOrder> paymentDetails = new java.util.ArrayList<>();
 
     @Column(name = "payment_date")
     private LocalDate paymentDate;
@@ -69,28 +70,4 @@ public class CustomerPayment {
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
 
-    public CustomerPayment mapDTO(CustomerPayment customerPayment, CustomerPaymentDTO customerPaymentDTO, String userName){
-        CustomerPayment newCustomerPayment = new CustomerPayment();
-        if (customerPayment!=null){
-            newCustomerPayment = customerPayment;
-            newCustomerPayment.setUpdatedUser(userName);
-            newCustomerPayment.setUpdatedDate(LocalDateTime.now());
-        }else {
-            newCustomerPayment.setAddedUser(userName);
-            newCustomerPayment.setAddedDate(LocalDateTime.now());
-        }
-        newCustomerPayment.setInvoiceNo(customerPaymentDTO.getInvoiceNo());
-        newCustomerPayment.setOrder(customerPaymentDTO.getOrder());
-        newCustomerPayment.setPaymentDate(customerPaymentDTO.getPaymentDate());
-        newCustomerPayment.setTotalAmount(customerPaymentDTO.getTotalAmount());
-        newCustomerPayment.setPaymentStatus(customerPaymentDTO.getPaymentStatus());
-        newCustomerPayment.setPaymentMethod(customerPaymentDTO.getPaymentMethod());
-        newCustomerPayment.setTransferid(customerPaymentDTO.getTransferid());
-        newCustomerPayment.setBalance(customerPaymentDTO.getBalance());
-        newCustomerPayment.setPayAmount(customerPaymentDTO.getPayAmount());
-
-
-
-        return newCustomerPayment;
-    }
 }

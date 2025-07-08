@@ -104,6 +104,17 @@ window.addEventListener('load', () => {
 
 });
 
+// Reset validation states for quotation request form
+function resetProductValidation() {
+    const form = document.getElementById('productAddForm');
+    if (!form) return;
+    Array.from(form.elements).forEach(field => {
+        if (field.classList) {
+            field.classList.remove('is-valid', 'is-invalid');
+        }
+    });
+}
+
 //Define product submit function
  const productSubmit = () => {
     event.preventDefault();
@@ -267,16 +278,22 @@ packageTypes.forEach(packageType => {
 const productFormRefill = (ob, rowIndex) => {
 
 
-  $("#modalAddProduct").modal('show');
   product = JSON.parse(JSON.stringify(ob));
   oldProduct = JSON.parse(JSON.stringify(ob));
 
 
   addProductName.value = product.productName ;
+  addProductName.disabled = true;
   addProductUnitSize.value = product.unitSize;
+  addProductUnitSize.disabled = true;
   addProductQty.value = product.quantity;
+  addProductQty.disabled = true;
   addProductPrice.value = product.salePrice;
+  addProductPrice.disabled = true;
   addProductUnitType.value = product.unitType;
+  addProductUnitType.disabled = true;
+  document.getElementById('addFlavourType').disabled = true;
+  document.getElementById('addPackageType').disabled = true;
 
 
   if(product.productPhoto !=null){
@@ -310,16 +327,18 @@ const productFormRefill = (ob, rowIndex) => {
 
   const batchSelect = document.getElementById('addProductBatch')
 
-  fillDataIntoSelect(
-         batchSelect,
-         "Select Batch",
-         batchList,
-         "batchNo",
-         product.batch.batchNo
-   );
+//   fillDataIntoSelect(
+//          batchSelect,
+//          "Select Batch",
+//          batchList,
+//          "batchNo",
+//          product.batch.batchNo
+//    );
+   addProductBatch.disabled = true;
 
 
-  //Select Valid Color for element
+   $("#modalAddProduct").modal('show');
+
 
 };
 
@@ -450,8 +469,7 @@ const getStatus = (ob) => {
 
 
 const getBatchNo = (ob) =>{
-//    return ob.batch.batchNo;
-return "BatchNO";
+    return ob.latestBatch.batchNo;
 }
 
 const getUnitAmount = (ob) =>{
@@ -472,7 +490,7 @@ const itemTableRefresh = () => {
             {dataType: "text", propertyName: "productCode"},
             {dataType: "text", propertyName: "productName"},
             {dataType: "function", propertyName: getBatchNo},
-            {dataType: "price", propertyName: "salePrice"},
+            {dataType: "price", propertyName: "salesPrice"},
             {dataType: "function", propertyName: getUnitAmount},
             {dataType: "text", propertyName: "quantity"},
             {dataType: "function", propertyName: getStatus},
@@ -713,6 +731,24 @@ const checkProductFormError = () => {
     return errors;
 }
 
+//Check product form errors
+const checkUpdateProductFormError = () => {
+    let errors = '';
+
+   if(product.reorderPoint == null) {
+        errors = errors + "Reorder Point can't be null \n";
+        addProductROP.classList.add('is-invalid')
+    }
+
+    if(product.reorderQuantity == null) {
+        errors = errors + "Reorder Quantity can't be null \n";
+        addProductROQ.classList.add('is-invalid')
+    }
+
+
+    return errors;
+}
+
 //Define function for Product update
   const productUpdate = () => {
     event.preventDefault();
@@ -721,7 +757,7 @@ const checkProductFormError = () => {
     console.log(product);
 
     //Check form Error
-    let errors = checkProductFormError();
+    let errors = checkUpdateProductFormError();
 
     if (errors === "") {
       //Check form update
@@ -742,23 +778,23 @@ const checkProductFormError = () => {
           if(result.isConfirmed){
             // Create ProductDTO structure
             const productDTO = {
-                id: product.id,
-                productName: product.productName,
-                quantity: product.quantity,
-                salePrice: product.salePrice,
-                unitType: product.unitType,
-                unitSize: product.unitSize,
+                // productName: product.productName,
+                // quantity: product.quantity,
+                // salePrice: product.salePrice,
+                // unitType: product.unitType,
+                // unitSize: product.unitSize,
+                productId: product.productId,
                 reorderPoint: product.reorderPoint,
                 reorderQuantity: product.reorderQuantity,
                 note: product.note,
                 productPhoto: product.productPhoto,
-                productPhotoName: product.productPhotoName,
+                // productPhotoName: product.productPhotoName,
                 // Create the batches array in DTO format
-                batches: [{
-                    batchId: product.batch.id,
-                    quantity: product.quantity,
-                    salesPrice: product.salePrice
-                }]
+                // batches: [{
+                //     batchId: product.batch.id,
+                //     quantity: product.quantity,
+                //     salesPrice: product.salePrice
+                // }]
             };
 
             let updateServiceResponse = ajaxRequestBody("/product", "PUT", productDTO);
@@ -815,21 +851,21 @@ const checkProductFormError = () => {
     const checkUpdates = () =>{
       let updates = "";
 
-      if(product.batch.batchNo !== oldProduct.batch.batchNo){
-        updates = updates + "Batch No is changed" + oldProduct.batchNo + " into " + product.batchNo + "<br>";
-      }
+    //   if(product.batch.batchNo !== oldProduct.batch.batchNo){
+    //     updates = updates + "Batch No is changed" + oldProduct.batchNo + " into " + product.batchNo + "<br>";
+    //   }
 
-      if(product.productName !== oldProduct.productName){
-        updates = updates + "Product Name is changed" + oldProduct.productName + " into " + product.productName +"<br>";
-      }
+    //   if(product.productName !== oldProduct.productName){
+    //     updates = updates + "Product Name is changed" + oldProduct.productName + " into " + product.productName +"<br>";
+    //   }
 
-      if(product.quantity !== oldProduct.quantity){
-        updates = updates + "Quantity is changed" + oldProduct.quantity + " into " + product.quantity + "<br>";
-      }
+    //   if(product.quantity !== oldProduct.quantity){
+    //     updates = updates + "Quantity is changed" + oldProduct.quantity + " into " + product.quantity + "<br>";
+    //   }
 
-      if(product.unitSize !== oldProduct.unitSize){
-        updates = updates + "UnitSize is changed" + oldProduct.unitSize + " into " + product.unitSize + "<br>";
-      }
+    //   if(product.unitSize !== oldProduct.unitSize){
+    //     updates = updates + "UnitSize is changed" + oldProduct.unitSize + " into " + product.unitSize + "<br>";
+    //   }
 
       if(product.reorderPoint !== oldProduct.reorderPoint){
         updates = updates + "ROP is changed" + oldProduct.reorderPoint + " into " + product.reorderPoint + "<br>";
@@ -839,12 +875,14 @@ const checkProductFormError = () => {
         updates = updates + "ROQ is changed" + oldProduct.reorderQuantity + " into " + product.reorderQuantity + "<br>";
       }
 
-      if(product.salePrice !== oldProduct.salePrice){
-        updates = updates + "Sales Price is Change " + oldProduct.salePrice + " into "+ product.salePrice+  "<br>";
-      }
+    //   if(product.salePrice !== oldProduct.salePrice){
+    //     updates = updates + "Sales Price is Change " + oldProduct.salePrice + " into "+ product.salePrice+  "<br>";
+    //   }
 
       if(product.note !== oldProduct.note){
-        updates = updates + "Note is Change " + oldProduct.note + " into "+ product.note+  "<br>";
+        let oldNote = oldProduct.note == null ? '' : oldProduct.note;
+        let newNote = product.note == null ? '' : product.note;
+        updates = updates + "Note is Change " + oldNote + " into "+ newNote +  "<br>";
       }
 
       if(product.productPhoto !== oldProduct.productPhoto){
@@ -1043,7 +1081,7 @@ const checkProductRestockFormError = () => {
           detailQuantity.innerText = product.quantity;
 
           const getBatchNo = (ob) =>{
-                      return ob.batch.batchNo;
+                      return ob.latestBatch.batchNo;
                       }
 
 
@@ -1056,7 +1094,8 @@ const checkProductRestockFormError = () => {
 
          let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/PRODUCT");
 
-         const productHasBatches = ajaxGetRequest(`/productHasBatch/getByProductId/${product.id}`)
+          const productHasBatches = ajaxGetRequest(`/productHasBatch/getByProductId/${product.productId}`)
+
 
 
          tableDataBinder(

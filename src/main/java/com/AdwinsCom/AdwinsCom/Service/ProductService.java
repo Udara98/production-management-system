@@ -190,87 +190,83 @@ public ResponseEntity<?> AddNewProduct(ProductBatchDTO dto) {
 //        product.setAddedUser(userRepository.getUserByUserName(auth.getName()).getId());
 //        product.setAddedDate(LocalDateTime.now());
 //
-//        productRepository.save(product);
-//
-//        return ResponseEntity.ok("Product Added Successfully");
-//    }
+   @Override
+   public ResponseEntity<?> UpdateProduct(ProductBatchDTO dto)  {
+       // Authentication and authorization
+       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+       HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "PRODUCT");
+       if (!loguserPrivi.get("update")) {
+           return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                   .body("Product update not Completed: You don't have permission!");
+       }
 
-//    @Override
-//    public ResponseEntity<?> UpdateProduct(Product product)  {
-//
-//        // Authentication and authorization
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//
-//        // Get privileges for the logged-in user
-//        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "PRODUCT");
-//
-//        // If user doesn't have "delete" permission, return 403 Forbidden
-//        if (!loguserPrivi.get("update")) {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-//                    .body("Product update not Completed: You don't have permission!");
-//        }
-//
-//        String photoPath = "";
-//        Batch seletedBatch = batchRepository.findById(product.getBatch().getId()).orElse(null);
-//
-//        Double unitSize = product.getUnitSize();
-//        if(product.getUnitType() == ProductUnitType.ML){
-//            unitSize = product.getUnitSize()/1000;
-//        }
-//        Product prevProduct = productRepository.findById(product.getId()).get();
-//        if (!Objects.equals(prevProduct.getQuantity(), product.getQuantity())){
-//            if(seletedBatch.getAvailableQuantity() < ( unitSize*product.getQuantity())){
-//                return ResponseEntity.badRequest().body("Can't Make "+product.getQuantity()+" Items. Batch quantity is insufficient.");
-//            }else {
-//                seletedBatch.setAvailableQuantity(seletedBatch.getAvailableQuantity()-( unitSize*product.getQuantity()));
-//                batchRepository.save(seletedBatch);
-//            }
-//        }
-//
-//
-////        if (!file.isEmpty()) {
-////            try {
-////                File uploadDirFile = new File(uploadDir);
-////                if (!uploadDirFile.exists()) {
-////                    uploadDirFile.mkdirs();
-////                }
-////
-////                String originalFilename = file.getOriginalFilename();
-////                String uniqueFilename = UUID.randomUUID().toString() + "_" + originalFilename;
-////                Path filePath = Paths.get(uploadDir, uniqueFilename);
-////
-////                Files.write(filePath, file.getBytes());
-////                photoPath = "/productimages/"+uniqueFilename;
-////
-////            } catch (IOException e) {
-////                e.printStackTrace();
-////                return ResponseEntity.status(500).body("response");
-////            }
-////        }
-//
-//        product.setBatch(seletedBatch);
-//
-//        try {
-//            product.setProductCode(QuotationRequest.generateUniqueId("PR-"));
-//        } catch (NoSuchAlgorithmException e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body("Error generating unique product code.");
-//        }
-//
-//        product.setAddedUser(userRepository.getUserByUserName(auth.getName()).getId());
-//        product.setAddedDate(LocalDateTime.now());
-//
-//        productRepository.save(product);
-//
-//        return ResponseEntity.ok("Product Updated Successfully");
-//
-//    }
+       if (dto.getProductId() == null) {
+           return ResponseEntity.badRequest().body("Product ID is required for update.");
+       }
+
+       Optional<Product> optionalProduct = productRepository.findById(dto.getProductId());
+       if (!optionalProduct.isPresent()) {
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
+       }
+       Product product = optionalProduct.get();
+
+       // Only update allowed fields
+       if (dto.getReorderPoint() != null) {
+           product.setReorderPoint(dto.getReorderPoint());
+       }
+       if (dto.getReorderQuantity() != null) {
+           product.setReorderQuantity(dto.getReorderQuantity());
+       }
+       if (dto.getNote() != null) {
+           product.setNote(dto.getNote());
+       }
+       if (dto.getProductPhoto() != null && dto.getProductPhoto().length > 0) {
+           product.setProductPhoto(dto.getProductPhoto());
+       }
+
+       // Set updated user and timestamp
+       product.setUpdatedUser(userRepository.getUserByUserName(auth.getName()).getId());
+       product.setUpdatedDate(LocalDateTime.now());
+
+       productRepository.save(product);
+       return ResponseEntity.ok("Product Updated Successfully");
+   }
 
     @Override
-    public ResponseEntity<?> GetAllProducts() {
-        List<Product> products = productRepository.findAll();
-        return ResponseEntity.ok(products);
+public ResponseEntity<?> GetAllProducts() {
+    List<Product> products = productRepository.findAll();
+    List<ProductBatchDTO> productDTOs = new ArrayList<>();
+    for (Product product : products) {
+        ProductBatchDTO dto = new ProductBatchDTO();
+        dto.setProductId(product.getId());
+        dto.setProductCode(product.getProductCode());
+        dto.setProductName(product.getProductName());
+        dto.setQuantity(product.getQuantity());
+        dto.setProductStatus(product.getProductStatus().toString());
+        dto.setUnitSize(product.getUnitSize());
+        dto.setUnitType(product.getUnitType());
+        dto.setReorderPoint(product.getReorderPoint());
+        dto.setReorderQuantity(product.getReorderQuantity());
+        dto.setNote(product.getNote());
+        dto.setProductPhoto(product.getProductPhoto());
+
+        // Find the latest batch (by id or date)
+        List<ProductHasBatch> batches = product.getBatches();
+        if (batches != null && !batches.isEmpty()) {
+            ProductHasBatch latestBatch = batches.stream()
+                .max(Comparator.comparing(ProductHasBatch::getId)) // or use getExpireDate or another field
+                .orElse(null);
+            if (latestBatch != null) {
+                dto.setLatestBatch(latestBatch.getBatch());
+                dto.setSalesPrice(latestBatch.getSalesPrice());
+            }
+        }
+
+        
+        productDTOs.add(dto);
     }
+    return ResponseEntity.ok(productDTOs);
+}   
 
     @Override
     @Transactional

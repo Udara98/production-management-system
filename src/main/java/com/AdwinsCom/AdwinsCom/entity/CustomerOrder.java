@@ -1,12 +1,12 @@
 package com.AdwinsCom.AdwinsCom.entity;
 
-import com.AdwinsCom.AdwinsCom.DTO.CustomerOrderDTO;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.security.NoSuchAlgorithmException;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,6 +30,9 @@ public class CustomerOrder {
 
     @Column(name = "order_no")
     private String orderNo;
+
+    @Column(name = "invoice_no", unique = true)
+    private String invoiceNo;
 
     @ManyToOne
     @JoinColumn(name = "customer_id" ,referencedColumnName = "id")
@@ -61,24 +64,16 @@ public class CustomerOrder {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-    public CustomerOrder mapDTO(CustomerOrder customerOrder, CustomerOrderDTO customerOrderDTO, String userName) throws NoSuchAlgorithmException {
-        CustomerOrder newCustomerOrder = new CustomerOrder();
-        if(customerOrder != null){
-            newCustomerOrder = customerOrder;
-            newCustomerOrder.setUpdatedUser(userName);
-            newCustomerOrder.setUpdatedDate(LocalDateTime.now());
-        }else{
-            newCustomerOrder.setOrderNo(QuotationRequest.generateUniqueId("ODR-"));
-            newCustomerOrder.setAddedDate(LocalDateTime.now());
-            newCustomerOrder.setAddedUser(userName);
-        }
-        newCustomerOrder.setRequiredDate(customerOrderDTO.getRequiredDate());
-        newCustomerOrder.setCustomer(customerOrderDTO.getCustomer());
-        newCustomerOrder.setTotalAmount(customerOrderDTO.getTotalAmount());
-        newCustomerOrder.setCustomerOrderProducts(customerOrderDTO.getCustomerOrderProducts());
-        newCustomerOrder.setOrderStatus(customerOrderDTO.getOrderStatus());
 
-        return newCustomerOrder;
+
+    @Transient
+    private Double outstanding;
+
+    public Double getOutstanding() {
+        return outstanding;
     }
 
+    public void setOutstanding(Double outstanding) {
+        this.outstanding = outstanding;
+    }
 }

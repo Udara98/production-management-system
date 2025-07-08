@@ -43,6 +43,15 @@ public class GoodReceiveNote {
     @Column(name = "total_amount")
     private Double totalAmount;
 
+    @Column(name = "accepted_quantity")
+    private Integer acceptedQuantity;
+
+    @Column(name = "rejected_quantity")
+    private Integer rejectedQuantity;
+
+    @Column(name = "reject_reason", length = 255)
+    private String rejectReason;
+
     @Column(name = "grn_status")
     @Enumerated(EnumType.STRING)
     private GRNStatus grnStatus;
@@ -84,7 +93,6 @@ public class GoodReceiveNote {
             newGoodReceiveNote = goodReceiveNote;
             newGoodReceiveNote.setUpdatedUser(userName);
             newGoodReceiveNote.setUpdatedDate(LocalDateTime.now());
-
         } else {
             newGoodReceiveNote.setGrnNo(QuotationRequest.generateUniqueId("GRN-"));
             newGoodReceiveNote.setAddedUser(userName);
@@ -96,13 +104,17 @@ public class GoodReceiveNote {
         newGoodReceiveNote.setGrnStatus(goodReceiveNoteDTO.getGrnStatus());
         newGoodReceiveNote.setPaymentStatus(goodReceiveNoteDTO.getPaymentStatus());
 
+        // Map new fields
+        newGoodReceiveNote.setAcceptedQuantity(goodReceiveNoteDTO.getAcceptedQuantity());
+        newGoodReceiveNote.setRejectedQuantity(goodReceiveNoteDTO.getRejectedQuantity());
+        newGoodReceiveNote.setRejectReason(goodReceiveNoteDTO.getRejectReason());
+
         // Directly set the supplier (assuming supplierId is always provided by the controller)
         Supplier supplier = new Supplier();
         supplier.setId(goodReceiveNoteDTO.getSupplierId());
         newGoodReceiveNote.setSupplier(supplier);
 
         return newGoodReceiveNote;
-
     }
 
 }

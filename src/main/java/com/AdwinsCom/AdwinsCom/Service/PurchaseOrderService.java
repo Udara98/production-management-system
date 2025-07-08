@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -31,28 +32,36 @@ public class PurchaseOrderService implements IPurchaseOrderService{
 
     @Override
     public ResponseEntity<?> AddNewPurchaseOrder(PurchaseOrderDTO purchaseOrderDTO, String userName) throws NoSuchAlgorithmException {
+        // Check for existing purchase order for this quotation
         PurchaseOrder exPurchaseOrder = purchaseOrderRepository.findByQuotationNo(purchaseOrderDTO.getQuotationNo());
-        if(exPurchaseOrder != null){
-            if(exPurchaseOrder.getPurchaseOrderStatus().equals("Removed")) {
-                return ResponseEntity.badRequest().body("There is an existing Purchase Order for this Quotation.");
-            }
+        if (exPurchaseOrder != null && exPurchaseOrder.getPurchaseOrderStatus() != PurchaseOrder.PurchaseOrderStatus.Removed) {
+            return ResponseEntity.badRequest().body("There is an existing Purchase Order for this Quotation.");
         }
-        PurchaseOrder newPurchaseOrder = new PurchaseOrder().mapDTO(null,purchaseOrderDTO, userName);
+
+        // Check ingredient existence
+        Ingredient ingredient = ingredientRepository.getIngredientByIngredientCode(purchaseOrderDTO.getIngredientCode());
+        if (ingredient == null) {
+            return ResponseEntity.badRequest().body("Invalid ingredient code: " + purchaseOrderDTO.getIngredientCode());
+        }
+
+        // Save new purchase order
+        PurchaseOrder newPurchaseOrder = new PurchaseOrder().mapDTO(null, purchaseOrderDTO, userName);
+        newPurchaseOrder.setOrderedDate(LocalDate.now());
         purchaseOrderRepository.save(newPurchaseOrder);
 
-        Ingredient ingredient = ingredientRepository.getIngredientByIngredientCode(purchaseOrderDTO.getIngredientCode());
-        //close quotation req
-
+        // Close related quotation request
         List<QuotationRequest> quotationRequests = quotationRequestRepository.findByIngredientId(ingredient.getId());
-        QuotationRequest quotationRequest = new QuotationRequest();
-        for (QuotationRequest qReq: quotationRequests
-        ) {
-            if(qReq.getRequestStatus() == QuotationRequest.QRequestStatus.Send){
+        QuotationRequest quotationRequest = null;
+        for (QuotationRequest qReq : quotationRequests) {
+            if (qReq.getRequestStatus() == QuotationRequest.QRequestStatus.Send) {
                 quotationRequest = qReq;
+                break;
             }
         }
-        quotationRequest.setRequestStatus(QuotationRequest.QRequestStatus.Closed);
-        quotationRequestRepository.save(quotationRequest);
+        if (quotationRequest != null) {
+            quotationRequest.setRequestStatus(QuotationRequest.QRequestStatus.Closed);
+            quotationRequestRepository.save(quotationRequest);
+        }
 
         return ResponseEntity.ok("Purchase order placed successfully");
     }

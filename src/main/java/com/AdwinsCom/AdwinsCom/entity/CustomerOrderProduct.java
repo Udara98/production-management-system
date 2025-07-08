@@ -30,4 +30,8 @@ public class CustomerOrderProduct {
 
     @Column(name = "product_line_price")
     private Double productLinePrice;
+
+    @ManyToOne
+    @JoinColumn(name = "product_has_batch_id", referencedColumnName = "id")
+    private ProductHasBatch productHasBatch;
 }

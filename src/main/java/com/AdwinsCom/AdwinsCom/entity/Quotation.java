@@ -46,6 +46,24 @@ public class Quotation {
     @Column(name = "price_per_unit")
     private Double pricePerUnit;
 
+    @Column(name = "quantity")
+    private Double quantity;
+
+    @Column(name = "unit_type")
+    private String unitType;
+
+    @Column(name = "total_price")
+    private Double totalPrice;
+
+    @Column(name = "advance_percentage")
+    private Double advancePercentage;
+
+    @Column(name = "credit_days")
+    private Integer creditDays;
+
+    @Column(name = "proposed_delivery_date")
+    private LocalDate proposedDeliveryDate;
+
     @Column(name = "received_date")
     private LocalDate receivedDate;
 
@@ -88,6 +106,9 @@ public class Quotation {
         newQuotation.setReceivedDate(quotationDTO.getReceivedDate());
         newQuotation.setDeadline(quotationDTO.getDeadline());
         newQuotation.setQuotationStatus(quotationDTO.getQuotationStatus());
+        newQuotation.setQuantity(quotationDTO.getQuantity());
+        newQuotation.setUnitType(quotationDTO.getUnitType());
+        newQuotation.setTotalPrice(quotationDTO.getTotalPrice());
 
         return newQuotation;
     }

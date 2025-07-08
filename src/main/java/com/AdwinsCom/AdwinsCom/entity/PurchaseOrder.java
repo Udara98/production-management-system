@@ -60,9 +60,11 @@ public class PurchaseOrder {
     @Column(name = "total_price")
     private Double totalPrice;
 
-    @Column(name = "required_date")
-    @NotNull
-    private LocalDate requiredDate;
+    @Column(name = "proposed_delivery_date")
+    private LocalDate proposedDeliveryDate;
+
+    @Column(name = "ordered_date")
+    private LocalDate orderedDate;
 
     @Column(name = "notes")
     private String notes;
@@ -102,7 +104,7 @@ public class PurchaseOrder {
 
         newPurchaseOrder.setQty(orderDTO.getQty());
         newPurchaseOrder.setTotalPrice(orderDTO.getTotalPrice());
-        newPurchaseOrder.setRequiredDate(orderDTO.getRequiredDate());
+        newPurchaseOrder.setProposedDeliveryDate(orderDTO.getProposedDeliveryDate());
         newPurchaseOrder.setNotes(orderDTO.getNotes());
         newPurchaseOrder.setPurchaseOrderStatus(orderDTO.getPurchaseOrderStatus());
 

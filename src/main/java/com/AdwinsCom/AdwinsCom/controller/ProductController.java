@@ -60,11 +60,11 @@ public class ProductController {
         return productService.AddNewProduct(dto);
     }
 
-//    @PutMapping()
-//    public ResponseEntity<?> UpdateProduct(@RequestBody Product product){
-//            return productService.UpdateProduct(product);
-//
-//    }
+   @PutMapping()
+   public ResponseEntity<?> UpdateProduct(@RequestBody ProductBatchDTO productDTO){
+           return productService.UpdateProduct(productDTO);
+
+   }
 
     @GetMapping("/getAllProducts")
     public ResponseEntity<?> GetAllProducts() {

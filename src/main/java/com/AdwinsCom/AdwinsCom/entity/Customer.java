@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "customer")
@@ -15,6 +17,17 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Customer {
+    @Column(name = "business_type")
+    private String businessType; // COMPANY or INDIVIDUAL
+    @Column(name = "contact_person")
+    private String contactPerson; // Only for company
+    @Column(name = "credit_limit")
+    private Double creditLimit; // Always present for both types
+    @Column(name = "first_name")
+    private String firstName; // Only for individual
+    @Column(name = "second_name")
+    private String secondName; // Only for individual
+
 
     public enum CustomerStatus{
         Active,
@@ -56,8 +69,8 @@ public class Customer {
     @Column(name = "brn")
     private String brn;
 
-    @Column(name = "points")
-    private Double points;
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BankAccount> bankAccounts = new ArrayList<>();
 
     @Column(name = "customer_status")
     @Enumerated(EnumType.STRING)
@@ -86,18 +99,35 @@ public class Customer {
             newCustomer.setAddedUser(userName);
             newCustomer.setAddedDate(LocalDateTime.now());
         }
-        newCustomer.setFName(customerDTO.getFirstName());
-        newCustomer.setSName(customerDTO.getSurname());
+        newCustomer.setBusinessType(customerDTO.getBusinessType());
+        newCustomer.setCompanyName(customerDTO.getCompanyName());
+        newCustomer.setBrn(customerDTO.getBrn());
+        newCustomer.setContactPerson(customerDTO.getContactPerson());
+        newCustomer.setFirstName(customerDTO.getFirstName());
+        newCustomer.setSName(customerDTO.getSecondName());
         newCustomer.setNic(customerDTO.getNic());
         newCustomer.setMobile(customerDTO.getMobile());
         newCustomer.setLandNo(customerDTO.getLandNo());
         newCustomer.setEmail(customerDTO.getEmail());
         newCustomer.setAddress(customerDTO.getAddress());
-        newCustomer.setCompanyName(customerDTO.getCompanyName());
-        newCustomer.setBrn(customerDTO.getBrn());
-        newCustomer.setPoints(customerDTO.getPoint());
+        newCustomer.setCreditLimit(customerDTO.getCreditLimit());
         newCustomer.setCustomerStatus(customerDTO.getCustomerStatus());
 
+        // Map BankAccountDTOs to BankAccount entities
+        List<BankAccount> bankAccountEntities = new ArrayList<>();
+        if (customerDTO.getBankAccounts() != null) {
+            for (var bankAccountDTO : customerDTO.getBankAccounts()) {
+                BankAccount account = new BankAccount();
+                account.setId(bankAccountDTO.getId());
+                account.setBankName(bankAccountDTO.getBankName());
+                account.setBankBranch(bankAccountDTO.getBankBranch());
+                account.setAccountNo(bankAccountDTO.getAccountNo());
+                account.setAccountName(bankAccountDTO.getAccountName());
+                account.setCustomer(newCustomer);
+                bankAccountEntities.add(account);
+            }
+        }
+        newCustomer.setBankAccounts(bankAccountEntities);
         return newCustomer;
     }
 

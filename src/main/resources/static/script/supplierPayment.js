@@ -1,5 +1,6 @@
 let spTableInstance;
 window.addEventListener('DOMContentLoaded',  () => {
+    
 
     reloadSPTable();
     refreshSupplierPaymentForm();
@@ -10,32 +11,6 @@ window.addEventListener('DOMContentLoaded',  () => {
      const supplierSelectElement = document.getElementById("add_sp_supplier");
 
 
-//    const grnSelectElement = document.getElementById("add_sp_grn");
-
-//    grnList.forEach(po => {
-//        const option = document.createElement('option');
-//        option.value = po.id;
-//        option.textContent = po.grnNo;
-//        grnSelectElement.appendChild(option);
-//    });
-
-//    grnSelectElement.addEventListener('change', (event) => {
-//        const val = event.target.value;
-//        selectedPO = grnList.filter((po) => po.id === parseInt(val))[0];
-//        document.getElementById("add_sp_spId").value = selectedPO.purchaseOrder.supplierRegNo;
-//        document.getElementById("add_sp_ingId").value = selectedPO.purchaseOrder.ingredientCode;
-//        document.getElementById("add-sp-total").value = parseInt(selectedPO.purchaseOrder.totalPrice).toLocaleString("en-US", {
-//            style: "currency",
-//            currency: "LKR",
-//        });
-//    });
-
-//    document.getElementById("add-sp-paidAmount").addEventListener('change', (event) => {
-//        document.getElementById("add-sp-balanceAmount").value = (parseInt(event.target.value) - selectedPO.purchaseOrder.totalPrice).toLocaleString("en-US", {
-//            style: "currency",
-//            currency: "LKR",
-//        });
-//    });
 
 });
 
@@ -108,6 +83,9 @@ window.addEventListener('DOMContentLoaded',  () => {
 //Refresh SupplierPayment form
 const refreshSupplierPaymentForm = () =>{
 
+    document.getElementById("supplierPaymentSubmitBtn").disabled = true;
+   
+
     SupplierPaymentFormValidation();
 
 
@@ -147,9 +125,10 @@ const refreshSupplierPaymentForm = () =>{
 
                  console.log(GRNs);
 
-                    if (GRNs.length > 0) {
+                    if (GRNs) {
                      grnListSection.style.display = 'block';
-
+                     document.getElementById("supplierPaymentSubmitBtn").disabled = false;
+                     document.getElementById('PaymentDetailsSection').classList.remove('d-none');
                      GRNs.forEach(grn => {
                                      const grnRow = document.createElement('tr');
                                      grnRow.className = 'grn-row';
@@ -179,6 +158,9 @@ const refreshSupplierPaymentForm = () =>{
                      updateTotals();
                  } else {
                      grnListSection.style.display = 'none';
+                     document.getElementById('PaymentDetailsSection').classList.add('d-none');
+                     document.getElementById('noOutstandingGRNs').classList.remove('d-none');
+
                  }
                  }
              });

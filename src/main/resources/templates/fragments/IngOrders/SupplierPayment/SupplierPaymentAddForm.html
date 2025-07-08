@@ -7,7 +7,7 @@
         <div class="modal-body">
             <form id="spAddForm" class="needs-validation">
                 <!-- Supplier Selection -->
-                <div class="row mt-2">
+                <div class="row mt-4">
                     <div class="col">
                         <label class="form-label fw-medium" for="add_sp_supplier">
                             Supplier<span class="text-danger"> * </span>
@@ -17,7 +17,9 @@
                         </select>
                     </div>
                 </div>
-
+                <div class="alert alert-warning d-none text-center mt-4"  id="noOutstandingGRNs">
+                    Supplier does not have any outstanding GRNs
+                </div>
                 <!-- GRN List Section -->
                 <div class="mt-4" id="grnListSection" style="display: none;">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -67,7 +69,7 @@
                 </div>
 
                 <!-- Payment Details -->
-                <div class="row mt-4">
+                <div class="row mt-4 d-none" id="PaymentDetailsSection">
                     <div class="col-md-6" id="paymentMethodCol">
                         <label class="form-label fw-medium" for="add-sp-paymentMethod">
                             Payment Method<span class="text-danger"> * </span>
@@ -223,95 +225,15 @@
                 </div>
 
                 <!-- Form Actions -->
-                <div class="d-flex justify-content-end mx-4 mt-5">
+                <div class="d-flex justify-content-end mx-4 mt-4">
                     <div>
                         <button class="btn btn-secondary mx-2"
                                 data-bs-dismiss="modal"
                                 type="button">Cancel</button>
-                        <button onclick="supplierPaymentSubmit()" class="btn btn-primary">Submit Payment</button>
+                        <button  id="supplierPaymentSubmitBtn" onclick="supplierPaymentSubmit()" class="btn btn-primary">Submit Payment</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const supplierSelect = document.getElementById('add_sp_supplier');
-        const grnListSection = document.getElementById('grnListSection');
-        const grnList = document.querySelector('.grn-list');
-        const payTotalCheckbox = document.getElementById('payTotalCheckbox');
-
-<!--        // Sample data - Replace with actual API data-->
-<!--        const grnData = {-->
-<!--            'supplier1': [-->
-<!--                { id: 'GRN001', ingredient: 'ING001', total: 50000, balance: 25000 },-->
-<!--                { id: 'GRN002', ingredient: 'ING002', total: 75000, balance: 75000 }-->
-<!--            ],-->
-<!--            'supplier2': [-->
-<!--                { id: 'GRN003', ingredient: 'ING003', total: 100000, balance: 50000 }-->
-<!--            ]-->
-<!--        };-->
-
-
-
-<!--        payTotalCheckbox.addEventListener('change', function() {-->
-<!--            const paymentInputs = document.querySelectorAll('.payment-amount');-->
-<!--            const isChecked = this.checked;-->
-
-<!--            paymentInputs.forEach(input => {-->
-<!--                if (isChecked) {-->
-<!--                    input.value = input.max;-->
-<!--                    input.disabled = true;-->
-<!--                } else {-->
-<!--                    input.value = '';-->
-<!--                    input.disabled = false;-->
-<!--                }-->
-<!--            });-->
-<!--            updateBalances();-->
-<!--        });-->
-
-<!--        window.updateBalances = function() {-->
-<!--            if (payTotalCheckbox.checked) {-->
-<!--                payTotalCheckbox.checked = false;-->
-<!--                document.querySelectorAll('.payment-amount').forEach(input => {-->
-<!--                    input.disabled = false;-->
-<!--                });-->
-<!--            }-->
-
-<!--            document.querySelectorAll('.grn-row').forEach(row => {-->
-<!--                const balanceInput = row.querySelector('.balance');-->
-<!--                const paymentInput = row.querySelector('.payment-amount');-->
-<!--                const newBalanceInput = row.querySelector('.new-balance');-->
-
-<!--                const balance = parseFloat(balanceInput.value);-->
-<!--                const payment = parseFloat(paymentInput.value) || 0;-->
-
-<!--                if (payment > balance) {-->
-<!--                    paymentInput.value = balance;-->
-<!--                    newBalanceInput.value = 0;-->
-<!--                } else {-->
-<!--                    newBalanceInput.value = balance - payment;-->
-<!--                }-->
-<!--            });-->
-<!--            updateTotals();-->
-<!--        };-->
-
-<!--        function updateTotals() {-->
-<!--            let totalPayable = 0;-->
-<!--            let totalPaid = 0;-->
-<!--            let totalBalance = 0;-->
-
-<!--            document.querySelectorAll('.grn-row').forEach(row => {-->
-<!--                totalPayable += parseFloat(row.querySelector('.total-amount').value);-->
-<!--                totalPaid += parseFloat(row.querySelector('.payment-amount').value) || 0;-->
-<!--                totalBalance += parseFloat(row.querySelector('.new-balance').value) || 0;-->
-<!--            });-->
-
-<!--            document.getElementById('totalPayable').value = totalPayable.toFixed(2);-->
-<!--            document.getElementById('totalPaid').value = totalPaid.toFixed(2);-->
-<!--            document.getElementById('remainingBalance').value = totalBalance.toFixed(2);-->
-<!--        }-->
-    });
-</script>

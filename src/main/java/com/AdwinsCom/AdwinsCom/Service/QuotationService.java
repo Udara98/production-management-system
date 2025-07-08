@@ -1,8 +1,11 @@
 package com.AdwinsCom.AdwinsCom.Service;
 
 import com.AdwinsCom.AdwinsCom.DTO.QuotationDTO;
+import com.AdwinsCom.AdwinsCom.DTO.SupplierQuotationDTO;
 import com.AdwinsCom.AdwinsCom.Repository.QuotationRepository;
+import com.AdwinsCom.AdwinsCom.Repository.QuotationRequestRepository;
 import com.AdwinsCom.AdwinsCom.entity.Quotation;
+import com.AdwinsCom.AdwinsCom.entity.QuotationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,12 +22,14 @@ import java.util.List;
 public class QuotationService implements IQuotationService {
 
     final QuotationRepository quotationRepository;
+    final QuotationRequestRepository quotationRequestRepository;
 
     @Autowired
     private IPrivilegeService privilegeService;
 
-    public QuotationService(QuotationRepository quotationRepository) {
+    public QuotationService(QuotationRepository quotationRepository,QuotationRequestRepository quotationRequestRepository) {
         this.quotationRepository = quotationRepository;
+        this.quotationRequestRepository = quotationRequestRepository;
     }
 
     @Override
@@ -45,7 +51,44 @@ public class QuotationService implements IQuotationService {
         if (exQuotation != null && exQuotation.getQuotationStatus() != Quotation.QuotationStatus.Closed ) {
             return ResponseEntity.badRequest().body("There is an existing Quotation for these Quotation Request and Supplier");
         }
-        Quotation newQuotation = new Quotation().mapDTO(null, quotationDTO, auth.getName());
+        // Set quantity and unitType from the DTO, or fetch from QuotationRequest if not provided
+        Double quantity = quotationDTO.getQuantity();
+        String unitType = quotationDTO.getUnitType();
+        if (quantity == null || quantity <= 0 || unitType == null || unitType.trim().isEmpty()) {
+            // Fetch from QuotationRequest if missing
+            QuotationRequest req = quotationRequestRepository.findByRequestNo(quotationDTO.getQuotationRequestNo());
+            if (req != null) {
+                if (quantity == null || quantity <= 0) quantity = req.getQuantity();
+                if (unitType == null || unitType.trim().isEmpty()) unitType = req.getUnitType();
+            }
+        }
+        if (quantity == null || quantity <= 0) {
+            return ResponseEntity.badRequest().body("Quantity must be provided and greater than 0 (either in form or request)");
+        }
+        if (unitType == null || unitType.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Unit Type must be provided (either in form or request)");
+        }
+        // Calculate totalPrice
+        Double pricePerUnit = quotationDTO.getPricePerUnit() != null ? quotationDTO.getPricePerUnit() : 0.0;
+        Double totalPrice = quantity * pricePerUnit;
+        // Create and populate Quotation entity directly
+        Quotation newQuotation = new Quotation();
+        newQuotation.setQuotationRequestNo(quotationDTO.getQuotationRequestNo());
+        newQuotation.setIngredientCode(quotationDTO.getIngredientCode());
+        newQuotation.setSupplierRegNo(quotationDTO.getSupplierRegNo());
+        newQuotation.setQuotationNo(QuotationRequest.generateUniqueId("QNO-"));
+        newQuotation.setAddedUser(auth.getName());
+        newQuotation.setAddedDate(java.time.LocalDateTime.now());
+        newQuotation.setPricePerUnit(pricePerUnit);
+        newQuotation.setReceivedDate(LocalDate.now());
+        newQuotation.setDeadline(quotationDTO.getDeadline());
+        newQuotation.setQuotationStatus(Quotation.QuotationStatus.Pending);
+        newQuotation.setQuantity(quantity);
+        newQuotation.setUnitType(unitType);
+        newQuotation.setTotalPrice(totalPrice);
+        newQuotation.setAdvancePercentage(quotationDTO.getAdvancePercentage());
+        newQuotation.setCreditDays(quotationDTO.getCreditDays());
+        newQuotation.setProposedDeliveryDate(quotationDTO.getProposedDeliveryDate());
         quotationRepository.save(newQuotation);
         return ResponseEntity.ok("Quotation Added Successfully");
     }
@@ -53,7 +96,27 @@ public class QuotationService implements IQuotationService {
     @Override
     public ResponseEntity<?> GetAllQuotations() {
         List<Quotation> quotationList = quotationRepository.findByQuotationStatusNotRemoved();
-        return ResponseEntity.ok(quotationList);
+        List<QuotationDTO> dtoList = quotationList.stream().map(q -> {
+            QuotationDTO dto = new QuotationDTO(
+                q.getId(),
+                q.getQuotationNo(),
+                q.getQuotationRequestNo(),
+                q.getIngredientCode(),
+                q.getSupplierRegNo(),
+                q.getPricePerUnit(),
+                q.getReceivedDate(),
+                q.getDeadline(),
+                q.getQuotationStatus(),
+                q.getQuantity(),
+                q.getUnitType(),
+                q.getTotalPrice(),
+                q.getAdvancePercentage(),
+                q.getCreditDays(),
+                q.getProposedDeliveryDate()
+            );
+            return dto;
+        }).toList();
+        return ResponseEntity.ok(dtoList);
     }
 
     @Override
@@ -94,5 +157,11 @@ public class QuotationService implements IQuotationService {
             }
         }
         return ResponseEntity.ok("Quotation Deleted Successfully");
+    }
+
+    @Override
+    public void saveSupplierQuotation(SupplierQuotationDTO supplierQuotationDTO, String requestNo, String supplierEmail) {
+        // TODO: Implement logic to save supplier quotation
+        // This is a stub for compilation
     }
 }

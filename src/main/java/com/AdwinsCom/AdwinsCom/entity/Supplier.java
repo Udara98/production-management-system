@@ -1,6 +1,8 @@
 package com.AdwinsCom.AdwinsCom.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import com.AdwinsCom.AdwinsCom.DTO.SupplierDTO;
@@ -80,6 +82,9 @@ public class Supplier {
 
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
+
+    @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, orphanRemoval = true)
+private List<BankAccount> bankAccounts = new ArrayList<>();
 
     public Supplier mapDTO(Supplier supplier, SupplierDTO supplierDTO, String userName){
         Supplier newSupplier = new Supplier();

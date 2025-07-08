@@ -1,6 +1,7 @@
 package com.AdwinsCom.AdwinsCom.controller;
 
 import com.AdwinsCom.AdwinsCom.DTO.GoodReceiveNoteDTO;
+import com.AdwinsCom.AdwinsCom.Service.GoodReceiveNoteService;
 import com.AdwinsCom.AdwinsCom.Service.IGoodReceiveNoteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -10,6 +11,16 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/grn")
 public class GoodReceiveNoteController {
+
+    @GetMapping("/remaining-qty/{purchaseOrderNo}")
+    public ResponseEntity<?> getRemainingQuantity(@PathVariable String purchaseOrderNo) {
+        Integer remaining = ((GoodReceiveNoteService)goodReceiveNoteService).getRemainingQuantityForPurchaseOrder(purchaseOrderNo);
+        if (remaining == null) {
+            return ResponseEntity.badRequest().body("Purchase Order not found");
+        }
+        return ResponseEntity.ok(java.util.Collections.singletonMap("remainingQuantity", remaining));
+    }
+
 
     final IGoodReceiveNoteService goodReceiveNoteService;
 

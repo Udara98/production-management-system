@@ -13,10 +13,14 @@ const reloadQRequestTable =  () =>{
     const qRequests = ajaxGetRequest("/quotation-request/getAllRequests")
     let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
 
+    // Show Ingredient Name, Quantity with Unit, Deadline
+    const getQuantityWithUnit = (ob) => `${ob.quantity} ${ob.unit}`;
     const displayProperty = [
         {dataType: "text", propertyName: "requestNo"},
-        {dataType: "text", propertyName: "ingCode"},
-        {dataType: "date", propertyName: "requestDate"},
+        {dataType: "text", propertyName: "ingredientName"},
+        {dataType: "function", propertyName: getQuantityWithUnit},
+        {dataType: "date", propertyName: "deadline"},
+        {dataType: "date", propertyName: "requiredDeliveryDate"},
         {dataType: "List", propertyName: getSuppliers},
         {dataType: "function", propertyName: getQRStatus},
     ];

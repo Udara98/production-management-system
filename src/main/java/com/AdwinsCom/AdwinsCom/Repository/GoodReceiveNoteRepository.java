@@ -12,6 +12,8 @@ import java.util.List;
 public interface GoodReceiveNoteRepository extends JpaRepository<GoodReceiveNote, Integer> {
     GoodReceiveNote findByPurchaseOrder(PurchaseOrder pOrder);
 
+    java.util.List<GoodReceiveNote> findAllByPurchaseOrder(PurchaseOrder purchaseOrder);
+
     GoodReceiveNote findByGrnNo(String grnNo);
     @Query("SELECT gr FROM GoodReceiveNote gr WHERE gr.grnStatus <> 'Removed' ")
     List<GoodReceiveNote> findByGrnStatusNotRemoved();
@@ -28,5 +30,7 @@ public interface GoodReceiveNoteRepository extends JpaRepository<GoodReceiveNote
     List<GoodReceiveNote> getActiveGRNBySupId(Integer supplierId);
 
 
+    @Query("SELECT SUM(g.acceptedQuantity) FROM GoodReceiveNote g WHERE g.purchaseOrder = ?1 AND g.grnStatus <> 'Removed'")
+    Integer sumAcceptedQuantityByPurchaseOrder(PurchaseOrder purchaseOrder);
 
 }

@@ -26,61 +26,37 @@ window.addEventListener('DOMContentLoaded', () => {
     //Call function for validation
     customerOrderFormValidation();
 
-
-
-  
-
     let orderProducts = []
     let totalAmount = 0
 
-
-    // const produtAdd = (customerOrderValidation) => {
-
-    // }
-    
-
     document.getElementById('product-add-btn').addEventListener('click', (event) => {
 
-               event.preventDefault();
+       event.preventDefault();
 
 
         let errors = checkCusOrderFormEroor();
         console.log(errors);
         if(errors === ""){
-        const selectedProduct = products.filter((p) => p.id === parseInt(document.getElementById('add-co-product').value))[0]
-        const quantity = parseInt(document.getElementById('add-co-qty').value)
+            const selectedProduct = products.filter((p) => p.productId  === parseInt(document.getElementById('add-co-product').value))[0]
+            const quantity = parseInt(document.getElementById('add-co-qty').value)
 
-        // document.getElementById('add-co-product').value = ''
-        // document.getElementById('add-co-qty').value = ''
-        // document.getElementById('add-co-reqDate').value = ''
-        // document.getElementById('add-co-status').value = 'Pending'
-        // document.getElementById('add-co-cus').value = ''
+            // Check for duplicate at the start
+            const alreadyExists = orderProducts.some(op => (op.product.id || op.product.productId) === (selectedProduct.id || selectedProduct.productId));
+            if (alreadyExists) {
+                swal.fire({
+                    title: "Product Already Added",
+                    text: "You cannot add the same product more than once to this order.",
+                    icon: "warning"
+                });
+                return;
+            }
 
-
-    
-
-        if (selectedProduct.quantity < quantity) {
-            swal.fire({
-                title: "Insufficient Quantity ",
-                text: 'Would You like to add more products?',
-                icon: "question",
-                showCancelButton: true,
-                confirmButtonColor: "#cb421a",
-                cancelButtonColor: "#3f3f44",
-                confirmButtonText: "Yes"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location = "/product"
-                }
-            });
-        } else {
-
-
+            // Proceed with add logic
             const orderProduct = {
                 product: selectedProduct,
                 quantity: quantity,
-                productPrice: selectedProduct.salePrice,
-                productLinePrice: (selectedProduct.salePrice * quantity)
+                productPrice: selectedProduct.salesPrice,
+                productLinePrice: (selectedProduct.salesPrice * quantity)
             }
 
             const newOrderProducts = [...orderProducts, orderProduct]
@@ -90,48 +66,86 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
             })
             displayOrderProducts(newOrderProducts);
-            totalAmount = totalAmount + (selectedProduct.salePrice * quantity)
+            totalAmount = totalAmount + (selectedProduct.salesPrice * quantity)
             document.getElementById('tot-amount').innerHTML = ''
             document.getElementById('tot-amount').innerHTML = `<h5>Total Amount : ${(totalAmount).toLocaleString("en-US", {
                 style: "currency",
                 currency: "LKR",
             })}</h5>`
-
-            orderProducts.push(orderProduct)
-        }}
+            orderProducts.push(orderProduct);
+        }
     })
 
 
-    document.getElementById('COAddForm').onsubmit = function (event) {
+    document.getElementById('place-order-btn').onclick = function (event) {
         event.preventDefault();
-        const selectedCustomer = customers.filter((cus) => cus.id === parseInt(document.getElementById('add-co-cus').value))[0];
+        let errors = checkCusOrderFormEroor();
+        console.log(errors);
+        if(errors === ""){
+        const customerId = parseInt(document.getElementById('add-co-cus').value);
+        const requiredDate = new Date(document.getElementById('add-co-reqDate').value).toISOString();
+        const orderStatus = document.getElementById('add-co-status').value;
+        // Map orderProducts to only productId and quantity
+        const customerOrderProducts = orderProducts.map(op => ({
+            productId: op.product.id || op.product.productId, // support both naming conventions
+            quantity: op.quantity
+        }));
         const customerOrder = {
-            customer: selectedCustomer,
-            requiredDate:new Date(document.getElementById('add-co-reqDate').value).toISOString(),
-            totalAmount:totalAmount,
-            customerOrderProducts: orderProducts,
-            orderStatus:document.getElementById('add-co-status').value
-        }
-
+            customerId,
+            requiredDate,
+            customerOrderProducts,
+            orderStatus
+        };
         console.log(customerOrder);
 
         let response = ajaxRequestBody("/customerOrder/addNewCustomerOrder", "POST", customerOrder);
         if (response.status === 200) {
+            console.log(response);
+          
+            
             swal.fire({
-                title: response.responseText,
+                title: response.responseText.responseText,
                 icon: "success",
             });
-            reloadOrderDetails();
+            // Robust form and modal reset (like employee.js)
+            const formCO = document.getElementById('COAddForm');
+            if(formCO) formCO.reset();
+            reloadOrderTable();
+            customerOrderFormRefill();
+            // Remove validation classes
+            document.querySelectorAll('#COAddForm input, #COAddForm select, #COAddForm textarea').forEach((input) => {
+                input.classList.remove('is-valid', 'is-invalid');
+            });
+            formCO.classList.remove('was-validated');
             $("#modalAddCO").modal("hide");
+
+            if (response.responseText.orderId) {
+                window.open('/customerOrder/invoice/' + response.responseText.orderId, '_blank');
+            }
+
+            // Clear the order products table (tableOPs)
+            if (OrderProductsTableInstance) {
+                OrderProductsTableInstance.clear().draw();
+            }
+            $("#tableOPs tbody").empty();
+
+          
+            if (document.getElementById('tot-amount')) {
+                document.getElementById('tot-amount').innerHTML = '';
+            }
+            // Clear orderProducts array if present
+            if (typeof orderProducts !== 'undefined') {
+                orderProducts.length = 0;
+            }
 
         } else {
             swal.fire({
                 title: "Something Went Wrong",
-                text: response.responseText,
+                html: response.responseText,
                 icon: "error",
             });
         }
-    }
+    }}
 })
 
 
@@ -168,16 +182,42 @@ const customerOrderFormRefill = () => {
           editCOReqDate.setAttribute('min', minDate);
       }
 
+    // Sort customers by regNo - Name or Company name
+    customers.sort((a, b) => {
+        // Compose display name for both
+        const aName = a.companyName && a.companyName.trim() !== '' ? a.companyName : (a.firstName || '') + ' ' + (a.secondName || '');
+        const bName = b.companyName && b.companyName.trim() !== '' ? b.companyName : (b.firstName || '') + ' ' + (b.secondName || '');
+        const aDisplay = (a.regNo || '') + ' - ' + aName.trim();
+        const bDisplay = (b.regNo || '') + ' - ' + bName.trim();
+        return aDisplay.localeCompare(bDisplay);
+    });
+
+    // Sort customers by regNo - Name or Company name
     customers.forEach(cus => {
         const option = document.createElement('option');
         option.value = cus.id;
-        option.textContent = cus.regNo;
+        let displayName = '';
+        if (cus.companyName && cus.companyName.trim() !== '') {
+            displayName = `${cus.regNo} - ${cus.companyName}`;
+        } else {
+            displayName = `${cus.regNo} - ${cus.firstName || ''} ${cus.secondName || ''}`.trim();
+        }
+        option.textContent = displayName;
         customerSelectElement.appendChild(option);
     });
+
+    // Sort products by productCode - productName
+    products.sort((a, b) => {
+        const aDisplay = (a.productCode || '') + ' - ' + (a.productName || '');
+        const bDisplay = (b.productCode || '') + ' - ' + (b.productName || '');
+        return aDisplay.localeCompare(bDisplay);
+    });
+
+    // Sort products by productCode - productName
     products.forEach(product => {
         const option = document.createElement('option');
-        option.value = product.id;
-        option.textContent = product.productCode;
+        option.value = product.productId;
+        option.textContent = `${product.productName}`;
         productSelectElement.appendChild(option);
     });
 }
@@ -323,38 +363,61 @@ const customerOrderFormValidation = () =>{
     });
 
     quantityElement.addEventListener('input',  () => {
-                validation(quantityElement, '^[1-9][0-9]{0,2}$', 'customerOrderValidation', 'orderQuantity');
+                validation(quantityElement, '^[1-9][0-9]{0,4}$', 'customerOrderValidation', 'orderQuantity');
     });
 
 }
 
 const checkCusOrderFormEroor = () => {
     let errors = '';
-  
-    if (customerOrderValidation.selectedProduct == null) {
-      errors = errors + "Product Must be selected \n";
-    //   textFullName.classList.add('is-invalid')
+    const customerSelectElement = document.getElementById("add-co-cus");
+    const productSelectElement = document.getElementById("add-co-product");
+    const requiredDateElement = document.getElementById("add-co-reqDate");
+    const orderStatusElement = document.getElementById("add-co-status");
+    const quantityElement = document.getElementById("add-co-qty");
+
+    // Customer validation
+    if (!customerSelectElement.value) {
+        errors += 'Customer must be selected.\n';
+        customerSelectElement.classList.add('is-invalid');
+    } else {
+        customerSelectElement.classList.remove('is-invalid');
+        customerSelectElement.classList.add('is-valid');
     }
-  
-    if (customerOrderValidation.orderQuantity == null) {
-      errors = errors + "quantity can't be null \n";
-    //   txtCallingName.classList.add('is-invalid')
+    // Product validation
+    if (!productSelectElement.value) {
+        errors += 'Product must be selected.\n';
+        productSelectElement.classList.add('is-invalid');
+    } else {
+        productSelectElement.classList.remove('is-invalid');
+        productSelectElement.classList.add('is-valid');
     }
-  
-  
-    // if (customerOrderValidation.productPrice == null) {
-    //   errors = errors + "Prodcut Price can't be null \n";
-    // //   textFullName.classList.add('is-invalid')
-    // }
-  
-    // if (orderProduct.productLinePrice == null) {
-    //   errors = errors + "Product Price can't be null \n";
-    // //   txtNic.classList.add('is-invalid')
-    // }
-  
-  
-  
+    // Required date validation
+    if (!requiredDateElement.value) {
+        errors += 'Required date is mandatory.\n';
+        requiredDateElement.classList.add('is-invalid');
+    } else {
+        requiredDateElement.classList.remove('is-invalid');
+        requiredDateElement.classList.add('is-valid');
+    }
+    // Order status validation
+    if (!orderStatusElement.value) {
+        errors += 'Order status must be selected.\n';
+        orderStatusElement.classList.add('is-invalid');
+    } else {
+        orderStatusElement.classList.remove('is-invalid');
+        orderStatusElement.classList.add('is-valid');
+    }
+    // Quantity validation
+    if (!quantityElement.value || isNaN(quantityElement.value) || Number(quantityElement.value) <= 0) {
+        errors += 'Quantity must be a positive number.\n';
+        quantityElement.classList.add('is-invalid');
+    } else {
+        quantityElement.classList.remove('is-invalid');
+        quantityElement.classList.add('is-valid');
+    }
     return errors;
-  }
+};
+
 
 

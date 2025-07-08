@@ -51,11 +51,13 @@ const reloadPOTable =  () => {
             return '<p class="align-middle redLabel mx-auto" style="width: 100px">Overdue</p>';
         }
     };
+    const getOrderDate = (ob) => ob.orderDate || '-';
     const displayProperty = [
         {dataType: "text", propertyName: "purchaseOrderNo"},
         {dataType: "text", propertyName: "quotationNo"},
+        {dataType: "function", propertyName: getOrderDate}, // Order Date column
         {dataType: "price", propertyName: "totalPrice"},
-        {dataType: "date", propertyName: "requiredDate"},
+        {dataType: "date", propertyName: "proposedDeliveryDate"}, // Changed from requiredDate
         {dataType: "function", propertyName: getStatus},
     ];
 

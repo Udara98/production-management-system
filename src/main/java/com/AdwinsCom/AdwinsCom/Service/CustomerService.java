@@ -20,25 +20,20 @@ public class CustomerService implements ICustomerService{
 
     @Override
     public ResponseEntity<?> AddNewCustomer(CustomerDTO customerDTO, String userName) throws NoSuchAlgorithmException {
-
         Customer exCustomer = customerRepository.findByNicAndBrn(customerDTO.getNic(), customerDTO.getBrn());
         if(exCustomer != null){
             return ResponseEntity.badRequest().body("Customer Already Exist.");
         }
-        Customer newCustomer = new Customer().mapDTO(null,customerDTO,userName);
-
+        Customer newCustomer = new Customer().mapDTO(null, customerDTO, userName);
         customerRepository.save(newCustomer);
-
         return ResponseEntity.ok("Customer Added Successfully");
     }
     @Override
     public ResponseEntity<?> UpdateCustomer(CustomerDTO customerDTO, String userName) throws NoSuchAlgorithmException {
         Customer customer = customerRepository.findById(customerDTO.getId()).get();
-        Customer updatedCus = new Customer().mapDTO(customer,customerDTO,userName);
-
+        Customer updatedCus = new Customer().mapDTO(customer, customerDTO, userName);
         customerRepository.save(updatedCus);
         return ResponseEntity.ok("Customer Updated Successfully");
-
     }
 
 

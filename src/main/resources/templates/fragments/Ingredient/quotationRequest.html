@@ -44,27 +44,29 @@
 
           <div class="row mb-3">
             <div class="col-6">
-              <label class="form-label fw-medium" for="QuoRequiredDate"
+              <label class="form-label fw-medium" for="requiredDeliveryDate"
               >Delivery Date<span class="text-danger"> * </span>
-              </label>
+                </label>
               <input
                       class="form-control"
-                      id="QuoRequiredDate"
+                      id="requiredDeliveryDate"
                       type="date"
-                      onchange=" dateFeildValidator(QuoRequiredDate,'','quoRequest','requiredDate')"
+                      
               />
               <div class="valid-feedback"></div>
               <div class="invalid-feedback">
-                Please Select Required date
+                Please Select Required Delivery Date
               </div>
             </div>
-            >Deadline<span class="text-danger"> * </span>
+            <div class="col-6">
+              <label class="form-label fw-medium" for="QuoDeadline"
+              >Deadline<span class="text-danger"> * </span>
               </label>
               <input
                       class="form-control"
                       id="QuoDeadline"
                       type="date"
-                      onchange=" dateFeildValidator(QuoRequiredDate,'','quoRequest','deadline')"
+                      
               />
               <div class="valid-feedback"></div>
               <div class="invalid-feedback">
@@ -79,30 +81,24 @@
           </div>
           <hr>
           <div class="row mt-3 mb-2">
-            <div class="col-1">
-              <button
-                      type="reset"
-                      class="btn btn-outline-danger"
-              >
-                Clear
-              </button>
-            </div>
-            <div class="col-7"></div>
-            <div class="col-4">
-              <button
-                      class="btn cusbutton btn-update"
-                      onclick=""
-              >
-                <i class="fa-solid fa-edit me-2"></i>Update
-              </button>
-              <button
-                      class="btn cusbutton ms-4 btn-submit"
-                      onclick="sendQuotationRequest()"
-              >
-                <i class="fa-solid fa-plus me-2"></i>Send
-              </button>
-            </div>
-          </div>
+  <div class="col-1">
+    <button
+      type="reset"
+      class="btn btn-outline-danger"
+      onclick="resetQuotationRequestValidation()"
+    >
+      Clear
+    </button>
+  </div>
+  <div class="col-11 d-flex justify-content-end align-items-center">
+    <button
+      class="btn cusbutton btn-submit"
+      onclick="sendQuotationRequest()"
+    >
+      <i class="fa-solid fa-plus me-2"></i>Send
+    </button>
+  </div>
+</div>
         </div>
       </form>
     </div>

@@ -13,10 +13,11 @@ public class PurchaseOrderDTO {
     private String quotationNo;
     private String ingredientCode;
     private String supplierRegNo;
+    private String unitType;
     private Double pricePerUnit;
     private Integer qty;
     private Double totalPrice;
-    private LocalDate requiredDate;
+    private LocalDate proposedDeliveryDate;
     private String notes;
     private PurchaseOrder.PurchaseOrderStatus purchaseOrderStatus;
 }

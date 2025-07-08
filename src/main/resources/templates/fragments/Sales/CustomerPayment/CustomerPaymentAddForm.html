@@ -7,78 +7,99 @@
         <div class="modal-body">
            <form id="CPAddForm" class="needs-validation">
                <div class="row mt-2">
-                   <div class="col">
-                       <label class="form-label fw-medium" for="add-cp-inv">Invoice No<span
-                               class="text-danger"> * </span></label>
+                   <!-- <div class="col">
+                       <label class="form-label fw-medium" for="add-cp-receipt">Receipt No<span class="text-danger"> * </span></label>
                        <div class="input-group">
                            <span class="input-group-text">INV-</span>
-                           <input class="form-control" id="add-cp-inv" type="number" placeholder="Enter Invoice No" required/>
+                           <input class="form-control" id="add-cp-receipt" type="number" placeholder="Enter Receipt No" required/>
                            <div class="invalid-feedback">Please Enter Valid Invoice Num</div>
                        </div>
-                   </div>
-
+                   </div> -->
                    <div class="col">
-                       <label class="form-label fw-medium" for="add-cp-ord">Order<span class="text-danger"> * </span></label>
-                       <select id="add-cp-ord" class="form-select" onchange="fillDataIntoTotal();" required>
-                           <option value="" selected>Select Order</option>
+                       <label class="form-label fw-medium" for="add-cp-customer">Customer<span class="text-danger"> * </span></label>
+                       <select id="add-cp-customer" class="form-select" required>
+                           <option value="" selected>Select Customer</option>
                        </select>
-                       <div class="invalid-feedback">Please select an Order.</div>
+                       <div class="invalid-feedback">Please select a Customer.</div>
                    </div>
+               </div>
+               <div class="row mt-3" id="customer-orders-section" style="display:none;">
+                   <div class="col-12">
+                       <div class="alert alert-warning d-none text-center mt-2" id="noUnpaidOrdersAlert">
+                            Customer does not have any unpaid orders
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-medium">Unpaid Orders</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="payAllOutstandingCheckbox">
+                                <label class="form-check-label" for="payAllOutstandingCheckbox">
+                                    Pay All Outstanding
+                                </label>
+                            </div>
+                        </div>
+                        <table class="table table-bordered" id="customerOrderPaymentTable">
+                            <thead>
+                           <tr>
+                               <th>Select</th>
+                               <th>Order No</th>
+                               <th>Invoice No</th>
+                               <th>Outstanding</th>
+                               <th>Pay Amount</th>
+                               <th>Balance</th>
+                           </tr>
+                           </thead>
+                           <tbody>
+                           <!-- Populated by JS after customer select -->
+                           </tbody>
+                       </table>
+                    </div>
 
+                    <!-- Totals Section -->
+                    <div class="row mt-4" id="totalsSection">
+                        <div class="col">
+                            <label class="form-label fw-medium">Total Payable (LKR)</label>
+                            <input type="text" class="form-control" id="totalPayable" disabled>
+                        </div>
+                        <div class="col">
+                            <label class="form-label fw-medium">Total Paid (LKR)</label>
+                            <input type="text" class="form-control" id="totalPaid" disabled>
+                        </div>
+                        <div class="col">
+                            <label class="form-label fw-medium">Remaining Balance (LKR)</label>
+                            <input type="text" class="form-control" id="remainingBalance" disabled>
+                        </div>
+                    </div>
+               </div>
+               <div class="row mt-4" id="paymentMethodRow">
                    <div class="col">
                        <label class="form-label fw-medium" for="add-cp-payMeth">Payment Method<span class="text-danger"> * </span></label>
-                       <select id="add-cp-payMeth" class="form-select" onchange="showPaymentOptionByMethod();">
+                       <select id="add-cp-payMeth" name="paymentMethod" class="form-select" required onchange="showPaymentOptionByMethod();">
                            <option disabled selected value="">Select Payment Method</option>
-                           <option  value="VISA_CARD">VISA CARD</option>
+                           <option value="VISA_CARD">VISA CARD</option>
                            <option value="MASTER_CARD">MASTER CARD</option>
                            <option value="BANK_TRANSFER">BANK TRANSFER</option>
                            <option value="CASH">CASH</option>
                            <option value="CHEQUE">CHEQUE</option>
-                       </select>
+</select>
                    </div>
 
-<!--                   <div class="col">-->
-<!--                       <label class="form-label fw-medium" for="add-cp-payDate">Payment Date<span class="text-danger"> * </span></label>-->
-<!--                       <input class="form-control" id="add-cp-payDate" type="date" />-->
-<!--                       <div class="valid-feedback"></div>-->
-<!--                       <div class="invalid-feedback">Please Enter Full name ex: Udara Deshan Udawatte</div>-->
-<!--                   </div>-->
+<div class="col">
+    <label class="form-label fw-medium" for="add-cp-payStatus">Payment Status<span class="text-danger"> * </span></label>
+    <select id="add-cp-payStatus" name="paymentStatus" class="form-select" required>
+        <option value="Pending" selected>Pending</option>
+        <option value="Completed">Completed</option>
+        <option value="OnHold">On Hold</option>
+        <option value="Canceled">Canceled</option>
+    </select>
+</div>
+<div class="col d-none" id="paymentDateRow">
+    <label class="form-label fw-medium" for="add-cp-payDate">Payment Date<span class="text-danger"> * </span></label>
+    <input class="form-control" id="add-cp-payDate" type="date" required />
+    <div class="valid-feedback"></div>
+    <div class="invalid-feedback">Please enter a valid payment date.</div>
+</div>
                </div>
-               <div class="row mt-4">
-                   <div class="col">
-                       <label class="form-label fw-medium" for="add-cp-tot" id="add-cp-tot-label" >Total Amount</label>
-                       <input class="form-control" id="add-cp-tot" type="text" placeholder="Enter Total Amount" disabled/>
-                       <div class="invalid-feedback"></div>
-                   </div>
-                   <div class="col">
-                       <label class="form-label fw-medium" for="add-cp-tot">Pay Amount</label>
-                       <input class="form-control" id="add-cp-pa" type="text" onkeyup="calculateAdvancePayBalance();" placeholder="Enter Pay Amount" />
-                       <div class="invalid-feedback">Please Enter Valid number</div>
-                   </div>
-                   <div class="col">
-                       <label class="form-label fw-medium" for="add-cp-tot">Balance</label>
-                       <input class="form-control" id="add-cp-balance" type="text" disabled />
-                       <div class="invalid-feedback"></div>
-                   </div>
-               </div>
-               <div class="row mt-4">
-                    <div class="col-6 " id="paymentDateCol">
-                            <label class="form-label fw-medium" for="add-cp-payDate">Payment Date<span class="text-danger"> * </span></label>
-                            <input class="form-control" id="add-cp-payDate" type="date" />
-                             <div class="valid-feedback"></div>
-                             <div class="invalid-feedback">Please Select Valid Date</div>
-                    </div>
-                   <div class="col-6" id="paymentStatusCol">
-                       <label class="form-label fw-medium" for="add-cp-status">Payment Status<span class="text-danger"> * </span></label>
-                       <select id="add-cp-status" class="form-select">
-                           <option disabled selected value="">Select Payment Status</option>
-                           <option value="Pending">Pending</option>
-                           <option value="Completed">Completed</option>
-                           <option value="OnHold">On Hold</option>
-                           <option value="Canceled">Canceled</option>
-                       </select>
-                   </div>
-               </div>
+               
 <!--               Bank Transfer Card-->
                <div class="row mt-3 mb-4 d-none" id="bankTranferDivRow">
                    <div class="col-12">
@@ -214,7 +235,7 @@
                    </div>
                </div>
 <!--               Note field-->
-               <div class="row mt-4">
+               <div class="row mt-4" id="paymentNoteRow">
                    <div class="col">
                        <div class="form-floating">
                                 <textarea
@@ -246,15 +267,14 @@
                    <div class="col-4">
                        <button
                                class="btn cusbutton btn-update"
-                               onclick="productUpdate()"
+                               id="add-cp-update"
                                type="submit"
                        >
                            <i class="fa-solid fa-edit me-2"></i>Update
                        </button>
                        <button
                                class="btn cusbutton ms-4 btn-submit"
-                               onclick="customerPaymentSubmit();"
-                       >
+                               id="add-cp-submit"                       >
                            <i class="fa-solid fa-plus me-2"></i>Add
                        </button>
                    </div>
