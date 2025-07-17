@@ -20,12 +20,17 @@ public class CustomerPaymentDTO {
     private java.util.List<CustomerPaymentHasOrderDTO> paymentDetails;
     private LocalDate paymentDate;
     private Double totalAmount;
+    private Double paidAmount;
     // Must be set from frontend: Pending, Completed, OnHold, Canceled
     private CustomerPayment.PaymentStatus paymentStatus;
     private PaymentMethod paymentMethod;
-    private BigDecimal payAmount;
     private BigDecimal balance;
     private String transferid;
     private String note;
+
+    // For receipt rendering
+    private String customerName;
+    private String customerMobile;
+    private String customerAddress;
 
 }

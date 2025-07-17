@@ -251,6 +251,8 @@ console.log("fieldId")
   }
 };
 
+
+
 const selectFieldValidator= (fieldId, pattern,object,property) => {
   const fieldValue = fieldId.value;
 

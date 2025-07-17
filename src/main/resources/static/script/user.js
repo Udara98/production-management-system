@@ -281,7 +281,7 @@ const buttonUserUpdate = () => {
                 if(result.isConfirmed){
                     let updateServiceResponse = ajaxRequestBody("/user", "PUT", user);
 
-                    if (updateServiceResponse.status === 201) {
+                    if (updateServiceResponse.status === 200) {
                         // alert("Update successfully ...! \n");
                         Swal.fire({
                             title: "Update successfully ..! ",
@@ -542,7 +542,7 @@ const checkUserUpdate = () =>{
         }
 
     if(user.password !== oldUser.password){
-        updates = updates + "Password is changed" + oldUser.password + " into " + user.password + "<br>";
+        updates = updates + "Password is changed to new password" + "<br>";
     }
 
     if(user.email !== oldUser.email){

@@ -8,28 +8,38 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-2">
                 <li class="nav-item">
-                    <a class="nav-link active icon-button"aria-current="page" href="#"><i class="fa-regular fa-bell"></i></a>
+                    <div class="d-flex flex-row gap-2 me-2 p-2">
+                        <!-- Check if user photo exists; if not, show default icon -->
+                        <th:block th:if="${loggedUserPhoto != null}">
+                            <img id="userPhoto"
+                            th:src="'data:image/png;base64,' + ${loggedUserPhoto}"
+                            alt="User Photo"
+                            style="width: 55px; height: 55px; border-radius: 50%;">                        </th:block>
+                        <th:block th:if="${loggedUserPhoto == null}">
+                            <i class="fa-solid fa-circle-user" style="font-size: 35px;"></i>
+                        </th:block>
+                        <div class="d-flex flex-column ">
+                            <div style="font-size: 16px;" class="fw-medium" th:text="${loggedUserName}"> </div>
+                            <div style="font-size: 14px;"  class="fw-normal" th:text="${loggedUserRole}"> </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link icon-button position-relative" href="#" id="notificationBell" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-regular fa-bell"></i>
+                        <span id="notificationCount" class="position-absolute top-1 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.7em;">0</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationBell" id="notificationDropdown" style="min-width: 500px;">
+                        <li class="dropdown-item text-muted">No notifications</li>
+                    </ul>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link icon-button" href="#"><i class="fa-solid fa-gear "></i></a>
+                    <a class="nav-link icon-button" href="#" onclick="refillUserProfileForm()" title="Edit Profile">
+                        <i class="fa-solid fa-gear"></i>
+                    </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link icon-button me-3" href="/logout"> <i class="fa-solid fa-right-from-bracket"></i></a>
-                </li>
-                <li class="nav-item">
-                    <div class="d-flex flex-row gap-2 me-2">
-                        <!-- Check if user photo exists; if not, show default icon -->
-                        <th:block th:if="${loggeduserphoto != null}">
-                            <img th:src="'data:image/jpeg;base64,' + ${loggeduserphoto}" alt="User Photo" style="width: 55px; height: 55px; border-radius: 50%;">
-                        </th:block>
-                        <th:block th:if="${loggeduserphoto == null}">
-                            <i class="fa-solid fa-circle-user" style="font-size: 35px;"></i>
-                        </th:block>
-                        <div class="d-flex flex-column">
-                            <div style="font-size: 15px;" class="fw-medium" th:text="${loggedusername}"> </div>
-                            <div style="font-size: 12px;"  class="fw-normal" th:text="${loggeduserrole}"> </div>
-                        </div>
-                    </div>
                 </li>
             </ul>
 <!--            <form class="d-flex" role="search">-->
@@ -39,4 +49,63 @@
         </div>
     </div>
 </nav>
+
+<!-- User Profile Edit Modal -->
+<div class="modal fade" id="userProfileEditModal" tabindex="-1" aria-labelledby="userProfileEditModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="userProfileEditModalLabel">Edit User Profile</h3>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="userProfileEditForm" class="needs-validation">
+        <div class="modal-body">
+          <div class="mb-3 text-center">
+            <div class="row">
+                <div class="col-6">
+                    <label class="form-label fw-bold">Profile Image</label>
+                    <div>
+                      <img id="editProfileImagePreview" src="/image/userprofilephotos/userprofilephotodummy.png" class="rounded-circle border mb-2" style="width: 200px; height: 200px; object-fit: cover;">
+                    </div>
+                </div>
+                <div class="col-6 d-flex flex-column justify-content-center align-items-start">
+                    <button type="button" class="btn addPrimaryBtn mb-2 rounded-2" onclick="fileUserPhoto.click();"><i class="fa-regular fa-image me-2"></i>Add/Change User Image</button>
+                <input type="file" class="d-none" id="fileUserPhoto" onchange="fileValidation(fileUserPhoto, 'user', 'editProfileImagePreview', 'editProfileImageName', editProfileImage);">
+                <button type="button" class="btn btn-outline-danger" onclick="clearProfileImage()">Clear Photo</button>
+                </div>
+
+            </div>
+            <!-- <input type="file" class="form-control" id="editProfileImage" name="profileImage" accept="image/*" style="max-width: 300px; margin: 0 auto;" onchange="onProfileImageChange(event)">
+            <button type="button" class="btn btn-outline-danger btn-sm mt-2" onclick="clearProfileImage()">Clear</button> -->
+            <!-- <div class="d-flex flex-row align-items-center justify-content-center  "> -->
+          </div>
+          <div class="row">
+          <div class="col">
+            <label for="editUsername" class="form-label fw-medium ">Username:</label>
+            <input type="text" class="form-control" id="editUsername" name="username" required>
+          </div>
+            <div class="col">
+              <label for="editEmail" class="form-label fw-medium">Email:</label>
+              <input type="email" class="form-control" id="editEmail" name="email" required>
+            </div>
+          </div>
+          <div class="row mt-3">
+            <div class="col">
+              <label for="editPassword" class="form-label fw-medium">New Password:</label>
+              <input type="password" class="form-control" id="editPassword" name="password" autocomplete="new-password">
+            </div>
+            <div class="col">
+              <label for="editConfirmPassword" class="form-label fw-medium">Confirm Password:</label>
+              <input type="password" class="form-control" id="editConfirmPassword" name="confirmPassword" autocomplete="new-password">
+            </div>
+        </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn addPrimaryBtn" onclick="updateProfile()">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

@@ -2,6 +2,7 @@ package com.AdwinsCom.AdwinsCom.Service;
 
 import com.AdwinsCom.AdwinsCom.Repository.PrivilegeRepository;
 import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
+import com.AdwinsCom.AdwinsCom.DTO.UserProfileUpdateDTO;
 import com.AdwinsCom.AdwinsCom.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -119,6 +120,8 @@ public class UserService implements IUserService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred: " + e.getMessage());
         }
     }
+
+    
 
     @Override
     public ResponseEntity<String> saveUser(User user) {
@@ -317,11 +320,64 @@ public class UserService implements IUserService {
         }
     }
 
+    @Override
+    public ResponseEntity<User> getUserByName(String username) {
+        return ResponseEntity.ok(userRepository.getUserByUserName(username));
     }
 
+    @Override
+    public ResponseEntity<String> updateUserProfile(UserProfileUpdateDTO dto) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String loggedInUsername = auth.getName();
 
+        // Fetch the logged-in user entity
+        User extUser = userRepository.getUserByUserName(loggedInUsername);
+        if (extUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Update not completed: User does not exist.");
+        }
 
+        // Only update fields present in the DTO
+        if (dto.getUsername() != null && !dto.getUsername().equals(extUser.getUsername())) {
+            extUser.setUsername(dto.getUsername());
+        }
+        if (dto.getEmail() != null && !dto.getEmail().equals(extUser.getEmail())) {
+            User extUserEmail = userRepository.getByEmail(dto.getEmail());
+            if (extUserEmail != null && !extUserEmail.getUsername().equals(loggedInUsername)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Update not completed: Email already exists.");
+            }
+            extUser.setEmail(dto.getEmail());
+        }
+        if (dto.getPhoto() != null) {
+            try {
+                byte[] photoBytes = java.util.Base64.getDecoder().decode(dto.getPhoto());
+                extUser.setPhoto(photoBytes);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Invalid photo data: must be base64 encoded.");
+            }
+        }
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            if (!bCryptPasswordEncoder.matches(dto.getPassword(), extUser.getPassword())) {
+                extUser.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Your new password cannot be the same as your current password. Please choose a different password.");
+            }
+        }
 
+        try {
+            extUser.setLastmodifieddatetime(LocalDateTime.now());
+            extUser.setModifieduser(extUser.getId());
+            userRepository.save(extUser);
+            return ResponseEntity.status(HttpStatus.OK).body("User updated successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Update not completed: " + e.getMessage());
+        }
+    }
+    }
 
 
 

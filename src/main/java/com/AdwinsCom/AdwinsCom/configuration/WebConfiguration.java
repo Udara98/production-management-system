@@ -19,7 +19,7 @@ public class WebConfiguration {
                             .requestMatchers("/resources/**", "/controllerjs/**", "/styles/**", "/bootstrap-5.3.2/**", "/image/**", "/productimages/**", "/fonts/**").permitAll()
                             .requestMatchers("/login").permitAll()
                             .requestMatchers("/createadminuser").permitAll()
-                            .requestMatchers("/dashboard/**").hasAnyAuthority("Admin", "Manager", "Cashier", "Store-Manager")
+                            .requestMatchers("/dashboard/**").hasAnyAuthority("Admin", "Manager", "Cashier", "Store-Manager","Procurement Officer")
                             .requestMatchers("/employee/**").hasAnyAuthority("Admin", "Manager")
                             .requestMatchers("/privilege/**").hasAnyAuthority("Admin")
                             .requestMatchers("/ingredient/**").hasAnyAuthority("Admin")
@@ -27,9 +27,13 @@ public class WebConfiguration {
                             .requestMatchers("/customerOrder/**").hasAnyAuthority("Admin","Procurement Officer")
                             .requestMatchers("/customerOrder/**").permitAll()
                             .requestMatchers("/quotation-request/**").hasAnyAuthority("Admin")
+                            .requestMatchers("/user/profile/update").authenticated()
+                            .requestMatchers("/user/byname/**").authenticated()
                             .requestMatchers("/quotation/**").hasAnyAuthority("Admin")
                             .requestMatchers("/user/**").hasAnyAuthority("Admin", "Manager")
                             .requestMatchers("/item/**").hasAnyAuthority("Admin", "Manager", "Cashier", "Store-Manager")
+                     
+                            
                             .anyRequest().authenticated();
                 })
                 .formLogin((login) -> {

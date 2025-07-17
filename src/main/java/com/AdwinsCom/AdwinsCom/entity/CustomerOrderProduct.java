@@ -1,6 +1,8 @@
 package com.AdwinsCom.AdwinsCom.entity;
 
 import com.AdwinsCom.AdwinsCom.entity.Product;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,8 +21,14 @@ public class CustomerOrderProduct {
     private Integer id;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "product_id" ,referencedColumnName = "id")
     private Product product;
+
+    @ManyToOne
+    @JsonBackReference
+    @JoinColumn(name = "cus_order_id", referencedColumnName = "id")
+    private CustomerOrder customerOrder;
 
     @Column(name = "quantity")
     private Integer quantity;
@@ -32,6 +40,7 @@ public class CustomerOrderProduct {
     private Double productLinePrice;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "product_has_batch_id", referencedColumnName = "id")
     private ProductHasBatch productHasBatch;
 }

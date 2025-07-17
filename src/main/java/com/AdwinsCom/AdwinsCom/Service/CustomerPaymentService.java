@@ -11,9 +11,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -78,7 +80,7 @@ public class CustomerPaymentService implements ICustomerPaymentService{
         newCustomerPayment.setPaymentMethod(customerPaymentDTO.getPaymentMethod());
         newCustomerPayment.setTransferid(customerPaymentDTO.getTransferid());
         newCustomerPayment.setBalance(customerPaymentDTO.getBalance());
-        newCustomerPayment.setPayAmount(customerPaymentDTO.getPayAmount());
+        newCustomerPayment.setPayAmount(new BigDecimal(customerPaymentDTO.getPaidAmount()));
 
         // Map payment details
         java.util.List<com.AdwinsCom.AdwinsCom.entity.CustomerPaymentHasOrder> details = new java.util.ArrayList<>();
@@ -98,7 +100,10 @@ public class CustomerPaymentService implements ICustomerPaymentService{
         }
         newCustomerPayment.setPaymentDetails(details);
         customerPaymentRepository.save(newCustomerPayment);
-        return ResponseEntity.ok("Payment Made Successfully");
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("paymentId", newCustomerPayment.getId());
+        resp.put("responseText", "Payment Made Successfully");
+        return ResponseEntity.ok(resp);
     }
 
     @Override
@@ -129,5 +134,43 @@ public class CustomerPaymentService implements ICustomerPaymentService{
 
         return ResponseEntity.ok(latestCompletedCP);
     }
-
+    @Override
+    public CustomerPaymentDTO getCustomerPaymentById(int id) {
+        Optional<CustomerPayment> paymentOpt = customerPaymentRepository.findById(id);
+        if (paymentOpt.isEmpty()) return null;
+        CustomerPayment payment = paymentOpt.get();
+        CustomerPaymentDTO dto = new CustomerPaymentDTO();
+        dto.setReceiptNo(payment.getReceiptNo());
+        dto.setPaymentDate(payment.getPaymentDate());
+        dto.setPaidAmount(payment.getPayAmount().doubleValue());
+        dto.setTotalAmount(payment.getTotalAmount());
+        dto.setPaymentStatus(payment.getPaymentStatus());
+        dto.setPaymentMethod(payment.getPaymentMethod());
+        dto.setTransferid(payment.getTransferid());
+        dto.setBalance(payment.getBalance());
+        // Map payment details
+        java.util.List<com.AdwinsCom.AdwinsCom.DTO.CustomerPaymentHasOrderDTO> detailDTOs = new java.util.ArrayList<>();
+        if (payment.getPaymentDetails() != null) {
+            for (com.AdwinsCom.AdwinsCom.entity.CustomerPaymentHasOrder detail : payment.getPaymentDetails()) {
+                com.AdwinsCom.AdwinsCom.DTO.CustomerPaymentHasOrderDTO detailDTO = new com.AdwinsCom.AdwinsCom.DTO.CustomerPaymentHasOrderDTO();
+                detailDTO.setOrderId(detail.getOrder().getId().intValue());
+                detailDTO.setOrderNo(detail.getOrder().getOrderNo());
+                detailDTO.setInvoiceNo(detail.getOrder().getInvoiceNo());
+                detailDTO.setInvoiceTotal(detail.getOrder().getTotalAmount());
+                detailDTO.setOutStanding(detail.getOrder().getOutstanding());
+                detailDTO.setPaidAmount(detail.getPaidAmount());
+                detailDTO.setBalance(detail.getBalance());
+                detailDTOs.add(detailDTO);
+            }
+        }
+        dto.setPaymentDetails(detailDTOs);
+        // Map customer info for receipt
+        if (payment.getPaymentDetails() != null && !payment.getPaymentDetails().isEmpty()) {
+            var customer = payment.getPaymentDetails().get(0).getOrder().getCustomer();
+            dto.setCustomerName(customer.getCompanyName() != null && !customer.getCompanyName().isEmpty() ? customer.getCompanyName() : customer.getFirstName() + " " + customer.getSecondName());
+            dto.setCustomerMobile(customer.getMobile());
+            dto.setCustomerAddress(customer.getAddress());
+        }
+        return dto;
+    }
 }

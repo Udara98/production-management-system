@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<head th:replace="~{fragments/head.html:: headDashboard}"></head>
+<head th:replace="~{fragments/head.html:: headDashboard}">
+</head>
 <body>
 <div th:replace="~{fragments/topnav.html}"></div>
 <div class="d-flex">
@@ -124,6 +125,9 @@
         </div>
     </div>
 </div>
+<script th:inline="javascript">
+    var loggedUserName = /*[[${loggedUserName}]]*/ '';
+</script>
 <script src="/script/dashboard.js"></script>
 </body>
 </html>

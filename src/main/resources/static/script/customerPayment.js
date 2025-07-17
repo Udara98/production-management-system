@@ -7,7 +7,7 @@ window.addEventListener('load', () => {
     //     // Call once on load to set initial state
     //     showPaymentOptionByMethod();
     // }
-    // reloadCustomerPaymentTable();
+    reloadCustomerPaymentTable();
     // reloadCustomerPaymentForm();
     // formValidation();
 
@@ -15,15 +15,12 @@ window.addEventListener('load', () => {
     const customerSelect = document.getElementById('add-cp-customer');
     const customerOrdersSection = document.getElementById('customer-orders-section');
     const orderTableBody = document.querySelector('#customerOrderPaymentTable tbody');
-    console.log(customerSelect);
-    console.log(customerOrdersSection);
-    console.log(orderTableBody);
     customerSelect.innerHTML = '<option value="" selected>Select Customer</option>';
     let customers = ajaxGetRequest('/customer/getAllCustomers') || [];
     customers.filter(c => c.customerStatus === 'Active').forEach(c => {
         let opt = document.createElement('option');
         opt.value = c.id;
-        opt.textContent = c.regNo + (c.companyName ? ' - ' + c.companyName : c.firstName + ' ' + c.secondName);
+        opt.textContent = c.regNo + (c.companyName ? '  -  ' + c.companyName : c.firstName + ' ' + c.secondName);
         console.log(opt);
         customerSelect.appendChild(opt);
     });
@@ -81,6 +78,7 @@ window.addEventListener('load', () => {
         }
     });
 
+    
     // Update balance on pay-amount input
     orderTableBody.addEventListener('input', function(e) {
         if (e.target.classList.contains('pay-amount')) {
@@ -182,7 +180,7 @@ window.addEventListener('load', () => {
         });
 
         if (paymentDetails.length === 0) {
-            Swal.fire({ title: "Error", text: "Please select at least one order and enter valid pay amounts.", icon: "error" });
+            Swal.fire({ title: "Error", text: "Please select the customer to add payment", icon: "error" });
             return;
         }
 
@@ -208,6 +206,7 @@ window.addEventListener('load', () => {
         let paymentStatus = document.getElementById('add-cp-payStatus')?.value || '';
         let dto = {
             payAmount: totalAmount,
+            paidAmount:totalAmount,
             balance: balanceSum,
             paymentMethod: paymentMethod,
             paymentStatus: paymentStatus,
@@ -225,29 +224,83 @@ window.addEventListener('load', () => {
 
         console.log(dto);
 
-        $.ajax({
-            url: '/cusPayment',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(dto),
-            success: function(response) {
-                Swal.fire({ title: "Success", text: response, icon: "success" });
-                reloadCustomerPaymentTable();
-                document.getElementById('CPAddForm').reset();
-                // Clear the orders table body
-                document.querySelector('#customerOrderPaymentTable tbody').innerHTML = '';
-                // Optionally reset totals fields if present
-                if (document.getElementById('totalPayable')) document.getElementById('totalPayable').value = '';
-                if (document.getElementById('totalPaid')) document.getElementById('totalPaid').value = '';
-                if (document.getElementById('remainingBalance')) document.getElementById('remainingBalance').value = '';
-                $('#modalAddCusPayment').modal('hide');
-            },
-            error: function(xhr) {
-                Swal.fire({ title: "Error", text: xhr.responseText, icon: "error" });
+        let response = ajaxRequestBody("/cusPayment", "POST", dto);
+        if (response.status === 200) {
+            console.log(response);
+          
+            
+            swal.fire({
+                title: response.responseText.responseText,
+                icon: "success",
+            });
+            // Robust form and modal reset (like employee.js)
+            const formCP = document.getElementById('CPAddForm');
+            if(formCP) formCP.reset();
+            reloadCustomerPaymentTable();
+            // customerPaymentFormRefill();
+            // Remove validation classes
+            document.querySelectorAll('#CPAddForm input, #CPAddForm select, #CPAddForm textarea').forEach((input) => {
+                input.classList.remove('is-valid', 'is-invalid');
+            });
+            formCP.classList.remove('was-validated');
+            $("#modalAddCusPayment").modal("hide");
+
+            if (response.responseText.paymentId) {
+                window.open('/cusPayment/receipt/' + response.responseText.paymentId, '_blank');
             }
 
+            // Clear the order products table (tableOPs)
+            if (OrderProductsTableInstance) {
+                OrderProductsTableInstance.clear().draw();
+            }
+            $("#tableOPs tbody").empty();
+
+          
+            if (document.getElementById('tot-amount')) {
+                document.getElementById('tot-amount').innerHTML = '';
+            }
+            // Clear orderProducts array if present
+            if (typeof orderProducts !== 'undefined') {
+                orderProducts.length = 0;
+            }
+
+        } else {
+            swal.fire({
+                title: "Something Went Wrong",
+                html: response.responseText,
+                icon: "error",
+            });
+        }
+
+        // $.ajax({
+        //     url: '/cusPayment',
+        //     type: 'POST',
+        //     contentType: 'application/json',
+        //     data: JSON.stringify(dto),
+        //     success: function(response) {
+        //         // If backend returns payment ID, open receipt
+        //         if (response && response.paymentId) {
+        //             window.open('/cusPayment/receipt/' + response.paymentId, '_blank');
+        //             Swal.fire({ title: "Success", text: "Payment Made Successfully", icon: "success" });
+        //         } else {
+        //             Swal.fire({ title: "Success", text: response, icon: "success" });
+        //         }
+        //         reloadCustomerPaymentTable();
+        //         document.getElementById('CPAddForm').reset();
+        //         // Clear the orders table body
+        //         document.querySelector('#customerOrderPaymentTable tbody').innerHTML = '';
+        //         // Optionally reset totals fields if present
+        //         if (document.getElementById('totalPayable')) document.getElementById('totalPayable').value = '';
+        //         if (document.getElementById('totalPaid')) document.getElementById('totalPaid').value = '';
+        //         if (document.getElementById('remainingBalance')) document.getElementById('remainingBalance').value = '';
+        //         $('#modalAddCusPayment').modal('hide');
+        //     },
+        //     error: function(xhr) {
+        //         Swal.fire({ title: "Error", text: xhr.responseText, icon: "error" });
+        //     }
+
             
-        });
+        // });
 
         reloadCustomerPaymentTable();
         document.getElementById('CPAddForm').reset();
@@ -281,6 +334,10 @@ const fillDataIntoTotal = () =>{
 
     }
 }
+
+const printCustomerPayment = (element) => {
+    window.open(`/cusPayment/receipt/${element.id}`);
+};
 
 const calculateAdvancePayBalance = () => {
     const addCpPa = document.getElementById("add-cp-pa");
@@ -458,7 +515,7 @@ const reloadCustomerPaymentTable = () => {
         {dataType: "text", propertyName: "receiptNo"},
         {dataType: "function", propertyName: getOrderNO},
         {dataType: "date", propertyName: "paymentDate"},
-        {dataType: "price", propertyName: "totalAmount"},
+        {dataType: "price", propertyName: "payAmount"},
         {dataType: "function", propertyName:  getPaymentMethod},
     ];
     if (cusPaymentTableInstance) {
@@ -483,7 +540,7 @@ const generateCPDropDown = (element) => {
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
-        {name: "Delete", action: null, icon: "fa-solid fa-trash me-2"},
+        {name: "Print", action: printCustomerPayment, icon: "fa-solid fa-print me-2"},
     ];
 
     buttonList.forEach((button) => {

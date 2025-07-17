@@ -1,5 +1,8 @@
 package com.AdwinsCom.AdwinsCom.Service;
 
+import com.AdwinsCom.AdwinsCom.DTO.BankAccountDTO;
+import com.AdwinsCom.AdwinsCom.entity.BankAccount;
+
 import com.AdwinsCom.AdwinsCom.DTO.SupplierWithIngredientsDTO;
 import com.AdwinsCom.AdwinsCom.Repository.IngredientRepository;
 import com.AdwinsCom.AdwinsCom.Repository.SupplierIngredientRepository;
@@ -60,6 +63,19 @@ public class SupplierIngredientService {
         supplier.setUpdatedDate(s.getUpdatedDate());
         supplier.setUpdatedUser(s.getUpdatedUser());
         supplier.setIngredients(ingredients);
+        // Map a single bank account to DTO
+        BankAccountDTO bankAccountDTO = null;
+        if (s.getBankAccounts() != null && !s.getBankAccounts().isEmpty()) {
+            BankAccount ba = s.getBankAccounts().get(0); // Use the first bank account
+            bankAccountDTO = new BankAccountDTO(
+                ba.getId(),
+                ba.getBankName(),
+                ba.getBankBranch(),
+                ba.getAccountNo(),
+                ba.getAccountName()
+            );
+        }
+        supplier.setBankAccount(bankAccountDTO);
         return supplier;
     }
 

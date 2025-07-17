@@ -86,27 +86,5 @@ public class Supplier {
     @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, orphanRemoval = true)
 private List<BankAccount> bankAccounts = new ArrayList<>();
 
-    public Supplier mapDTO(Supplier supplier, SupplierDTO supplierDTO, String userName){
-        Supplier newSupplier = new Supplier();
-        if(supplier != null){
-            newSupplier = supplier;
-            newSupplier.setUpdatedUser(userName);
-            newSupplier.setUpdatedDate(LocalDateTime.now());
-        }else {
-            newSupplier.setAddedUser(userName);
-            newSupplier.setAddedDate(LocalDateTime.now());
-        }
-        newSupplier.setRegNo(supplierDTO.getRegNo());
-        newSupplier.setSupplierName(supplierDTO.getSupplierName());
-        newSupplier.setContactPersonName(supplierDTO.getContactPersonName());
-        newSupplier.setContactNo(supplierDTO.getContactNo());
-        newSupplier.setEmail(supplierDTO.getEmail());
-        newSupplier.setAddress(supplierDTO.getAddress());
-        newSupplier.setJoinDate(supplierDTO.getJoinDate());
-        newSupplier.setSupplierStatus(supplierDTO.getSupplierStatus());
-        newSupplier.setIngredients(supplierDTO.getIngredients());
-        newSupplier.setNote(supplierDTO.getNote());
 
-        return newSupplier;
-    }
 }

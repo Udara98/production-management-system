@@ -20,7 +20,7 @@ const tableDataBinder = (
     dataList.reverse().forEach((element, index) => {
         const tr = document.createElement("tr");
         tr.className = "align-items-center";
-
+        
         const tdIndex = document.createElement("td");
         tdIndex.className = "align-middle";
         tdIndex.innerText = parseInt(index) + 1;

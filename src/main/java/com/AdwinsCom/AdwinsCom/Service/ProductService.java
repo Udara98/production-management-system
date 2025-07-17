@@ -134,62 +134,6 @@ public ResponseEntity<?> AddNewProduct(ProductBatchDTO dto) {
     return ResponseEntity.ok("Product Added Successfully");
 }
 
-
-//    public ResponseEntity<?> AddNewProduct(Product product)  {
-//
-//        // Authentication and authorization
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//
-//        // Get privileges for the logged-in user
-//        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "PRODUCT");
-//
-//        // If user doesn't have "insert" permission, return 403 Forbidden
-//        if (!loguserPrivi.get("insert")) {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-//                    .body("Product Adds not Completed: You don't have permission!");
-//        }
-//
-//
-//        Batch seletedBatch = batchRepository.findById(product.getBatch().getId()).orElse(null);
-//
-//        Double unitSize = product.getUnitSize();
-//        if(product.getUnitType() == ProductUnitType.ML){
-//            unitSize = product.getUnitSize()/1000;
-//        }
-//
-//        if(seletedBatch.getAvailableQuantity() < ( unitSize*product.getQuantity())){
-//            return ResponseEntity.badRequest().body("Can't Make "+product.getQuantity()+" Items. Batch quantity is insufficient.");
-//        }else {
-//            seletedBatch.setAvailableQuantity(seletedBatch.getAvailableQuantity()-( unitSize*product.getQuantity()));
-//            batchRepository.save(seletedBatch);
-//        }
-//
-//
-////        if (!file.isEmpty()) {
-////            try {
-////                File uploadDirFile = new File(uploadDir);
-////                if (!uploadDirFile.exists()) {
-////                    uploadDirFile.mkdirs();
-////                }
-////
-////                String originalFilename = file.getOriginalFilename();
-////                String uniqueFilename = UUID.randomUUID().toString() + "_" + originalFilename;
-////                Path filePath = Paths.get(uploadDir, uniqueFilename);
-////
-////                Files.write(filePath, file.getBytes());
-////                photoPath = "/productimages/"+uniqueFilename;
-////
-////            } catch (IOException e) {
-////                e.printStackTrace();
-////                return ResponseEntity.status(500).body("response");
-////            }
-////        }
-//
-//        product.setBatch(seletedBatch);
-//        product.setProductCode(QuotationRequest.generateUniqueId("PR-"));
-//        product.setAddedUser(userRepository.getUserByUserName(auth.getName()).getId());
-//        product.setAddedDate(LocalDateTime.now());
-//
    @Override
    public ResponseEntity<?> UpdateProduct(ProductBatchDTO dto)  {
        // Authentication and authorization
@@ -262,7 +206,7 @@ public ResponseEntity<?> GetAllProducts() {
             }
         }
 
-        
+            
         productDTOs.add(dto);
     }
     return ResponseEntity.ok(productDTOs);

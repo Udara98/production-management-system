@@ -98,12 +98,28 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
         Ingredient ingredient = ingredientRepository.getIngredientByIngredientCode(purchaseOrder.getIngredientCode());
         Double currentQuantity = ingredient.getQuantity();
         Integer acceptedQty = goodReceiveNoteDTO.getAcceptedQuantity() != null ? goodReceiveNoteDTO.getAcceptedQuantity() : 0;
+        // Calculate new avgCost if unit cost is available
+        Double oldQty = ingredient.getQuantity() != null ? ingredient.getQuantity() : 0.0;
+        Double oldAvgCost = ingredient.getAvgCost() != null ? ingredient.getAvgCost() : 0.0;
+        Double newQty = acceptedQty.doubleValue();
+        // Assume unit cost is available from purchaseOrder or DTO
+        Double newUnitCost = null;
+        if (goodReceiveNoteDTO.getTotalAmount() != null && acceptedQty > 0) {
+            newUnitCost = goodReceiveNoteDTO.getTotalAmount() / acceptedQty;
+        }
+        // Only update avgCost if newUnitCost is available
+        if (newUnitCost != null) {
+            Double totalQty = oldQty + newQty;
+            Double newAvgCost = totalQty > 0 ? ((oldQty * oldAvgCost) + (newQty * newUnitCost)) / totalQty : newUnitCost;
+            ingredient.setAvgCost(newAvgCost);
+        }
         ingredient.setQuantity(currentQuantity + acceptedQty);
         ingredientRepository.save(ingredient);
 
         GoodReceiveNote newGoodReceiveNote = new GoodReceiveNote().mapDTO(null, goodReceiveNoteDTO, auth.getName());
         newGoodReceiveNote.setAcceptedQuantity(goodReceiveNoteDTO.getAcceptedQuantity());
         newGoodReceiveNote.setRejectedQuantity(goodReceiveNoteDTO.getRejectedQuantity());
+        newGoodReceiveNote.setBalance(goodReceiveNoteDTO.getTotalAmount());
         newGoodReceiveNote.setRejectReason(goodReceiveNoteDTO.getRejectReason());
         newGoodReceiveNote.setPaymentStatus(GoodReceiveNote.PaymentStatus.Pending);
         goodReceiveNoteRepository.save(newGoodReceiveNote);
@@ -207,6 +223,45 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
         }
         return ResponseEntity.ok(grnList);
     }
+    public List<com.AdwinsCom.AdwinsCom.DTO.GrnIngredientSummaryDTO> getGrnIngredientSummary(java.time.LocalDate startDate, java.time.LocalDate endDate) {
+        java.sql.Date sqlStartDate = java.sql.Date.valueOf(startDate);
+        java.sql.Date sqlEndDate = java.sql.Date.valueOf(endDate);
+        List<Object[]> rows = goodReceiveNoteRepository.getGrnIngredientSummary(sqlStartDate, sqlEndDate);
+        List<com.AdwinsCom.AdwinsCom.DTO.GrnIngredientSummaryDTO> result = new java.util.ArrayList<>();
+
+        // Calculate lead time as number of days in the range (inclusive)
+        long leadTime = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        if (leadTime <= 0) leadTime = 1;
+
+        // Aggregate total received quantity per ingredient in the period
+        java.util.Map<String, Double> ingredientTotalQty = new java.util.HashMap<>();
+        List<Object[]> qtyRows = goodReceiveNoteRepository.aggregateIngredientReceivedQty(sqlStartDate, sqlEndDate);
+        for (Object[] row : qtyRows) {
+            String ingredientName = row[0] != null ? row[0].toString() : null;
+            // row[1] is ingredientCode, row[2] is SUM(gr.accepted_quantity)
+            Double qty = row[2] != null ? Double.valueOf(row[2].toString()) : 0d;
+            if (ingredientName != null) ingredientTotalQty.put(ingredientName, qty);
+        }
+
+        for (Object[] row : rows) {
+            String ingredientName = row[0] != null ? row[0].toString() : null;
+            String ingredientCode = row[1] != null ? row[1].toString() : null;
+            Double totalQuantity1 = row[2] != null ? Double.valueOf(row[2].toString()) : 0d;
+            Double totalCost = row[3] != null ? Double.valueOf(row[3].toString()) : 0d;
+            Double ropFromDb = row[4] != null ? Double.valueOf(row[4].toString()) : 0d;
+            com.AdwinsCom.AdwinsCom.DTO.GrnIngredientSummaryDTO dto = new com.AdwinsCom.AdwinsCom.DTO.GrnIngredientSummaryDTO();
+            dto.setIngredientCode(ingredientCode);
+            dto.setIngredientName(ingredientName);
+            dto.setTotalQuantity(totalQuantity1);
+            dto.setTotalCost(totalCost);
+            // Calculate generated ROP as before (average daily usage × leadTime)
+            Double totalQty = ingredientTotalQty.getOrDefault(ingredientName, 0d);
+            double avgDailyUsage = totalQty / leadTime;
+            dto.setGeneratedRop(avgDailyUsage * leadTime);
+            dto.setGeneratedRoq(avgDailyUsage * (leadTime + 1));
+            result.add(dto);
+        }
+        return result;
+    }
 
 }
-

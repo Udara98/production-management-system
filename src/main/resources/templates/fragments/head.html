@@ -1,7 +1,6 @@
 <head th:fragment ="headSettings">
     <meta charset="UTF-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title th:text = "${title}"></title>
     <!-- Link Bootstrap min -->
     <link href="/bootstrap-5.3.2/css/bootstrap.min.css"  rel="stylesheet"
     />
@@ -47,7 +46,6 @@
     <script src="/Sweetalert/package/dist/sweetalert2.all.min.js"></script>
 
     <!--    Link Dashboard Js-->
-    <script src="/script/dashboard.js"></script>
     <script src="/script/tableDataFeeder.js"></script>
     <script src="/script/sidebar.js"></script>
 
@@ -116,6 +114,8 @@
     <script src="/script/tableDataFeeder.js"></script>
     <script src="/script/sidebar.js"></script>
 
+    <script src="/script/notification.js"></script>
+
 
 
 
@@ -170,6 +170,8 @@
     <script src="/script/product.js" ></script>
 
     <script src="/script/productionSettings.js"></script>
+
+    <script src="/script/notification.js"></script>
 
 
 
@@ -283,6 +285,8 @@
     <link href="/styles/IngTransferList.css" rel="stylesheet">
     <script src="/script/tableDataFeeder.js" ></script>
 
+    <script src="/script/notification.js"></script>
+
 
 
 </head>
@@ -342,6 +346,8 @@
 
     <script src="/script/tableDataFeeder.js" ></script>
 
+    <script src="/script/notification.js"></script>
+
 
 </head>
 
@@ -400,6 +406,7 @@
     <link href="/styles/IngTransferList.css" rel="stylesheet">
     <script src="/script/tableDataFeeder.js" ></script>
     <script src="/script/quotationRequest.js" ></script>
+    <script src="/script/notification.js"></script>
 
 </head>
 
@@ -519,6 +526,7 @@
     </style>
     <script src="/script/sidebar.js"></script>
     <script src="/script/tableDataFeeder.js" ></script>
+    <script src="/script/notification.js"></script>
 
 </head>
 <head th:fragment ="headCommon">
@@ -564,9 +572,14 @@
     <!--    Link Sweetalert-->
     <script src="/Sweetalert/package/dist/sweetalert2.all.min.js"></script>
 
+    <script src="/script/dashboard.js"></script>
+
+    <script src="/script/notification.js"></script>
+
     <script src="/script/sidebar.js"></script>
     <script src="/script/tableDataFeeder.js" ></script>
     <link href="/styles/purchaseOrder/viewPO.css" rel="stylesheet"/>
+    <script src="/script/userProfile.js"></script>
 
 
 </head>
@@ -629,12 +642,15 @@
     <script src="/script/productionItem.js"></script>
     <script src="/script/batch.js"></script>
 
+    <script src="/script/dashboard.js"></script>
+    <script src="/script/notification.js"></script>
+
 
 </head>
 <head th:fragment ="headDashboard">
     <meta charset="UTF-8"/>
+    <title>Dashboard</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title th:text = "${title}"></title>
     <!-- Link Bootstrap min -->
     <link href="/bootstrap-5.3.2/css/bootstrap.min.css"  rel="stylesheet"
     />
@@ -701,4 +717,7 @@
     <script src="/script/tableDataFeeder.js" ></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="/script/notification.js"></script>
+    <script src="/script/userProfile.js"></script>
+
 </head>

@@ -2,6 +2,7 @@ package com.AdwinsCom.AdwinsCom.controller;
 
 import com.AdwinsCom.AdwinsCom.DTO.CustomerOrderDTO;
 import com.AdwinsCom.AdwinsCom.Service.ICustomerOrderService;
+import com.AdwinsCom.AdwinsCom.Service.OrderAssignmentService;
 import com.AdwinsCom.AdwinsCom.entity.CustomerOrder;
 
 import org.springframework.http.ResponseEntity;
@@ -15,9 +16,11 @@ import org.springframework.web.servlet.ModelAndView;
 public class CustomerOrderController {
 
     final ICustomerOrderService customerOrderService;
+    final OrderAssignmentService orderAssignmentService;
 
-    public CustomerOrderController(ICustomerOrderService customerOrderService) {
+    public CustomerOrderController(ICustomerOrderService customerOrderService, OrderAssignmentService orderAssignmentService) {
         this.customerOrderService = customerOrderService;
+        this.orderAssignmentService = orderAssignmentService;
     }
 
     @GetMapping
@@ -76,6 +79,15 @@ public class CustomerOrderController {
         ModelAndView mv = new ModelAndView("fragments/Sales/CustomerOrder/CustomerOrderInvoice");
         mv.addObject("order", order);
         return mv;
+    }
+
+    @GetMapping("/assign/{orderId}")
+    public ResponseEntity<?> assignOrder(@PathVariable Integer orderId) {
+        try {
+            return orderAssignmentService.assignOrder(orderId);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
     }
 
 }

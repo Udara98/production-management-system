@@ -34,10 +34,10 @@ public class DashboardController {
             photoBase64 = Base64.getEncoder().encodeToString(loggedUser.getPhoto());
         }
 
-        dashboardMV.addObject("loggedusername", auth.getName());
-        dashboardMV.addObject("loggeduserrole", loggedUser.getRoles().iterator().next().getName());    // 'next()' return first role ob
-        dashboardMV.addObject("loggeduserphoto", photoBase64);
-        dashboardMV.addObject("topcontenttitle", "Dashboard");
+        dashboardMV.addObject("loggedUserName", auth.getName());
+        dashboardMV.addObject("loggedUserRole", loggedUser.getRoles().iterator().next().getName());    // 'next()' return first role ob
+        dashboardMV.addObject("loggedUserPhoto", photoBase64);
+        dashboardMV.addObject("topContentTitle", "Dashboard");
 
         dashboardMV.setViewName("dashboard.html");
         return dashboardMV;

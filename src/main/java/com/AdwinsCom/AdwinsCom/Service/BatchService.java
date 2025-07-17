@@ -1,6 +1,9 @@
 package com.AdwinsCom.AdwinsCom.Service;
 
 import com.AdwinsCom.AdwinsCom.DTO.BatchDTO;
+import com.AdwinsCom.AdwinsCom.DTO.BatchProductionReportDTO;
+import java.util.ArrayList;
+import com.AdwinsCom.AdwinsCom.DTO.BatchProductionReportDTO;
 import com.AdwinsCom.AdwinsCom.Repository.*;
 import com.AdwinsCom.AdwinsCom.entity.Ingredient;
 import com.AdwinsCom.AdwinsCom.entity.ProductHasBatch;
@@ -14,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,13 +28,14 @@ public class BatchService implements IBatchService{
     final RecipeRepository recipeRepository;
     final IngredientRepository ingredientRepository;
     final ProductHasBatchRepository productHasBatchRepository;
+    final SupplierPaymentHasGoodReceiveNoteService supplierPaymentHasGoodReceiveNoteService;
 
-
-    public BatchService(BatchRepository batchRepository, RecipeRepository recipeRepository, IngredientRepository ingredientRepository, ProductHasBatchRepository productHasBatchRepository) {
+    public BatchService(BatchRepository batchRepository, RecipeRepository recipeRepository, IngredientRepository ingredientRepository, ProductHasBatchRepository productHasBatchRepository, SupplierPaymentHasGoodReceiveNoteService supplierPaymentHasGoodReceiveNoteService) {
         this.batchRepository = batchRepository;
         this.recipeRepository = recipeRepository;
         this.ingredientRepository = ingredientRepository;
         this.productHasBatchRepository = productHasBatchRepository;
+        this.supplierPaymentHasGoodReceiveNoteService = supplierPaymentHasGoodReceiveNoteService;
     }
 
 
@@ -142,6 +148,32 @@ public class BatchService implements IBatchService{
     }
 
 
+    public List<BatchProductionReportDTO> getBatchProductionReportByDateRange(java.time.LocalDateTime start, java.time.LocalDateTime end) {
+        
+        
+        List<Object[]> rows = batchRepository.getBatchProductionReportByDateRange(start, end);
+        return mapRowsToDTO(rows);
+    }
 
+    private List<BatchProductionReportDTO> mapRowsToDTO(List<Object[]> rows) {
+        List<BatchProductionReportDTO> result = new ArrayList<>();
+        for (Object[] row : rows) {
+            BatchProductionReportDTO dto = new BatchProductionReportDTO();
+            dto.setBatchNo(row[0] != null ? row[0].toString() : null);
+            dto.setTotalQuantity(row[1] != null ? Double.valueOf(row[1].toString()) : null);
+            dto.setAvailableQuantity(row[2] != null ? Double.valueOf(row[2].toString()) : null);
+            dto.setDamagedQuantity(row[3] != null ? Double.valueOf(row[3].toString()) : null);
+            dto.setTotalCost(row[4] != null ? Double.valueOf(row[4].toString()) : null);
+            result.add(dto);
+        }
+        return result;
+    }
+
+
+
+    public java.util.List<com.AdwinsCom.AdwinsCom.DTO.SupplierPaymentReportDTO> getSupplierPaymentReportByDateRange(LocalDate startDate, LocalDate endDate) {
+        return supplierPaymentHasGoodReceiveNoteService.getSupplierPaymentReportByDateRange(startDate, endDate);
+    }
 
 }
+

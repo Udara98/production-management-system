@@ -98,6 +98,8 @@ window.addEventListener("load",  () => {
 //Define function to generate Supplier table
 const reloadSupTable =  () => {
     const suppliers = ajaxGetRequest("/supplier/getAllSuppliers");
+
+    console.log(suppliers);
     let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
 
     const getStatus = (ob) => {
@@ -171,6 +173,41 @@ const SupformValidation = () =>{
     note.addEventListener('input', () => {
         validation(note, '^.{0,255}$', 'supplier', 'note');
     });
+
+    // --- Bank Account Fields Validation ---
+    const bankName = document.getElementById('bankName');
+    const bankBranch = document.getElementById('bankBranch');
+    const accountNo = document.getElementById('accountNo');
+    const accountName = document.getElementById('accountName');
+
+    if (!supplier.bankAccount) {
+        supplier.bankAccount = {
+            bankName: '',
+            bankBranch: '',
+            accountNo: '',
+            accountName: ''
+        };
+    }
+    if (bankName) {
+        bankName.addEventListener('input', () => {
+            validation(bankName, '^[A-Za-z0-9 .,&-]{2,50}$', 'supplier.bankAccount', 'bankName');
+        });
+    }
+    if (bankBranch) {
+        bankBranch.addEventListener('input', () => {
+            validation(bankBranch, '^[A-Za-z0-9 .,&-]{2,50}$', 'supplier.bankAccount', 'bankBranch');
+        });
+    }
+    if (accountNo) {
+        accountNo.addEventListener('input', () => {
+            validation(accountNo, '^.{4,30}$', 'supplier.bankAccount', 'accountNo'); // Allows alphanumeric, min 4 chars
+        });
+    }
+    if (accountName) {
+        accountName.addEventListener('input', () => {
+            validation(accountName, '^[A-Za-z ]{2,50}$', 'supplier.bankAccount', 'accountName');
+        });
+    }
 }
 
 //Define Supplier submit function
@@ -186,6 +223,15 @@ const supplierSubmit = () => {
             });
 
     supplier.ingredients = ingList;
+
+    // Collect bank account details from form
+    const bankAccount = {
+        bankName: document.getElementById("bankName").value,
+        bankBranch: document.getElementById("bankBranch").value,
+        accountNo: document.getElementById("accountNo").value,
+        accountName: document.getElementById("accountName").value
+    };
+    supplier.bankAccount = bankAccount;
     console.log(supplier);
 
     // Check form errors
@@ -256,12 +302,75 @@ const reloadSupplierForm = () =>{
 }
 
 //Define function to generate dropdown
+const printSupplier = (supplier) => {
+    // Populate modal with supplier details and show print button
+    const supplierModal = new bootstrap.Modal(document.getElementById("supplierModal"));
+
+    const supplierDetailsDiv = document.getElementById("supplierDetails");
+    let bankAccountsHtml = '';
+    if (supplier.bankAccount) {
+        bankAccountsHtml = `<div>
+            <hr>
+            <h6><strong>Bank Account</strong></h6>
+            <div><strong>Bank Name:</strong> ${supplier.bankAccount.bankName || ''}</div>
+            <div><strong>Bank Branch:</strong> ${supplier.bankAccount.bankBranch || ''}</div>
+            <div><strong>Account No:</strong> ${supplier.bankAccount.accountNo || ''}</div>
+            <div><strong>Account Name:</strong> ${supplier.bankAccount.accountName || ''}</div>
+        </div>`;
+    }
+    let ingredientsHtml = '';
+    if (supplier.ingredients && supplier.ingredients.length > 0) {
+        ingredientsHtml = `<div class="mb-3"><ul>${supplier.ingredients.map(ing => `<li>${ing.ingredientName} (${ing.ingredientCode})</li>`).join('')}</ul></div>`;
+    }
+    supplierDetailsDiv.innerHTML = `
+        <div class="mb-3">
+            <div><strong>Reg No:</strong> ${supplier.regNo || ''}</div>
+            <div><strong>Name:</strong> ${supplier.supplierName || ''}</div>
+            <div><strong>Contact Person:</strong> ${supplier.contactPersonName || ''}</div>
+            <div><strong>Contact Number:</strong> ${supplier.contactNo || ''}</div>
+            <div><strong>Email:</strong> ${supplier.email || ''}</div>
+            <div><strong>Address:</strong> ${supplier.address || ''}</div>
+            <div><strong>Status:</strong> ${supplier.supplierStatus || ''}</div>
+            <div><strong>Join Date:</strong> ${supplier.joinDate || ''}</div>
+            <div><strong>Note:</strong> ${supplier.note || 'N/A'}</div>
+        </div>
+        <div class="mb-3">
+            <hr>
+            <h6><strong>Supplier Ingredients</strong></h6>
+            ${ingredientsHtml}
+        </div>
+        ${bankAccountsHtml}
+        <div class="text-end">
+            <button id="btnPrintSupplier" class="btn btn-primary"><i class="fa fa-print"></i> Print</button>
+        </div>
+    `;
+    supplierModal.show();
+    setTimeout(() => {
+        document.getElementById('btnPrintSupplier').onclick = function() {
+            // Print only the modal content
+            let printContents = supplierDetailsDiv.innerHTML;
+            let printWindow = window.open('', '', 'height=700,width=900');
+            printWindow.document.write(`
+                <html>
+                <head>
+                <title>Supplier Details</title>
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+                </head>
+                <body>` + printContents + `</body></html>`);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
+        };
+    }, 300);
+};
+
 const generateSupDropDown = (element) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
         {name: "View", action: viewSupplierData, icon: "fa-solid fa-eye me-2"},
+        {name: "Print", action: printSupplier, icon: "fa-solid fa-print me-2"},
         {
             name: "Edit",
             action: editSupplier,
@@ -334,7 +443,7 @@ const viewSupplierData = (supplier) => {
         document.getElementById("supplierModal")
     );
 
-    bindSupplierData(supplier);
+    // bindSupplierData(supplier);
     supplierModal.show();
 };
 

@@ -27,11 +27,12 @@
         <thead class="cusTableHead">
         <th>#</th>
         <th>Reg No</th>
+        <th>Business Type</th>
+        <th>Company Name</th>
         <th>Customer Name</th>
         <th>NIC</th>
         <th>Mobile No</th>
         <th>Address</th>
-        <th>Company Name</th>
         <th>Customer State</th>
         <th>Modify</th>
         </thead>
@@ -53,4 +54,21 @@
     >
         <div th:replace="~{fragments/Sales/Customer/CustomerEditForm.html}"  ></div>
     </div>
+    <div
+            class="modal fade"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+            id="customerModal"
+    >
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Customer Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="customerDetails">
+                        </div>
+                    </div>
+                </div>
+            </div>
 </div>

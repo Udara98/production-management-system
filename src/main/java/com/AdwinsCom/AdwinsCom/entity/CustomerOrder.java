@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "customer_order")
 @Data
@@ -18,6 +20,7 @@ import java.util.List;
 public class CustomerOrder {
 
     public enum OrderStatus{
+        NotAssigned, // Order accepted but not yet assigned for processing/deduction
         Pending,
         Completed,
         Canceled
@@ -46,6 +49,7 @@ public class CustomerOrder {
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "cus_order_id")
+    @JsonManagedReference
     private List<CustomerOrderProduct> customerOrderProducts;
 
     @Column(name = "added_user")

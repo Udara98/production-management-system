@@ -4,14 +4,16 @@ import com.AdwinsCom.AdwinsCom.entity.Customer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.math.BigDecimal;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomerDTO {
     private Integer id;
+    private String regNo;
     private String businessType; // "COMPANY" or "INDIVIDUAL"
     private String companyName; // Business Name (Company)
     private String brn; // Business Registration Number (Company)
@@ -25,5 +27,5 @@ public class CustomerDTO {
     private String address;
     private Double creditLimit;
     private Customer.CustomerStatus customerStatus;
-    private java.util.List<BankAccountDTO> bankAccounts;
+    private BankAccountDTO bankAccount;
 }

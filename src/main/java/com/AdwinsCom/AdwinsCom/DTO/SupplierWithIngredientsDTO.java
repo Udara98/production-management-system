@@ -9,11 +9,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class SupplierWithIngredientsDTO {
+    private BankAccountDTO bankAccount;
     private Integer id;
     private String regNo;
     private String supplierName;

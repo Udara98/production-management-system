@@ -909,7 +909,7 @@ const checkUpdateProductFormError = () => {
         const stockUnitCost = document.getElementById('stockUnitCost');
 
 
-     const restockBatchList = ajaxGetRequest(`batch/getBatchesForProduct/${product.id}/true`)
+     const restockBatchList = ajaxGetRequest(`batch/getBatchesForProduct/${product.productId}/true`)
 
      console.log(restockBatchList);
 
@@ -925,7 +925,7 @@ const checkUpdateProductFormError = () => {
       stockAdd = new Object();
       oldStockAdd = null;
 
-      stockAdd.productId = product.id;
+      stockAdd.productId = product.productId;
 
 
       stockProductName.value = product.productName;
@@ -1052,69 +1052,54 @@ const checkProductRestockFormError = () => {
 
 
  //Refill Ingredient form fields
-    const viewProductDetailsTableRefill = (ob, rowIndex) => {
-      $("#modalViewProduct").modal('show');
-      product = JSON.parse(JSON.stringify(ob));
-      console.log(product);
+const viewProductDetailsTableRefill = (ob, rowIndex) => {
+    console.log(ob);
 
-        const detailProductImageThumbnail = document.getElementById('detailProductImageThumbnail');
+    $("#modalViewProduct").modal('show');
+    product = JSON.parse(JSON.stringify(ob));
+    console.log(product);
 
-        const detailProductName = document.getElementById('detailProductName');
+    const detailProductImageThumbnail = document.getElementById('detailProductImageThumbnail');
+    const detailProductName = document.getElementById('detailProductName');
+    const detailProductCode = document.getElementById('detailProductCode');
+    const detailProductStatus = document.getElementById('detailProductStatus');
+    const detailQuantity = document.getElementById('detailQuantity');
 
-        const detailProductCode = document.getElementById('detailProductCode');
+    // Set product image or fallback
+    if (product.productPhoto != null) {
+        detailProductImageThumbnail.src = atob(product.productPhoto);
+    } else {
+        detailProductImageThumbnail.src = '/image/productimages/photo-icon-picture-icon.jpg';
+    }
 
-        const detailProductStatus = document.getElementById('detailProductStatus');
+    detailProductName.innerText = product.productName || '';
+    detailProductCode.innerText = product.productCode || '';
+    detailProductStatus.innerHTML = getStatus(product);
+    detailQuantity.innerText = product.quantity ?? '';
 
-        const detailQuantity = document.getElementById('detailQuantity');
+    // Batch No function (null safe)
+    const getBatchNo = (ob) => ob.latestBatch && ob.latestBatch.batchNo ? ob.latestBatch.batchNo : '';
 
+    const displayProperty = [
+        { dataType: "function", propertyName: getBatchNo },
+        { dataType: "text", propertyName: "quantity" },
+        { dataType: "text", propertyName: "expireDate" },
+        { dataType: "price", propertyName: "salesPrice" },
+    ];
 
-         if(product.productPhoto !=null){
-            detailProductImageThumbnail.src = atob(product.productPhoto);
+    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/PRODUCT");
+    const productHasBatches = ajaxGetRequest(`/productHasBatch/getByProductId/${product.productId || product.id}`);
 
-          }else {
-             productPhoto.src = '/image/productimages/photo-icon-picture-icon.jpg';
-          }
-
-          detailProductName.innerText = product.productName;
-          detailProductCode.innerText = product.productCode;
-          detailProductStatus.innerHTML = getStatus(product);
-          detailQuantity.innerText = product.quantity;
-
-          const getBatchNo = (ob) =>{
-                      return ob.latestBatch.batchNo;
-                      }
-
-
-           const displayProperty = [
-                      {dataType: "function", propertyName: getBatchNo},
-                      {dataType: "text", propertyName: "quantity"},
-                      {dataType: "text", propertyName: "expireDate"},
-                      {dataType: "price", propertyName: "salesPrice"},
-                  ];
-
-         let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/PRODUCT");
-
-          const productHasBatches = ajaxGetRequest(`/productHasBatch/getByProductId/${product.productId}`)
-
-
-
-         tableDataBinder(
-             batchDetailsTable,
-             productHasBatches,
-             displayProperty,
-             null,
-             null,
-             getPrivilege,
-             null
-         );
-
-//        const stockUnitCost = document.getElementById('stockUnitCost');
-//
-//
-//     const restockBatchList = ajaxGetRequest(`batch/getBatchesForProduct/${product.id}/true`)
-//
-//     console.log(restockBatchList);
-//
+    tableDataBinder(
+        batchDetailsTable,
+        productHasBatches,
+        displayProperty,
+        null,
+        null,
+        getPrivilege,
+        null
+    );
+};
 //     //Fill Dropdown of  select Supplier
 //       restockBatchList.forEach(batch => {
 //               const option = document.createElement('option');
@@ -1136,4 +1121,4 @@ const checkProductRestockFormError = () => {
 //      currentStock.value = product.quantity;
 //      currentStock.disabled = true;
 
-    };
+    

@@ -26,4 +26,5 @@ public class SupplierDTO {
     private LocalDate joinDate;
     private Supplier.SupplierStatus supplierStatus;
     private Set<Ingredient> ingredients;
+    private BankAccountDTO bankAccount;
 }

@@ -23,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,6 +38,9 @@ public class ProductionItemService implements IProductionItemService {
 
     @Autowired
     private IPrivilegeService privilegeService;
+
+    @Autowired
+private INotificationService notificationService;
 
     @Autowired
     private UserRepository userRepository;
@@ -55,10 +60,10 @@ public class ProductionItemService implements IProductionItemService {
 
         User loggedUser = userRepository.getUserByUserName(auth.getName());
 
-
-        productionItemMV.addObject("loggedUsername", auth.getName());
-        productionItemMV.addObject("loggeduserrole", loggedUser.getRoles().iterator().next().getName());
-        productionItemMV.addObject("loggeduserphoto", loggedUser.getPhoto()); 
+        productionItemMV.addObject("loggedUserName", auth.getName());
+        productionItemMV.addObject("loggedUserRole", loggedUser.getRoles().iterator().next().getName());
+        productionItemMV.addObject("loggedUserPhoto", loggedUser.getPhoto()); 
+        
 
         productionItemMV.setViewName("ProductionManagement.html");
 
@@ -125,6 +130,9 @@ public class ProductionItemService implements IProductionItemService {
     @Override
     public ResponseEntity<?> CheckIngredientAvailability(String recipeCode, Integer batchSize) {
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+
         Recipe recipe = recipeRepository.findByRecipeCode(recipeCode);
         List<IngredientAvailabilityDTO> ingredientAvailabilityDTOS = new ArrayList<>();
         AvailabilityResultDTO resultDTO = new AvailabilityResultDTO();
@@ -153,9 +161,35 @@ public class ProductionItemService implements IProductionItemService {
             if(ingredientStockLevel > (ingRecipeQuantity * batchSize)){
                 availabilityDTO.setIsAvailable(true);
                 cost += (ingRecipeQuantity * batchSize)*ingredient.getAvgCost();
-            }else {
+
+                // Low stock warning logic: only if stock is below ROP (reorder point)
+                if (ingredientStockLevel < ingredient.getRop()) {
+                    com.AdwinsCom.AdwinsCom.entity.Notification notification = new com.AdwinsCom.AdwinsCom.entity.Notification();
+                    notification.setType("LowStockWarning");
+                    String msg = "Low stock warning: " +
+                        ingredient.getIngredientName() + " (" + ingredient.getIngredientCode() + ")\n" +
+                        "Available: " + ingredientStockLevel + " " + ingredient.getUnitType() + "\n" +
+                        "ROP: " + ingredient.getRop() + " " + ingredient.getUnitType() + "\n" +
+                        "For Recipe: " + recipe.getRecipeName() + " (" + recipe.getRecipeCode() + ")\n" +
+                        LocalDateTime.now() + "\n" + "by" + auth.getName();
+                    notification.setMessage(msg);
+                    notificationService.saveNotification(notification);
+                }
+            } else {
                 availabilityDTO.setIsAvailable(false);
                 resultDTO.setIsIngAvailable(false);
+
+                // Ingredient shortage notification
+                com.AdwinsCom.AdwinsCom.entity.Notification notification = new com.AdwinsCom.AdwinsCom.entity.Notification();
+                notification.setType("IngredientShortage");
+                String msg = "Ingredient shortage: " +
+                    ingredient.getIngredientName() + " (" + ingredient.getIngredientCode() + ")\n" +
+                    "Required: " + (ingRecipeQuantity * batchSize) + " " + ingredient.getUnitType() + "\n" +
+                    "Available: " + ingredientStockLevel + " " + ingredient.getUnitType() + "\n" +
+                    "For Recipe: " + recipe.getRecipeName() + " (" + recipe.getRecipeCode() + ")\n" +
+                    "Time: 2025-07-11 00:13:11";
+                notification.setMessage(msg);
+                notificationService.saveNotification(notification);
             }
 
             ingredientAvailabilityDTOS.add(availabilityDTO);

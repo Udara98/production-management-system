@@ -59,6 +59,22 @@ public class Product {
     @Column(name = "reorder_quantity")
     private Integer reorderQuantity;
 
+    public Integer getRop() {
+        return reorderPoint;
+    }
+
+    public void setRop(Integer rop) {
+        this.reorderPoint = rop;
+    }
+
+    public Integer getRoq() {
+        return reorderQuantity;
+    }
+
+    public void setRoq(Integer roq) {
+        this.reorderQuantity = roq;
+    }
+
     @Column(name = "quantity")
     private Integer quantity;
 

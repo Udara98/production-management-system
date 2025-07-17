@@ -1,6 +1,7 @@
 package com.AdwinsCom.AdwinsCom.Service;
 
 import com.AdwinsCom.AdwinsCom.DTO.CustomerOrderDTO;
+import com.AdwinsCom.AdwinsCom.DTO.CustomerSalesSummaryDTO;
 import com.AdwinsCom.AdwinsCom.Repository.CustomerOrderRepository;
 import com.AdwinsCom.AdwinsCom.Repository.ProductHasBatchRepository;
 import com.AdwinsCom.AdwinsCom.Repository.CustomerRepository;
@@ -18,11 +19,16 @@ import com.AdwinsCom.AdwinsCom.entity.QuotationRequest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.AdwinsCom.AdwinsCom.entity.Notification;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class CustomerOrderService implements ICustomerOrderService{
@@ -31,7 +37,13 @@ public class CustomerOrderService implements ICustomerOrderService{
     final ProductHasBatchRepository productHasBatchRepository;
     final CustomerRepository customerRepository;
     final ProductRepository productRepository;
-    final com.AdwinsCom.AdwinsCom.Repository.CustomerPaymentHasOrderRepository customerPaymentHasOrderRepository;
+    final com.AdwinsCom.AdwinsCom.Repository.CustomerPaymentHasOrderRepository customerPaymentHasOrderRepository; // removed unnecessary orderProducts field
+
+    @Autowired
+    private com.AdwinsCom.AdwinsCom.Repository.CustomerOrderProductRepository customerOrderProductRepository;
+
+    @Autowired
+    private com.AdwinsCom.AdwinsCom.Service.NotificationService notificationService;
 
     public CustomerOrderService(CustomerOrderRepository customerOrderRepository, ProductHasBatchRepository productHasBatchRepository, CustomerRepository customerRepository, ProductRepository productRepository, com.AdwinsCom.AdwinsCom.Repository.CustomerPaymentHasOrderRepository customerPaymentHasOrderRepository) {
         this.customerOrderRepository = customerOrderRepository;
@@ -80,6 +92,7 @@ public class CustomerOrderService implements ICustomerOrderService{
         newCustomerOrder.setCustomer(customer);
         newCustomerOrder.setOrderStatus(customerOrderDTO.getOrderStatus());
 
+
         // Generate invoiceNo if not set
         if (newCustomerOrder.getInvoiceNo() == null || newCustomerOrder.getInvoiceNo().isEmpty()) {
             String invoiceNo = generateNextInvoiceNo();
@@ -88,6 +101,8 @@ public class CustomerOrderService implements ICustomerOrderService{
 
         List<CustomerOrderProduct> orderProducts = new ArrayList<>();
 
+
+        boolean allProductsHaveStock = true;
         for (CustomerOrderDTO.CustomerOrderProductDTO orderProductDTO : customerOrderDTO.getCustomerOrderProducts()) {
             Integer productId = orderProductDTO.getProductId();
             Integer requiredQty = orderProductDTO.getQuantity();
@@ -103,12 +118,14 @@ public class CustomerOrderService implements ICustomerOrderService{
                     .collect(Collectors.toList());
 
             int remaining = requiredQty;
+            boolean hasSufficientStock = false;
+            Double latestBatchPrice = null;
+            if (!batches.isEmpty()) {
+                latestBatchPrice = batches.get(batches.size() - 1).getSalesPrice();
+            }
             for (ProductHasBatch batch : batches) {
                 if (batch.getQuantity() <= 0) continue;
                 int takeQty = Math.min(remaining, batch.getQuantity());
-                // Deduct from batch
-                batch.setQuantity(batch.getQuantity() - takeQty);
-                productHasBatchRepository.save(batch);
 
                 // Use batch price for this portion
                 double productPrice = batch.getSalesPrice();
@@ -123,10 +140,24 @@ public class CustomerOrderService implements ICustomerOrderService{
                 orderProducts.add(orderLine);
 
                 remaining -= takeQty;
-                if (remaining <= 0) break;
+                if (remaining <= 0) {
+                    hasSufficientStock = true;
+                    break;
+                }
             }
             if (remaining > 0) {
-                throw new IllegalStateException("Insufficient stock for product ID: " + productId);
+                // Save the remaining as a product line with no batch
+                CustomerOrderProduct orderLine = new CustomerOrderProduct();
+                orderLine.setProduct(product);
+                orderLine.setQuantity(remaining);
+                orderLine.setProductPrice(latestBatchPrice); // could be null if no batch exists
+                orderLine.setProductLinePrice(latestBatchPrice != null ? latestBatchPrice * remaining : null);
+                orderLine.setProductHasBatch(null);
+                orderProducts.add(orderLine);
+                hasSufficientStock = false;
+            }
+            if (!hasSufficientStock) {
+                allProductsHaveStock = false;
             }
         }
         // Calculate total amount (sum of all order line prices)
@@ -137,15 +168,42 @@ public class CustomerOrderService implements ICustomerOrderService{
         // Dynamic credit limit check
         Double outstanding = customerOrderRepository.getTotalOutstandingByCustomerId(customer.getId());
         if (outstanding == null) outstanding = 0.0;
-        if (outstanding + totalAmount > customer.getCreditLimit()) {
-            return ResponseEntity.status(400)
-                .body("Order cannot be placed: Customer credit limit exceeded. <br> Outstanding: Rs. " + outstanding + ", Order Total: Rs. " + totalAmount + " <br> Credit Limit: Rs. " + customer.getCreditLimit());
+        boolean hasSufficientCredit = (outstanding + totalAmount <= customer.getCreditLimit());
+
+        // Set order status based on stock/credit
+        if (allProductsHaveStock && hasSufficientCredit) {
+            newCustomerOrder.setOrderStatus(CustomerOrder.OrderStatus.Pending);
+            // Deduct from batch quantities
+            for (CustomerOrderProduct orderLine : orderProducts) {
+                ProductHasBatch batch = orderLine.getProductHasBatch();
+                if (batch != null) {
+                    batch.setQuantity(batch.getQuantity() - orderLine.getQuantity());
+                    productHasBatchRepository.save(batch);
+                }
+            }
+        } else {
+            newCustomerOrder.setOrderStatus(CustomerOrder.OrderStatus.NotAssigned);
+            // Do NOT deduct from batch quantities
+            // Send notification for NotAssigned order
+            Notification notAssignedNotif = new Notification();
+            notAssignedNotif.setType("OrderNotAssigned");
+            notAssignedNotif.setTimestamp(LocalDateTime.now());
+            notAssignedNotif.setResolved(false);
+            notAssignedNotif.setReportedBy(userName);
+            String dateStr = java.time.LocalDate.now().toString();
+            notAssignedNotif.setMessage("Order " + newCustomerOrder.getOrderNo() + " for customer " + customer.getCompanyName() + " is not assigned due to insufficient stock or credit.\nReported By: " + userName + "\nDate: " + dateStr);
+            notificationService.saveNotification(notAssignedNotif);
         }
 
         customerOrderRepository.save(newCustomerOrder);
         Map<String, Object> resp = new HashMap<>();
         resp.put("orderId", newCustomerOrder.getId());
-        resp.put("responseText", "Customer Order Placed Successfully");
+        resp.put("orderStatus", newCustomerOrder.getOrderStatus().name());
+        if (newCustomerOrder.getOrderStatus() == CustomerOrder.OrderStatus.NotAssigned) {
+            resp.put("responseText", "Order placed but not assigned due to insufficient stock or credit.");
+        } else {
+            resp.put("responseText", "Customer Order Placed Successfully");
+        }
         return ResponseEntity.ok(resp);
     }
 
@@ -199,6 +257,41 @@ public class CustomerOrderService implements ICustomerOrderService{
         return ResponseEntity.ok(dtoList);
     }
 
+    @Override
+    public java.util.List<com.AdwinsCom.AdwinsCom.DTO.CustomerSalesSummaryDTO> getCustomerSalesSummary(java.time.LocalDate startDate, java.time.LocalDate endDate) {
+        java.util.List<Object[]> rawList = customerOrderRepository.getCustomerSalesSummary(startDate, endDate);
+        java.util.List<com.AdwinsCom.AdwinsCom.DTO.CustomerSalesSummaryDTO> result = new java.util.ArrayList<>();
+        System.out.println(rawList);
+        for (Object[] row : rawList) {
+            // regNo (String), customerName (String), totalAmount (Number), totalQuantity (Number)
+            String regNo = row[0] != null ? row[0].toString() : null;
+            String customerName = row[1] != null ? row[1].toString() : "";
+            Double totalAmount = 0.0;
+            Integer totalQuantity = 0;
+            if (row[2] != null) {
+                if (row[2] instanceof Number) {
+                    totalAmount = ((Number) row[2]).doubleValue();
+                } else {
+                    try {
+                        totalAmount = Double.parseDouble(row[2].toString());
+                    } catch (Exception e) { totalAmount = 0.0; }
+                }
+            }
+            if (row[3] != null) {
+                if (row[3] instanceof Number) {
+                    totalQuantity = ((Number) row[3]).intValue();
+                } else {
+                    try {
+                        totalQuantity = Integer.parseInt(row[3].toString());
+                    } catch (Exception e) { totalQuantity = 0; }
+                }
+            }
+            result.add(new CustomerSalesSummaryDTO(regNo, customerName, totalAmount, totalQuantity));
+        }
+        return result;
+    }
+
+
     public CustomerOrder getOrderEntityById(Integer id) {
         return customerOrderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + id));
     }
@@ -223,5 +316,26 @@ public class CustomerOrderService implements ICustomerOrderService{
     @Override
     public ResponseEntity<?> DeleteCustomerOrder(Integer id) {
         return null;
+    }
+
+    // Product Sales Summary
+    public java.util.List<com.AdwinsCom.AdwinsCom.DTO.ProductSalesSummaryDTO> getProductSalesSummary(java.time.LocalDate startDate, java.time.LocalDate endDate) {
+        java.util.List<Object[]> rawList = customerOrderProductRepository.getProductSalesSummary(startDate, endDate);
+        java.util.List<com.AdwinsCom.AdwinsCom.DTO.ProductSalesSummaryDTO> result = new java.util.ArrayList<>();
+        long leadTime = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
+for (Object[] row : rawList) {
+    String productName = row[0] != null ? row[0].toString() : "";
+    Integer totalQuantity = row[1] != null ? ((Number) row[1]).intValue() : 0;
+    Double totalAmount = row[2] != null ? ((Number) row[2]).doubleValue() : 0.0;
+    Double avgDailySales = leadTime > 0 ? totalQuantity / (double)leadTime : 0.0;
+    Double generatedRop = avgDailySales * (double)leadTime;
+    com.AdwinsCom.AdwinsCom.DTO.ProductSalesSummaryDTO dto = new com.AdwinsCom.AdwinsCom.DTO.ProductSalesSummaryDTO();
+    dto.setProductName(productName);
+    dto.setTotalAmount(totalAmount);
+    dto.setTotalQuantity(totalQuantity);
+    dto.setGeneratedRop(generatedRop);
+    result.add(dto);
+}
+        return result;
     }
 }

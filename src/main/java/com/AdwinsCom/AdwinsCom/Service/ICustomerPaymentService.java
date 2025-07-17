@@ -13,4 +13,5 @@ public interface ICustomerPaymentService {
     ResponseEntity<?>getLatestCompletedPaymentByOrderId(Integer id);
 
 
+    CustomerPaymentDTO getCustomerPaymentById(int id);
 }

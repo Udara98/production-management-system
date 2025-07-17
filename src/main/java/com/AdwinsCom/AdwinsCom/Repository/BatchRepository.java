@@ -23,4 +23,10 @@ public interface BatchRepository extends JpaRepository<Batch,Integer> {
     @Query("SELECT b.batchNo FROM Batch b WHERE b.id = :batchId")
     String findBatchNoById(@Param("batchId") Integer batchId);
 
+    @Query("SELECT b.batchNo, b.totalQuantity, b.availableQuantity, b.damagedQuantity, b.totalCost FROM Batch b WHERE b.batchStatus <> 'Removed' AND b.manufactureDate BETWEEN :startDate AND :endDate")
+    List<Object[]> getBatchProductionReportByDateRange(@Param("startDate") java.time.LocalDateTime startDate, @Param("endDate") java.time.LocalDateTime endDate);
+
+    @Query("SELECT b.batchNo, b.totalQuantity, b.availableQuantity, b.damagedQuantity, b.totalCost FROM Batch b WHERE b.batchStatus <> 'Removed'")
+    List<Object[]> getBatchProductionReport();
 }
+

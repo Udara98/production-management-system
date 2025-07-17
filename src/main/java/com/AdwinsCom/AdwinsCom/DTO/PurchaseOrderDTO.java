@@ -16,6 +16,7 @@ public class PurchaseOrderDTO {
     private String unitType;
     private Double pricePerUnit;
     private Integer qty;
+    private LocalDate orderedDate;
     private Double totalPrice;
     private LocalDate proposedDeliveryDate;
     private String notes;

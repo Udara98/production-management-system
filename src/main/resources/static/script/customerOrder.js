@@ -1,8 +1,44 @@
 let OrderProductsTableInstance;
 let cusOrderTableInstance;
+let orderProducts = []
+let products = []
 
 
 window.addEventListener('DOMContentLoaded', () => {
+    // Clear All button logic
+    const clearAllBtn = document.getElementById('clear-all-btn');
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', function () {
+            // Reset all form fields
+            document.getElementById('add-co-cus').selectedIndex = 0;
+            document.getElementById('add-co-reqDate').value = '';
+            document.getElementById('add-co-status').selectedIndex = 0;
+            document.getElementById('add-co-product').selectedIndex = 0;
+            document.getElementById('add-co-qty').value = '';
+
+            // Remove validation classes
+            [
+                'add-co-cus',
+                'add-co-reqDate',
+                'add-co-status',
+                'add-co-product',
+                'add-co-qty'
+            ].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.remove('is-valid', 'is-invalid');
+                }
+            });
+
+            // Clear orderProducts array and table
+            orderProducts.length = 0;
+            displayOrderProducts([]);
+
+            // Reset total amount
+            document.getElementById('tot-amount').innerHTML = '';
+        });
+    }
+
 
     const customerSelectElement = document.getElementById("add-co-cus");
     const productSelectElement = document.getElementById("add-co-product");
@@ -11,7 +47,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const quantityElement = document.getElementById("add-co-qty");
 
     const customers = ajaxGetRequest("/customer/getAllCustomers").filter((cus) => cus.customerStatus === "Active");
-    const products = ajaxGetRequest("/product/getAllProducts").filter((p) => p.productStatus !== "OutOfStock");
+     products = ajaxGetRequest("/product/getAllProducts").filter((p) => p.productStatus !== "OutOfStock");
 
 
     //Call function for validation
@@ -26,7 +62,6 @@ window.addEventListener('DOMContentLoaded', () => {
     //Call function for validation
     customerOrderFormValidation();
 
-    let orderProducts = []
     let totalAmount = 0
 
     document.getElementById('product-add-btn').addEventListener('click', (event) => {
@@ -76,6 +111,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     })
 
+   
 
     document.getElementById('place-order-btn').onclick = function (event) {
         event.preventDefault();
@@ -253,17 +289,87 @@ const displayOrderProducts = (products) => {
     });
 }
 
+// const deleteSelectedOrder = (element) => {
+//     const button = element.currentTarget;
+//     console.log(button);
+//     const row = button.closest('tr');
+//     const orderId = row ? row.getAttribute('data-order-id') : null;
+//     console.log(orderId);
+//     if (!row || !orderId) {
+//         return;
+//     }
+
+//     Swal.fire({
+//         title: 'Are you sure?',
+//         text: 'Do you want to remove this order from the table?',
+//         icon: 'warning',
+//         showCancelButton: true,
+//         confirmButtonText: 'Yes, remove',
+//         cancelButtonText: 'Cancel'
+//     }).then((result) => {
+//         if (result.isConfirmed) {
+//             // Remove from UI
+//             if (typeof OrderProductsTableInstance !== 'undefined') {
+//                 OrderProductsTableInstance.row(row).remove().draw();
+//             } else {
+//                 row.remove();
+//             }
+//             // Remove from products/orderProducts array if present
+//             if (typeof products !== 'undefined') {
+//                 const idx = products.findIndex(p => p.id == orderId);
+//                 if (idx > -1) products.splice(idx, 1);
+//             }
+//             if (typeof orderProducts !== 'undefined') {
+//                 const idx = orderProducts.findIndex(p => p.id == orderId);
+//                 if (idx > -1) orderProducts.splice(idx, 1);
+//             }
+//             Swal.fire({ title: "Removed!", text: "Order removed from table.", icon: "success" });
+//         }
+//     });
+// }
+
+const deleteSelectedProduct = (productObj) => {
+    console.log(productObj);
+    Swal.fire({
+        title: 'Are you sure?',
+        text: `Do you want to remove ${productObj.product.productName} from the table?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, remove',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Remove from global orderProducts array
+            const idx = window.orderProducts.findIndex(p => p.productId === productObj.product.productId);
+            if (idx > -1) {
+                window.orderProducts.splice(idx, 1);
+            }
+            // Restore quantity in products array
+            const prodInProducts = window.products.find(p => 
+                (p.id || p.productId) === (productObj.product.id || productObj.product.productId)
+            );
+            if (prodInProducts) {
+                prodInProducts.quantity += productObj.quantity;
+            }
+            displayOrderProducts(window.orderProducts);
+            Swal.fire({ title: "Removed!", text: "Product removed from table.", icon: "success" });
+        }
+    });
+};
+
 const generateDropDown = (element) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
-        {name: "Delete", action: null, icon: "fa-solid fa-trash me-2"},
+        {name: "Delete", action: deleteSelectedProduct, icon: "fa-solid fa-trash me-2"},
+        
     ];
     buttonList.forEach((button) => {
         const buttonElement = document.createElement("button");
         buttonElement.className = "dropdown-item btn";
         buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
+        buttonElement.type = "button";
         buttonElement.onclick = function () {
             button.action(element);
         };
@@ -273,6 +379,30 @@ const generateDropDown = (element) => {
     });
     return dropdownMenu;
 };
+
+const generateInvoice = (element) => {
+    window.open(`/customerOrder/invoice/${element.id}`);
+}
+
+const assignOrder = (element) => {
+    const rsponseOrder = ajaxGetRequest(`/customerOrder/assign/${element.id}`)
+    console.log(rsponseOrder);
+
+    if (rsponseOrder.status === 200) {
+        Swal.fire({
+            title: "Assigned!",
+            text: "Order assigned successfully.",
+            icon: "success"
+        });
+        reloadOrderTable();
+    }else{
+        Swal.fire({
+            title: "Failed!",
+            html: rsponseOrder.message,
+            icon: "error"
+        });
+    }
+}
 
 const reloadOrderTable=()=>{
     const cusOrders = ajaxGetRequest("/customerOrder/getAllCustomerOrders")
@@ -308,19 +438,18 @@ const reloadOrderTable=()=>{
     });
 }
 
+const printCustomerOrder = (element) => {
+    window.open(`/customerOrder/invoice/${element.id}`);
+}
+
 const generateCODropDown = (element) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
-        {name: "View", action: null, icon: "fa-solid fa-eye me-2"},
-
-        {
-            name: "Edit",
-            action: null,
-            icon: "fa-solid fa-edit me-2",
-        },
-        {name: "Delete", action: null, icon: "fa-solid fa-trash me-2"},
+        {name: "Print", action: printCustomerOrder, icon: "fa-solid fa-print me-2"},
+        {name: "Invoice", action: generateInvoice, icon: "fa-solid fa-file-invoice me-2"},
+        {name: "Assign", action: assignOrder, icon: "fa-solid fa-file-invoice me-2"},
     ];
 
     buttonList.forEach((button) => {

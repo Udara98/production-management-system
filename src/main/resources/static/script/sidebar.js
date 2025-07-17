@@ -34,11 +34,11 @@ window.addEventListener('load', function () {
 // Function to add 'show' class to offcanvas on large screens
     function addShowClass() {
         var offcanvasElement = document.getElementById("offcanvasScrolling");
+        if (!offcanvasElement) return;
         if (window.matchMedia("(min-width: 768px)").matches) {
           offcanvasElement.classList.add("show");
         } else {
           offcanvasElement.classList.remove("show");
-
         }
       }
   

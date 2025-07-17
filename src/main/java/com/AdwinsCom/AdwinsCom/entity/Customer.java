@@ -8,8 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+
 
 @Entity
 @Table(name = "customer")
@@ -69,8 +68,8 @@ public class Customer {
     @Column(name = "brn")
     private String brn;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BankAccount> bankAccounts = new ArrayList<>();
+    @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private BankAccount bankAccount;
 
     @Column(name = "customer_status")
     @Enumerated(EnumType.STRING)
@@ -113,21 +112,17 @@ public class Customer {
         newCustomer.setCreditLimit(customerDTO.getCreditLimit());
         newCustomer.setCustomerStatus(customerDTO.getCustomerStatus());
 
-        // Map BankAccountDTOs to BankAccount entities
-        List<BankAccount> bankAccountEntities = new ArrayList<>();
-        if (customerDTO.getBankAccounts() != null) {
-            for (var bankAccountDTO : customerDTO.getBankAccounts()) {
-                BankAccount account = new BankAccount();
-                account.setId(bankAccountDTO.getId());
-                account.setBankName(bankAccountDTO.getBankName());
-                account.setBankBranch(bankAccountDTO.getBankBranch());
-                account.setAccountNo(bankAccountDTO.getAccountNo());
-                account.setAccountName(bankAccountDTO.getAccountName());
-                account.setCustomer(newCustomer);
-                bankAccountEntities.add(account);
-            }
+        // Map BankAccountDTO to BankAccount entity
+        BankAccount bankAccount = null;
+        if (customerDTO.getBankAccount() != null) {
+            bankAccount = new BankAccount();
+            bankAccount.setBankName(customerDTO.getBankAccount().getBankName());
+            bankAccount.setBankBranch(customerDTO.getBankAccount().getBankBranch());
+            bankAccount.setAccountNo(customerDTO.getBankAccount().getAccountNo());
+            bankAccount.setAccountName(customerDTO.getBankAccount().getAccountName());
+            bankAccount.setCustomer(newCustomer);
+            newCustomer.setBankAccount(bankAccount);
         }
-        newCustomer.setBankAccounts(bankAccountEntities);
         return newCustomer;
     }
 

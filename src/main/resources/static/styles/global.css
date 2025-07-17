@@ -471,6 +471,103 @@ div.dt-container .dt-input {
 
 /* Adjust main content to account for sidebar
 .flex-grow-1 {
+}
+
+/* --- Notification Dropdown Styles --- */
+.notification-dropdown {
+  width: 350px;
+  max-width: 95vw;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.notification-dropdown li.dropdown-item.alert {
+  min-height: 60px;
+  max-height: 120px;
+  width: 100%;
+  white-space: pre-line;
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 2.5rem;
+  background: #fffbe6;
+  border-left: 4px solid #ffbe3d;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+}
+
+.notification-dropdown li .btn-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+}
+
+.notification-dropdown li strong {
+  font-weight: 600;
+  color: #7c5800;
+}
+
+.notification-dropdown li {
+  font-size: 1rem;
+  line-height: 1.3;
+  padding: 10px 16px 10px 12px;
+  box-sizing: border-box;
+}
+
+/* For notification bell dropdown */
+#notificationDropdown {
+  width: 350px;
+  max-width: 95vw;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0;
+}
+
+#notificationDropdown li.dropdown-item.alert {
+  min-height: 60px;
+  max-height: 120px;
+  width: 100%;
+  white-space: pre-line;
+  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 2.5rem;
+  background: #fffbe6;
+  border-left: 4px solid #ffbe3d;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+}
+
+#notificationDropdown li .btn-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+}
+
+#notificationDropdown li strong {
+  font-weight: 600;
+  color: #7c5800;
+}
+
+#notificationDropdown li {
+  font-size: 1rem;
+  line-height: 1.3;
+  padding: 10px 16px 10px 12px;
+  box-sizing: border-box;
+}
+/* --- End Notification Dropdown Styles --- */
+
+/* Adjust main content to account for sidebar
+.flex-grow-1 {
     margin-left: 250px;
     transition: margin-left 0.3s ease;
-} */
+}
+*/
+

@@ -1,20 +1,17 @@
 package com.AdwinsCom.AdwinsCom.controller;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-
-import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
+import com.AdwinsCom.AdwinsCom.DTO.UserProfileUpdateDTO;
 import com.AdwinsCom.AdwinsCom.Service.IUserService;
 import com.AdwinsCom.AdwinsCom.entity.User;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+
+
 
 @RestController
 @RequestMapping(value = "/user")
@@ -218,6 +215,28 @@ public class UserController {
 
         return userService.getUserById(userid);
     }
+
+    //Get User by name
+    @GetMapping(value = "/byname/{username}",produces = "application/json")
+    public ResponseEntity<User> getUserByName(@PathVariable("username") String username){
+        return userService.getUserByName(username);
+    }
+
+    //Update user Profile
+
+@PutMapping("/profile/update")
+public ResponseEntity<String> updateUserProfile(@RequestBody UserProfileUpdateDTO dto, HttpServletRequest request) {
+    ResponseEntity<String> response = userService.updateUserProfile(dto);
+    if (response.getStatusCode().is2xxSuccessful()) {
+        // Logout user: invalidate session and clear authentication
+        try {
+            request.getSession().invalidate();
+        } catch (Exception ignored) {}
+        org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        return ResponseEntity.ok("User updated successfully. Please log in again.");
+    }
+    return response;
+}
 
 //    @PostMapping("/uploadPhoto/{userId}")
 //    public ResponseEntity<String> uploadUserPhoto(@RequestParam("file") MultipartFile file, @PathVariable int userId) {

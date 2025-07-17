@@ -2,9 +2,12 @@ package com.AdwinsCom.AdwinsCom.Service;
 
 import com.AdwinsCom.AdwinsCom.DTO.SupplierDTO;
 import com.AdwinsCom.AdwinsCom.DTO.SupplierWithIngredientsDTO;
+import com.AdwinsCom.AdwinsCom.DTO.BankAccountDTO;
+import com.AdwinsCom.AdwinsCom.Repository.BankAccountRepository;
 import com.AdwinsCom.AdwinsCom.Repository.IngredientRepository;
 import com.AdwinsCom.AdwinsCom.Repository.SupplierIngredientRepository;
 import com.AdwinsCom.AdwinsCom.Repository.SupplierRepository;
+import com.AdwinsCom.AdwinsCom.entity.BankAccount;
 import com.AdwinsCom.AdwinsCom.entity.Ingredient;
 import com.AdwinsCom.AdwinsCom.entity.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,9 @@ public class SupplierService implements ISupplierService {
     private SupplierIngredientService supplierIngredientService;
 
     @Autowired
+    private BankAccountRepository bankAccountRepository;
+
+    @Autowired
     private IPrivilegeService privilegeService;
 
     @Override
@@ -53,13 +59,44 @@ public class SupplierService implements ISupplierService {
          }
 
 
-        Supplier newSupplier = new Supplier().mapDTO(null, supplierDTO, userName);
+        Supplier newSupplier = new Supplier();
+        newSupplier.setRegNo(supplierDTO.getRegNo());
+        newSupplier.setSupplierName(supplierDTO.getSupplierName());
+        newSupplier.setContactPersonName(supplierDTO.getContactPersonName());
+        newSupplier.setContactNo(supplierDTO.getContactNo());
+        newSupplier.setEmail(supplierDTO.getEmail());
+        newSupplier.setAddress(supplierDTO.getAddress());
+        newSupplier.setJoinDate(supplierDTO.getJoinDate());
+        newSupplier.setSupplierStatus(supplierDTO.getSupplierStatus());
+        newSupplier.setNote(supplierDTO.getNote());
+        newSupplier.setAddedUser(userName);
+        newSupplier.setAddedDate(LocalDateTime.now());
 
         if (newSupplier.getRegNo() == null || newSupplier.getRegNo().isEmpty()) {
             newSupplier.setRegNo(getNextSupplierRegNo());
         }
 
+
+        // Save supplier first to generate ID for FK
+        supplierRepository.save(newSupplier);
+
         mapIngredients(supplierDTO, newSupplier);
+
+
+        // Save bank account if present
+        if (supplierDTO.getBankAccount() != null) {
+            BankAccountDTO bankAccountDTO = supplierDTO.getBankAccount();
+            BankAccount bankAccount = new BankAccount();
+            bankAccount.setBankName(bankAccountDTO.getBankName());
+            bankAccount.setBankBranch(bankAccountDTO.getBankBranch());
+            bankAccount.setAccountNo(bankAccountDTO.getAccountNo());
+            bankAccount.setAccountName(bankAccountDTO.getAccountName());
+            bankAccount.setSupplier(newSupplier);
+            bankAccountRepository.save(bankAccount);
+            // Optionally add to supplier's list
+            newSupplier.getBankAccounts().add(bankAccount);
+        }
+
         return ResponseEntity.ok("Supplier Registered Successfully");
     }
 
@@ -84,7 +121,39 @@ public class SupplierService implements ISupplierService {
     public ResponseEntity<?> UpdateSupplier(SupplierDTO supplierDTO, String userName) {
 
         Supplier supplier = supplierRepository.getSupplierByRegNo(supplierDTO.getRegNo());
-        Supplier updatedSupplier = new Supplier().mapDTO(supplier, supplierDTO, userName);
+        Supplier updatedSupplier = supplier;
+        updatedSupplier.setSupplierName(supplierDTO.getSupplierName());
+        updatedSupplier.setContactPersonName(supplierDTO.getContactPersonName());
+        updatedSupplier.setContactNo(supplierDTO.getContactNo());
+        updatedSupplier.setEmail(supplierDTO.getEmail());
+        updatedSupplier.setAddress(supplierDTO.getAddress());
+        updatedSupplier.setJoinDate(supplierDTO.getJoinDate());
+        updatedSupplier.setSupplierStatus(supplierDTO.getSupplierStatus());
+        updatedSupplier.setNote(supplierDTO.getNote());
+        updatedSupplier.setUpdatedUser(userName);
+        updatedSupplier.setUpdatedDate(LocalDateTime.now());
+
+        // Update or add bank account
+        if (supplierDTO.getBankAccount() != null) {
+            BankAccountDTO bankAccountDTO = supplierDTO.getBankAccount();
+            BankAccount bankAccount;
+            // Try to update existing bank account if present
+            if (updatedSupplier.getBankAccounts() != null && !updatedSupplier.getBankAccounts().isEmpty()) {
+                bankAccount = updatedSupplier.getBankAccounts().get(0); // Assume one bank account per supplier for now
+            } else {
+                bankAccount = new BankAccount();
+                bankAccount.setSupplier(updatedSupplier);
+            }
+            bankAccount.setBankName(bankAccountDTO.getBankName());
+            bankAccount.setBankBranch(bankAccountDTO.getBankBranch());
+            bankAccount.setAccountNo(bankAccountDTO.getAccountNo());
+            bankAccount.setAccountName(bankAccountDTO.getAccountName());
+            bankAccountRepository.save(bankAccount);
+            // Ensure it's in the supplier's list
+            if (updatedSupplier.getBankAccounts() == null || updatedSupplier.getBankAccounts().isEmpty()) {
+                updatedSupplier.getBankAccounts().add(bankAccount);
+            }
+        }
 
         mapIngredients(supplierDTO, updatedSupplier);
         return ResponseEntity.ok("Supplier Updated Successfully");
@@ -133,11 +202,10 @@ public class SupplierService implements ISupplierService {
         Set<Ingredient> managedIngredients = new HashSet<>();
         for (Ingredient ingredient : supplierDTO.getIngredients()) {
             Ingredient managedIngredient = ingredientRepository.findById(ingredient.getId())
-                    .orElse(ingredient);
+                    .orElseThrow(() -> new RuntimeException("Ingredient not found: " + ingredient.getId()));
             managedIngredients.add(managedIngredient);
         }
         updatedSupplier.setIngredients(managedIngredients);
-
         supplierRepository.save(updatedSupplier);
     }
 

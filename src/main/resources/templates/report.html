@@ -22,7 +22,10 @@
                     <div style="flex: 0.7; margin-right: 10rem">
                         <label class="form-label fw-medium" for="add-report-type"></label>
                         <select id="add-report-type" class="form-select" required>
-                            <option selected value="CSR">Customer Sales Report</option>
+                            <option selected disabled> Select the report type </option>
+                            <option value="CSR">Customer Sales Report</option>
+                            <option value="PSR">Product Sales Report</option>
+                            <option value="GRN">GRN Ingredient Report</option>
                             <option value="SPR">Supplier Payment Report</option>
                             <option value="PCR">Production Cost Report</option>
                         </select>
@@ -50,13 +53,171 @@
                         </button>
                     </div>
                 </div>
-            <div id="saleReport" style="display: none" th:replace="~{fragments/Report/salseReport.html}"></div>
-            <div id="supPayReport" style="display: none" th:replace="~{fragments/Report/supplierPaymentReport.html}"></div>
-            <div id="costReport" style="display: none" th:replace="~{fragments/Report/costReport.html}"></div>
+                <div class="row mt-4"  id="saleReport"  style="display: none">
+                    <!-- Customer Sales Report Section -->
+                    <div class="mt-2 col-7">
+                        <div class="mt-2 mb-2">
+                            <div class="mt-2 mb-2">
+                                <label for="customerOrdersTotalAmount" class="fw-normal fs-5">Total Sales:</label>
+                                <span id="customerOrdersTotalAmount" class="fw-medium fs-5"></span>
+                            </div>
+                        </div>
+                        <table class="table table-bordered table-hover bg-light cusTable" id="tableCusSales">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Customer Name</th>
+                                <th>Total Quantity</th>
+                                <th>Total Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex align-items-center col-5" style="min-height:200px;">
+                        <canvas id="salesChart" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Product Sales Report Section -->
+                <div class="row mt-4" id="productSalesReport" style="display: none;">
+                    <div class="mt-2 col-md-7">
+                        <div class="mt-2 mb-2 d-flex align-items-center justify-content-between">
+    <div>
+            <label for="productSalesTotalAmount" class="fw-normal fs-5">Total Sales:</label>
+            <span id="productSalesTotalAmount" class="fw-medium fs-5"></span>
         </div>
+        <button id="updateProductRopBtn" class="btn btn-warning btn-sm ms-2">Update ROPs</button>
+    </div>
+    <table class="table table-bordered table-hover" id="tableProductSales">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Product Name</th>
+                                    <th>Total Quantity</th>
+                                    <th>Total Amount</th>
+                                    <th>ROP</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-5 d-flex align-items-center" style="min-height:200px;">
+                        <canvas id="productSalesChart" height="200"></canvas>
+                    </div>
+                </div>
+        <!-- GRN Ingredient Summary Report Section -->
+        <div class="row mt-4" id="grnIngredientReport" style="display: none;">
+            <div class="mt-2 col-md-7">
+                <div class="mt-2 mb-2 d-flex align-items-center justify-content-between">
+    <div>
+        <label for="grnIngredientTotalAmount" class="fw-normal fs-5">Total Cost: Rs.</label>
+        <span id="grnIngredientTotalAmount" class="fw-medium fs-5"></span>
+    </div>
+    <button id="updateIngredientRopBtn" class="btn btn-warning btn-sm ms-2">Update ROPs</button>
+</div>
+<table class="table table-bordered table-hover" id="tableGrnIngredient">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Ingredient Code</th>
+                            <th>Ingredient Name</th>
+                            <th>Total Quantity</th>
+                            <th>Total Cost</th>
+                            <th>ROP</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="col-md-5 d-flex align-items-center" style="min-height:200px;">
+                <canvas id="grnIngredientPieChart" height="200"></canvas>
+            </div>
+        </div>
+        
+        <!-- Supplier Payment Report Section -->
+        <div class="row mt-4" id="supPayReport" style="display: none;">
+            <div class="mt-2 col-md-7">
+                <div class="mt-2 mb-2">
+                    <label for="supPayTotalAmount" class="fw-normal fs-5">Total Paid:</label>
+                    <span id="supPayTotalAmount" class="fw-medium fs-5"></span>
+                </div>
+                <table class="table table-bordered table-hover" id="tableSupPayReport">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Reg No</th>
+                            <th>Supplier Name</th>
+                            <th>Amount Paid</th>
+                            <th>Outstanding Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="col-md-5 d-flex align-items-center" style="min-height:200px;">
+                <canvas id="supPayBarChart" height="200"></canvas>
+            </div>
+        </div>
+        <!-- Batch Production Report Section -->
+        <div class="row mt-4" id="batchProductionReport" style="display: none;">
+    <div class="mt-2 col-md-8">
+        <div class="mt-2 mb-2">
+            <label for="batchProductionTotalQuantity" class="fw-normal fs-5">Total Quantity:</label>
+            <span id="batchProductionTotalQuantity" class="fw-medium fs-5"></span>
+        </div>
+        <table class="table table-bordered table-hover" id="tableBatchProductionReport">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Batch No</th>
+                    <th>Total Quantity</th>
+                    <th>Available Quantity</th>
+                    <th>Damaged Quantity</th>
+                    <th>Total Cost</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="col-md-4 d-flex align-items-center" style="min-height:300px;">
+        <canvas id="batchProductionPieChart" height="250"></canvas>
+    </div>
 </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
 <script src="/script/report.js"></script>
+<script>
+// Dropdown and Search logic
+// function showReportSection(type) {
+//     var sale = document.getElementById('saleReport');
+//     var product = document.getElementById('productSalesReport');
+//     var grn = document.getElementById('grnIngredientReport');
+//     var sup = document.getElementById('supPayReport');
+//     var cost = document.getElementById('costReport');
+//     if (sale) sale.style.display = (type === 'CSR') ? '' : 'none';
+//     if (product) product.style.display = (type === 'PSR') ? '' : 'none';
+//     if (grn) grn.style.display = (type === 'GRN') ? '' : 'none';
+//     if (sup) sup.style.display = (type === 'SPR') ? '' : 'none';
+//     if (cost) cost.style.display = (type === 'PCR') ? '' : 'none';
+// }
+
+
+// const reportTypeDropdown = document.getElementById('add-report-type');
+// const searchBtn = document.getElementById('searchBtn');
+// const saleReportDiv = document.getElementById('saleReport');
+
+// reportTypeDropdown.addEventListener('change', function() {
+//     showReportSection(this.value);
+// });
+
+
+
+// Show default on load
+// showReportSection(reportTypeDropdown.value);
+
+</script>
 </body>
 </html>

@@ -14,11 +14,9 @@ public interface IngredientRepository extends JpaRepository<Ingredient,Integer> 
 
     Ingredient getIngredientByIngredientCode(String ingredientCode);
 
+    Ingredient findByIngredientName(String ingredientName);
+
     @Query("SELECT MAX(i.ingredientCode) FROM Ingredient i")
     String getMaxIngredientCode();
-
-
-
-
 
 }

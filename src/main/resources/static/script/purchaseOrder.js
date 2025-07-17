@@ -55,7 +55,7 @@ const reloadPOTable =  () => {
     const displayProperty = [
         {dataType: "text", propertyName: "purchaseOrderNo"},
         {dataType: "text", propertyName: "quotationNo"},
-        {dataType: "function", propertyName: getOrderDate}, // Order Date column
+        {dataType: "text", propertyName: "orderedDate"}, // Order Date column
         {dataType: "price", propertyName: "totalPrice"},
         {dataType: "date", propertyName: "proposedDeliveryDate"}, // Changed from requiredDate
         {dataType: "function", propertyName: getStatus},

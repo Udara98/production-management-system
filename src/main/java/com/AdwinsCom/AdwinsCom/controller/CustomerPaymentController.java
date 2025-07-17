@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 @RestController
 @RequestMapping(value = "/cusPayment")
@@ -49,6 +50,14 @@ public class CustomerPaymentController {
     @GetMapping(value = "/latest-completed", produces = "application/json")
     public ResponseEntity<?> getLatestCompletedPaymentByOrderId(@RequestParam("orderid") int orderid) {
         return customerPaymentService.getLatestCompletedPaymentByOrderId(orderid);
+    }
 
+    @GetMapping("/receipt/{id}")
+    public ModelAndView printCustomerPaymentReceipt(@PathVariable("id") int id) {
+        ModelAndView mv = new ModelAndView("fragments/Sales/CustomerPayment/CustomerPaymentReceipt");
+        CustomerPaymentDTO payment = customerPaymentService.getCustomerPaymentById(id);
+        mv.addObject("payment", payment);
+        return mv;
     }
 }
+

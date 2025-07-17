@@ -27,7 +27,7 @@
                             aria-controls="coPay-tab-pane"
                             aria-selected="false"
                             class="nav-link"
-                            data-bs-target="#coPay-tab-pane"
+                            data-bs-target="#pay-tab-pane"
                             data-bs-toggle="tab"
                             id="coPay-tab"
                             role="tab"
@@ -53,8 +53,8 @@
             </ul>
         </div>
         <div class="tab-content" id="myTabContent">
-            <div th:replace = "~{fragments/Sales/CustomerOrder.html}"></div>
             <div th:replace = "~{fragments/Sales/Customer.html}"></div>
+            <div th:replace = "~{fragments/Sales/CustomerOrder.html}"></div>
             <div th:replace = "~{fragments/Sales/CustomerPayments.html}"></div>
         </div>
     </div>
