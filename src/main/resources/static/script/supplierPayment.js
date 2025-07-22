@@ -1,83 +1,71 @@
 let spTableInstance;
 window.addEventListener('DOMContentLoaded',  () => {
-    
-
     reloadSPTable();
     refreshSupplierPaymentForm();
     let selectedPO;
-    SupplierPaymentFormValidation();
-
-
-     const supplierSelectElement = document.getElementById("add_sp_supplier");
-
-
-
+    supplierPaymentFormValidation();
+    // No need to call SupplierPaymentFormValidation (now replaced)
 });
 
-   const supplierPaymentSubmit = () =>  {
-        event.preventDefault();
-
-       // Collect payment details from all GRN rows
-        const paymentDetails = [];
-        let totalPaymentAmount = 0;
-        const grnRows = document.querySelectorAll('.grn-row');
-        const supplierId = selectedSupplier;
-
-        grnRows.forEach(row => {
-                const paymentInput = row.querySelector('.payment-amount');
-                const grnNo = row.querySelector('.grn-no').value;
-                console.log(grnNo);
-                const paymentAmount = parseFloat(paymentInput.value) || 0;
-                const newBalance = parseFloat(row.querySelector('.new-balance').value) || 0;
-
-                if (paymentAmount > 0) {
-//                    const grnId = row.dataset.grn-no;
-//                    console.log(grnId);
-                    const grnId = ajaxGetRequest(`/grn/get-grn-id/${grnNo}`);
-                    totalPaymentAmount += paymentAmount;
-
-                    paymentDetails.push({
-                        goodReceiveNoteId: grnId,
-                        supplierId:parseInt(supplierId),
-                        amount: paymentAmount,
-                        balance: newBalance
-                    });
-                }
-            });
-
-        // Calculate totals
-        const totalAmount = parseFloat(document.getElementById('totalPaid').value);
-        const totalBalanceAmount = totalAmount - totalPaymentAmount;
-
-
-        supplierPayment.totalAmount = totalAmount;
-        supplierPayment.totalPaymentAmount = totalPaymentAmount;
-        supplierPayment.totalPaymentAmount = totalPaymentAmount;
-        supplierPayment.paymentMethod = document.getElementById("add-sp-paymentMethod").value.toUpperCase();
-        supplierPayment.paymentMethodSupId = parseInt(selectedSupplier);
-        supplierPayment.paymentDetails = paymentDetails;
-        supplierPayment.supplierId = parseInt(supplierId);
-
-        console.log(supplierPayment);
-
-
-        let response = ajaxRequestBody("/supplier_payment/addNewSP", "POST", supplierPayment);
-        if (response.status === 200) {
-            swal.fire({
-                title: response.responseText,
-                icon: "success",
-            });
-            reloadSPTable()
-            $("#modalSPAdd").modal("hide");
-
-        } else {
-            swal.fire({
-                title: "Something Went Wrong",
-                text: response.responseText,
-                icon: "error",
+   const supplierPaymentSubmit = (event) =>  {
+    event.preventDefault();
+    // Validate using new error function
+    let errors = checkSupplierPaymentFormError();
+    if(errors !== '') {
+        swal.fire({
+            title: 'Form has errors!',
+            text: errors,
+            icon: 'error'
+        });
+        return;
+    }
+    // Collect payment details from all GRN rows
+    const paymentDetails = [];
+    let totalPaymentAmount = 0;
+    const grnRows = document.querySelectorAll('.grn-row');
+    const supplierId = selectedSupplier;
+    grnRows.forEach(row => {
+        const paymentInput = row.querySelector('.payment-amount');
+        const grnNo = row.querySelector('.grn-no').value;
+        const paymentAmount = parseFloat(paymentInput.value) || 0;
+        const newBalance = parseFloat(row.querySelector('.new-balance').value) || 0;
+        if (paymentAmount > 0) {
+            const grnId = ajaxGetRequest(`/grn/get-grn-id/${grnNo}`);
+            totalPaymentAmount += paymentAmount;
+            paymentDetails.push({
+                goodReceiveNoteId: grnId,
+                supplierId:parseInt(supplierId),
+                amount: paymentAmount,
+                balance: newBalance
             });
         }
-    };
+    });
+    // Calculate totals
+    const totalAmount = parseFloat(document.getElementById('totalPaid').value);
+    const totalBalanceAmount = totalAmount - totalPaymentAmount;
+    supplierPayment.totalAmount = totalAmount;
+    supplierPayment.totalPaymentAmount = totalPaymentAmount;
+    supplierPayment.paymentMethod = document.getElementById("add-sp-paymentMethod").value.toUpperCase();
+    supplierPayment.paymentMethodSupId = parseInt(selectedSupplier);
+    supplierPayment.paymentDetails = paymentDetails;
+    supplierPayment.supplierId = parseInt(supplierId);
+    let response = ajaxRequestBody("/supplier_payment/addNewSP", "POST", supplierPayment);
+    if (response.status === 200) {
+        swal.fire({
+            title: response.responseText,
+            icon: "success",
+        });
+        reloadSPTable()
+        $("#modalSPAdd").modal("hide");
+    } else {
+        swal.fire({
+            title: "Something Went Wrong",
+            text: response.responseText,
+            icon: "error",
+        });
+    }
+};
+    
 
 
 //Refresh SupplierPayment form
@@ -86,7 +74,7 @@ const refreshSupplierPaymentForm = () =>{
     document.getElementById("supplierPaymentSubmitBtn").disabled = true;
    
 
-    SupplierPaymentFormValidation();
+    supplierPaymentFormValidation();
 
 
     //Get All Active Suppliers
@@ -114,22 +102,63 @@ const refreshSupplierPaymentForm = () =>{
 
      supplierSelectElement.addEventListener('change', function() {
 
-                  selectedSupplier = this.value;
+        selectedSupplier = this.value;
+        grnList.innerHTML = '';
+        payTotalCheckbox.checked = false;
 
-                 grnList.innerHTML = '';
-                 payTotalCheckbox.checked = false;
+        // --- Set min/max for payment date fields based on GRN dates ---
+        const paymentDateInput = document.getElementById('add-sp-payDate');
+        const cardDateInput = document.getElementById('inputCardDate');
+        const chequeDateInput = document.getElementById('inputChequeDate');
+        const bankTransferredDateInput = document.getElementById('inputBankTransferredDateTime');
 
-                 if (selectedSupplier) {
+        if (selectedSupplier) {
+            const GRNs = ajaxGetRequest(`/grn/get-active-non-paid-grns/${selectedSupplier}`);
+            console.log(GRNs);
 
-                 const GRNs = ajaxGetRequest(`/grn/get-active-non-paid-grns/${selectedSupplier}`);
+            if (GRNs && GRNs.length > 0) {
 
-                 console.log(GRNs);
+                noOutstandingGRNs.classList.add('d-none');
+                // Find earliest GRN date
+                const grnDates = GRNs.map(grn => new Date(grn.addedDate || grn.addeddate));
+                const minDate = new Date(Math.min(...grnDates));
+                const minDateStr = minDate.toISOString().slice(0, 10);
+                // Use today's date for max
+                const today = new Date(Date.now());
+                const todayStr = today.toISOString().slice(0, 10);
+                if (paymentDateInput) { paymentDateInput.setAttribute('min', minDateStr); paymentDateInput.setAttribute('max', todayStr); }
+                if (cardDateInput) { cardDateInput.setAttribute('min', minDateStr); cardDateInput.setAttribute('max', todayStr); }
+                if (chequeDateInput) { chequeDateInput.setAttribute('min', minDateStr); chequeDateInput.setAttribute('max', todayStr); }
+                if (bankTransferredDateInput) { bankTransferredDateInput.setAttribute('min', minDateStr); bankTransferredDateInput.setAttribute('max', todayStr); }
 
-                    if (GRNs) {
+                
+            } else {
+                // No GRNs: remove min/max restrictions
+                if (paymentDateInput) { paymentDateInput.removeAttribute('min'); paymentDateInput.removeAttribute('max'); }
+                if (cardDateInput) { cardDateInput.removeAttribute('min'); cardDateInput.removeAttribute('max'); }
+                if (chequeDateInput) { chequeDateInput.removeAttribute('min'); chequeDateInput.removeAttribute('max'); }
+                if (bankTransferredDateInput) { bankTransferredDateInput.removeAttribute('min'); bankTransferredDateInput.removeAttribute('max'); }
+            }
+        } else {
+            // No supplier selected: remove min/max restrictions
+            if (paymentDateInput) { paymentDateInput.removeAttribute('min'); paymentDateInput.removeAttribute('max'); }
+            if (cardDateInput) { cardDateInput.removeAttribute('min'); cardDateInput.removeAttribute('max'); }
+            if (chequeDateInput) { chequeDateInput.removeAttribute('min'); chequeDateInput.removeAttribute('max'); }
+            if (bankTransferredDateInput) { bankTransferredDateInput.removeAttribute('min'); bankTransferredDateInput.removeAttribute('max'); }
+        }
+
+        // --- End min/max logic ---
+
+        if (selectedSupplier) {
+            const GRNs = ajaxGetRequest(`/grn/get-active-non-paid-grns/${selectedSupplier}`);
+            console.log(GRNs);
+
+            if (GRNs) {
                      grnListSection.style.display = 'block';
                      document.getElementById("supplierPaymentSubmitBtn").disabled = false;
                      document.getElementById('PaymentDetailsSection').classList.remove('d-none');
                      GRNs.forEach(grn => {
+                                    console.log(grn);
                                      const grnRow = document.createElement('tr');
                                      grnRow.className = 'grn-row';
                                      grnRow.innerHTML = `
@@ -146,14 +175,51 @@ const refreshSupplierPaymentForm = () =>{
                                              <input type="number" class="form-control balance" value="${grn.balance}" disabled>
                                          </td>
                                          <td>
-                                             <input type="number" class="form-control payment-amount"
-                                                    min="0" max="${grn.totalAmount}"
-                                                    oninput="updateBalances()">
+                                             <input type="text" class="form-control payment-amount">
+                                             <div class="invalid-feedback">Enter a valid pay amount</div>
                                          </td>
                                          <td>
                                              <input type="number" class="form-control new-balance" disabled>
                                          </td>`;
                                      grnList.appendChild(grnRow);
+                                     // Attach event listeners to payment-amount fields after GRN rows are rendered
+                                     grnRow.querySelector('.payment-amount').addEventListener('input', function() {
+                                        const row = this.closest('.grn-row');
+                                        const balanceInput = row.querySelector('.balance');
+                                        const newBalanceInput = row.querySelector('.new-balance');
+                                        const balance = parseFloat(balanceInput.value) || 0;
+                                        let value = this.value;
+                                        // Only allow positive numbers (whole or decimal)
+                                        if (!/^\d+(\.\d{1,2})?$/.test(value) || value === '' || isNaN(parseFloat(value)) || parseFloat(value) < 0) {
+                                            this.classList.remove('is-valid');
+                                            this.classList.add('is-invalid');
+                                            newBalanceInput.value = balance.toFixed(2);
+                                            return;
+                                        }
+                                        let payAmount = parseFloat(value) || 0;
+                                        if (payAmount > balance) {
+                                            this.value = balance;
+                                            payAmount = balance;
+                                            Swal.fire({
+                                                icon: 'warning',
+                                                title: 'Invalid Amount',
+                                                text: 'Pay amount cannot exceed outstanding balance.',
+                                                timer: 2000,
+                                                showConfirmButton: false
+                                            });
+                                        }
+                                        let newBal = balance - payAmount;
+                                        newBalanceInput.value = newBal >= 0 ? newBal.toFixed(2) : balance.toFixed(2);
+                                        // Mark valid if value is positive and ≤ balance
+                                        if (payAmount >= 0 && payAmount <= balance) {
+                                            this.classList.remove('is-invalid');
+                                            this.classList.add('is-valid');
+                                        } else {
+                                            this.classList.remove('is-valid');
+                                            this.classList.add('is-invalid');
+                                        }
+                                        updateTotals();
+                                    });
                                  });
                      updateTotals();
                  } else {
@@ -165,7 +231,45 @@ const refreshSupplierPaymentForm = () =>{
                  }
              });
 
-
+             document.querySelectorAll('.payment-amount').forEach(input => {
+                input.addEventListener('input', function() {
+                    const row = input.closest('.grn-row');
+                    const balanceInput = row.querySelector('.balance');
+                    const newBalanceInput = row.querySelector('.new-balance');
+                    const balance = parseFloat(balanceInput.value) || 0;
+                    let value = input.value;
+                    // Only allow positive numbers (whole or decimal)
+                    if (!/^\d+(\.\d{1,2})?$/.test(value) || value === '' || isNaN(parseFloat(value)) || parseFloat(value) < 0) {
+                        input.classList.remove('is-valid');
+                        input.classList.add('is-invalid');
+                        newBalanceInput.value = balance.toFixed(2);
+                        return;
+                    }
+                    let payAmount = parseFloat(value) || 0;
+                    if (payAmount > balance) {
+                        input.value = balance;
+                        payAmount = balance;
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Invalid Amount',
+                            text: 'Pay amount cannot exceed outstanding balance.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    }
+                    let newBal = balance - payAmount;
+                    newBalanceInput.value = newBal >= 0 ? newBal.toFixed(2) : balance.toFixed(2);
+                    // Mark valid if value is positive and ≤ balance
+                    if (payAmount >= 0 && payAmount <= balance) {
+                        input.classList.remove('is-invalid');
+                        input.classList.add('is-valid');
+                    } else {
+                        input.classList.remove('is-valid');
+                        input.classList.add('is-invalid');
+                    }
+                    updateTotals();
+                });
+            });
      // Store original balances when the checkbox is checked
      let originalBalances = [];
 
@@ -220,6 +324,9 @@ const refreshSupplierPaymentForm = () =>{
          updateTotals();
      };
 
+       
+    
+
      function updateTotals() {
          let totalPayable = 0;
          let totalPaid = 0;
@@ -246,50 +353,147 @@ const refreshSupplierPaymentForm = () =>{
 
 }
 
-const SupplierPaymentFormValidation = () =>{
+// Supplier Payment Form Validation (matches customer payment pattern)
+const supplierPaymentFormValidation = () => {
+    // Get field references
+    const supplierSelect = document.getElementById('add_sp_supplier');
+    const payMethSelect = document.getElementById('add-sp-paymentMethod');
+    const paymentDateInput = document.getElementById('add-sp-payDate');
+    const inputCardRefNo = document.getElementById('inputCardRefNo');
+    const inputChequeNo = document.getElementById('inputChequeNo');
+    const inputBankRefNo = document.getElementById('inputBankTranferId');
+    const cardDateInput = document.getElementById('inputCardDate');
+    const chequeDateInput = document.getElementById('inputChequeDate');
+    const bankTransferredDateInput = document.getElementById('inputBankTransferredDateTime');
+    const totalPaidInput = document.getElementById('totalPaid');
 
-const supplierSelectElement = document.getElementById("add_sp_supplier");
-
-
-    const addSPayDate = document.getElementById('add-sp-payDate')
-
-    addSPayDate.addEventListener('change', () =>{
-        dateFeildValidator(addSPayDate,'','supplierPayment','paymentDate')
-        })
-
-
-    const inputCardRefNo = document.getElementById('inputCardRefNo')
-        inputCardRefNo.addEventListener('keyup',  () => {
-                    validation(inputCardRefNo, '', 'supplierPayment', 'transferid');
+    // Payment method
+    payMethSelect.addEventListener('change', () => {
+        payMethSelect.classList.remove('is-invalid');
+        payMethSelect.classList.add('is-valid');
     });
-
-    const inputChequeNo = document.getElementById('inputChequeNo')
-            inputChequeNo.addEventListener('keyup',  () => {
-                        validation(inputChequeNo, '', 'supplierPayment', 'transferid');
+    // Payment date
+    paymentDateInput.addEventListener('change', () => {
+        paymentDateInput.classList.remove('is-invalid');
+        paymentDateInput.classList.add('is-valid');
     });
+    // Card/Cheque/Bank Ref No fields
+    inputCardRefNo.addEventListener('input', () => {
+        if (/^(?=.*\d)[A-Za-z0-9-_]{6,50}$/.test(inputCardRefNo.value) && inputCardRefNo.value !== '') {
+            inputCardRefNo.classList.remove('is-invalid');
+            inputCardRefNo.classList.add('is-valid');
+        } else {
+            inputCardRefNo.classList.add('is-invalid');
+        }
+    });
+    inputChequeNo.addEventListener('input', () => {
+        if (/^(?=.*\d)[A-Za-z0-9-_]{6,50}$/.test(inputChequeNo.value) && inputChequeNo.value !== '') {
+            inputChequeNo.classList.remove('is-invalid');
+            inputChequeNo.classList.add('is-valid');
+        } else {
+            inputChequeNo.classList.add('is-invalid');
+        }
+    });
+    inputBankRefNo.addEventListener('input', () => {
+        if (/^(?=.*\d)[A-Za-z0-9-_]{6,50}$/.test(inputBankRefNo.value) && inputBankRefNo.value !== '') {
+            inputBankRefNo.classList.remove('is-invalid');
+            inputBankRefNo.classList.add('is-valid');
+        } else {
+            inputBankRefNo.classList.add('is-invalid');
+        }
+    });
+    // Card/Cheque/Bank Date fields
+    cardDateInput.addEventListener('input', () => {
+        cardDateInput.classList.remove('is-invalid');
+        cardDateInput.classList.add('is-valid');
+    });
+    chequeDateInput.addEventListener('input', () => {
+        chequeDateInput.classList.remove('is-invalid');
+        chequeDateInput.classList.add('is-valid');
+    });
+    bankTransferredDateInput.addEventListener('change', () => {
+        bankTransferredDateInput.classList.remove('is-invalid');
+        bankTransferredDateInput.classList.add('is-valid');
+    });
+    cardDateInput.addEventListener('change', () => {
+        cardDateInput.classList.remove('is-invalid');
+        cardDateInput.classList.add('is-valid');
+    });
+    chequeDateInput.addEventListener('change', () => {
+        chequeDateInput.classList.remove('is-invalid');
+        chequeDateInput.classList.add('is-valid');
+    });
+    bankTransferredDateInput.addEventListener('change', () => {
+        bankTransferredDateInput.classList.remove('is-invalid');
+        bankTransferredDateInput.classList.add('is-valid');
+    });
+};
 
-       console.log(document.getElementById('inputBankTranferId'));
-            document.getElementById('inputBankTranferId').addEventListener('keyup',  () => {
-                        validation(inputTransferId, '', 'supplierPayment', 'transferid');
-        });
+// Supplier Payment Form Error Checking (matches customer payment pattern)
+function checkSupplierPaymentFormError() {
+    let errors = '';
+    const supplierSelect = document.getElementById('add_sp_supplier');
+    const payMethSelect = document.getElementById('add-sp-paymentMethod');
+    const paymentDateInput = document.getElementById('add-sp-payDate');
+    const inputCardRefNo = document.getElementById('inputCardRefNo');
+    const inputChequeNo = document.getElementById('inputChequeNo');
+    const inputBankRefNo = document.getElementById('inputBankTranferId');
+    const cardDateInput = document.getElementById('inputCardDate');
+    const chequeDateInput = document.getElementById('inputChequeDate');
+    const bankTransferredDateInput = document.getElementById('inputBankTransferredDateTime');
+    const totalPaidInput = document.getElementById('totalPaid');
 
-
-    const inputBankTransferredDateTime = document.getElementById('inputBankTransferredDateTime')
-            inputBankTransferredDateTime.addEventListener('change',  () => {
-                     dateFeildValidator(inputBankTransferredDateTime,'','supplierPayment','paymentDate')
-        });
-
-    const inputChequeDate = document.getElementById('inputChequeDate')
-                inputChequeDate.addEventListener('change',  () => {
-                         dateFeildValidator(inputChequeDate,'','supplierPayment','paymentDate')
-            });
-
-    const inputCardDate = document.getElementById('inputCardDate')
-                inputCardDate.addEventListener('change',  () => {
-                         dateFeildValidator(inputCardDate,'','supplierPayment','paymentDate')
-            });
-
+    if (supplierSelect.value === '') {
+        supplierSelect.classList.add('is-invalid');
+        errors += "Supplier is required.\n";
+    }
+    if (payMethSelect.value === '') {
+        payMethSelect.classList.add('is-invalid');
+        errors += "Payment Method is required. \n";
+    }
+    if (totalPaidInput.value === '' || parseFloat(totalPaidInput.value) <= 0) {
+        totalPaidInput.classList.add('is-invalid');
+        errors += "Total paid amount is required. \n";
+    }
+    if (payMethSelect.value === 'CASH') {
+        if (paymentDateInput.value === '') {
+            paymentDateInput.classList.add('is-invalid');
+            errors += "Payment Date is required. \n";
+        }
+    }
+    if (payMethSelect.value === 'CHEQUE') {
+        if (chequeDateInput.value === '') {
+            chequeDateInput.classList.add('is-invalid');
+            errors += "Cheque Date is required. \n";
+        }
+        if (!/^(?=.*\d)[A-Za-z0-9-_]{6,50}$/.test(inputChequeNo.value) || inputChequeNo.value === '') {
+            inputChequeNo.classList.add('is-invalid');
+            errors += "Enter Valid Cheque No. \n";
+        }
+    }
+    if (payMethSelect.value === 'VISA_CARD' || payMethSelect.value === 'MASTER_CARD') {
+        if (cardDateInput.value === '') {
+            cardDateInput.classList.add('is-invalid');
+            errors += "Card Date is required. \n";
+        }
+        if (!/^(?=.*\d)[A-Za-z0-9-_]{6,50}$/.test(inputCardRefNo.value) || inputCardRefNo.value === '') {
+            inputCardRefNo.classList.add('is-invalid');
+            errors += "Enter Valid Card Ref No. \n";
+        }
+    }
+    if (payMethSelect.value === 'BANK_TRANSFER') {
+        if (bankTransferredDateInput.value === '') {
+            bankTransferredDateInput.classList.add('is-invalid');
+            errors += "Bank Date is required. \n";
+        }
+        if (!/^(?=.*\d)[A-Za-z0-9-_]{6,50}$/.test(inputBankRefNo.value) || inputBankRefNo.value === '') {
+            inputBankRefNo.classList.add('is-invalid');
+            errors += "Enter Valid Bank Ref No. \n";
+        }
+    }
+    return errors;
 }
+
 
 // show payment options according to selected payment method - ex- show bank transfer option
 const showPaymentOptionByMethod =  () => {
@@ -336,7 +540,7 @@ if (paymentMthd === 'BANK_TRANSFER') {
 
 const reloadSPTable = function () {
     let supplierPayments = ajaxGetRequest("/supplier_payment/getAllSP");
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
+    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER_PAYMENT");
     let grnNos = ajaxGetRequest("/SupplierPaymentHasGoodReceiveNote/32/grn-numbers");
 
     const getGRNNos = (ob) => {
@@ -394,25 +598,40 @@ const reloadSPTable = function () {
     });
 };
 
-const generateSPDropDown = (element) => {
+// Dropdown menu for each supplier payment row (refactored to match product.js pattern)
+const generateSPDropDown = (element, index, privilegeOb = null) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
-        { name: "Delete", action: deleteSP, icon: "fa-solid fa-trash me-2" },
+        {
+            name: "Print",
+            action: printSupplierPayment,
+            icon: "fa-solid fa-print me-2",
+            enabled: privilegeOb ? !!privilegeOb.select : true,
+        },
     ];
 
     buttonList.forEach((button) => {
         const buttonElement = document.createElement("button");
         buttonElement.className = "dropdown-item btn";
-        buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
+        buttonElement.innerHTML = `<i class=\"${button.icon}\"></i>${button.name}`;
+        buttonElement.type = "button";
+        buttonElement.disabled = !button.enabled;
+        if (!button.enabled) {
+            buttonElement.style.cursor = "not-allowed";
+            buttonElement.classList.add("text-muted");
+        }
         buttonElement.onclick = function () {
-            button.action(element);
+            if (button.enabled) {
+                button.action(element, index);
+            }
         };
-        const liElement = document.createElement("li");
-        liElement.appendChild(buttonElement);
-        dropdownMenu.appendChild(liElement);
+        const li = document.createElement("li");
+        li.appendChild(buttonElement);
+        dropdownMenu.appendChild(li);
     });
+
     return dropdownMenu;
 };
 

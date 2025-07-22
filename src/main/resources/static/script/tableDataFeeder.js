@@ -110,7 +110,7 @@ const tableDataBinder = (
             iconButton.setAttribute("aria-expanded", "false");
             iconButton.innerHTML = '<i class="fa-solid fa-ellipsis-vertical"></i>';
 
-            const dropdownMenu = dropDown(element,index);
+            const dropdownMenu = dropDown(element,index,privilegeOb);
 
             divDropdownContainer.appendChild(iconButton);
             divDropdownContainer.appendChild(dropdownMenu);

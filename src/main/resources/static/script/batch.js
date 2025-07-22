@@ -14,10 +14,10 @@ const reloadBatchTable=()=>{
 
     const getStatus = (ob) => {
         if (ob.batchStatus === "InProduction") {
-            return '<p class="align-middle yellowLabel mx-auto" style="width: 100px">InProduction</p>';
+            return '<p class="align-middle yellowLabel mx-auto" style="width: 150px">InProduction</p>';
         }
         if (ob.batchStatus === "ProductionDone") {
-            return '<p class="align-middle GrayLabel mx-auto" style="width: 100px">ProductionDone</p>';
+            return '<p class="align-middle greenLabel mx-auto" style="width: 150px">ProductionDone</p>';
         }
 
     };

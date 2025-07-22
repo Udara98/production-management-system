@@ -16,4 +16,7 @@ public interface QuotationRepository extends JpaRepository<Quotation, Integer> {
     @Query("SELECT q FROM Quotation q WHERE q.quotationStatus <> 'Removed'")
     List<Quotation> findByQuotationStatusNotRemoved();
 
+    @Query("SELECT MAX(q.quotationNo) FROM Quotation q")
+    String getMaxQuotationNo();
+
 }

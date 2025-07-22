@@ -3,110 +3,41 @@ let selectedPI;
 let totalCost;
 let recipeCode = "";
 let recipeName = "";
+let checkBtn;
+let resultDiv;
+let viewResBtn;
+let recipeSelect;
+let batchStatusSelect;
+let batchTotalCost;
+
 const flavours = ajaxGetRequest("/flavour/getAllFlavours");
 const packageTypes = ajaxGetRequest("/packageType/getAllPackageTypes")
 const recipes = ajaxGetRequest("/recipe/getAllRecipes").filter((r) => r.status === "Active");
 
+
 window.addEventListener('load', () => {
 
-    //Call function to Reload the production table
-//    reloadPITable();
-
-    //Call function to refresh the add production item form
-//    refreshProductionItemForm();
-
-    //Call function to refresh the add new batch form
-
-    //Call function to refresh the recipe form
-
-    //Call Recipe form validation
-//    productionItemValidation();
-
-//    const flavourSelectElement = document.getElementById("add_pi_flavourId");
-//    const ptSelectElement = document.getElementById("add_pi_ptId");
-//    const recipeSelectElement = document.getElementById("add_pi_recipeId");
-//
-//    flavours.forEach(flavour => {
-//        const option = document.createElement('option');
-//        option.value = flavour.id;
-//        option.textContent = flavour.name;
-//        flavourSelectElement.appendChild(option);
-//    });
-//
-//    packageTypes.forEach(pt => {
-//        const option = document.createElement('option');
-//        option.value = pt.id;
-//        option.textContent = pt.name;
-//        ptSelectElement.appendChild(option);
-//    });
-//
-//    recipes.forEach(rec => {
-//        const option = document.createElement('option');
-//        option.value = rec.recipeCode;
-//        option.textContent = rec.recipeCode;
-//        recipeSelectElement.appendChild(option);
-//    });
-
-//    document.getElementById("piAddForm").onsubmit = function (event) {
-//        event.preventDefault();
-//
-//        const productionItem = {
-//            productionItemName: document.getElementById("add-pi-name").value,
-//            flavourId: document.getElementById("add_pi_flavourId").value,
-//            packageTypeId: document.getElementById("add_pi_ptId").value,
-//            recipeCode: document.getElementById("add_pi_recipeId").value,
-//            status: document.getElementById("add-pi-status").value,
-//        }
-//
-//        let response = ajaxRequestBody("/productionItem/addNewPI", "POST", productionItem);
-//        if (response.status === 200) {
-//            swal.fire({
-//                title: response.responseText,
-//                icon: "success",
-//            });
-//            reloadPITable();
-//            $("#modalAddPI").modal("hide");
-//
-//        } else {
-//            swal.fire({
-//                title: "Something Went Wrong",
-//                text: response.responseText,
-//                icon: "error",
-//            });
-//        }
-//    }
-//    document.getElementById('piEditForm').onsubmit = function (event) {
-//        event.preventDefault();
-//
-//        selectedPI.productionItemName = document.getElementById('edit-pi-name').value;
-//        selectedPI.flavourId = document.getElementById('edit_pi_flavourId').value;
-//        selectedPI.packageTypeId = document.getElementById('edit_pi_ptId').value;
-//        selectedPI.recipeCode = document.getElementById('edit_pi_recipeId').value;
-//        selectedPI.status = document.getElementById('edit-pi-status').value;
-//
-//        let response = ajaxRequestBody("/productionItem/updatePI", "PUT", selectedPI);
-//        if (response.status === 200) {
-//            swal.fire({
-//                title: response.responseText,
-//                icon: "success",
-//            });
-//            reloadPITable();
-//            $("#modalEditPI").modal("hide");
-//
-//        } else {
-//            swal.fire({
-//                title: "Something Went Wrong",
-//                text: response.responseText,
-//                icon: "error",
-//            });
-//        }
-//
-//    }
-
-
-   const recipes = ajaxGetRequest("/recipe/getAllRecipes").filter((recipe) => recipe.status === "Active");
-
    const RecipeSelectElement = document.getElementById("sel-recipe");
+
+   checkBtn = document.getElementById("check-btn");
+
+   resultDiv = document.getElementById("check-result");
+
+   viewResBtn = document.getElementById("viewResBtn");
+
+   batchStatusSelect = document.getElementById("add-bt-status");
+
+   recipeSelect = document.getElementById("sel-recipe");
+   recipeSelect.classList.remove("invalid-feedback")
+   recipeSelect.classList.remove("is-invalid")
+
+   setupBatchSizeValidation();
+
+
+   // If using Bootstrap modal:
+    $('#modalMakeNewBatch').on('shown.bs.modal', function () {
+        setupBatchSizeValidation();
+    });
 
     recipes.forEach(rec => {
         const option = document.createElement('option');
@@ -115,13 +46,17 @@ window.addEventListener('load', () => {
         RecipeSelectElement.appendChild(option);
     });
 
-    document.getElementById('makeNewBatchForm').onsubmit = function (event) {
-        event.preventDefault();
+   
+})
+
+    //Define function for
+    const createBatch = (e) => {
+        e.preventDefault();
         
         // Validate form
         const form = this;
         if (!form.checkValidity()) {
-            event.stopPropagation();
+            e.stopPropagation();
             form.classList.add('was-validated');
             return;
         }
@@ -136,7 +71,7 @@ window.addEventListener('load', () => {
             return;
         }
         
-        if (totalCost <= 0) {
+        if (batchTotalCost <= 0) {
             Swal.fire({
                 title: "Cost Error",
                 text: "Total cost must be greater than zero.",
@@ -166,7 +101,7 @@ window.addEventListener('load', () => {
             availableQuantity: parseFloat(document.getElementById("add-batchSize").value),
             manufactureDate: mfgDate.toISOString(),
             expireDate: expDate.toISOString(),
-            totalCost: totalCost,
+            totalCost: batchTotalCost,
             batchStatus: document.getElementById("add-bt-status").value,
             note: document.getElementById("add-bt-note").value || "",
         };
@@ -185,16 +120,7 @@ window.addEventListener('load', () => {
             cancelButtonText: "Cancel"
         }).then((result) => {
             if (result.isConfirmed) {
-                // Show loading state
-                Swal.fire({
-                    title: "Creating Batch...",
-                    text: "Please wait while we create your batch.",
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-                
+
                 let response = ajaxRequestBody("/batch/addNewBatch", "POST", batch);
                 
                 if (response.status === 200) {
@@ -228,66 +154,7 @@ window.addEventListener('load', () => {
             }
         });
     }
-})
 
-
-
-//Define the function to refresh the production item form
-const refreshProductionItemForm = () =>{
-
-    productionItem = new Object();
-    oldProductionItem = null;
-
-    //Get All Flavours/ PackageTypes/ Recipes
-    const flavours = ajaxGetRequest("/flavour/getAllFlavours");
-    const packageTypes = ajaxGetRequest("/packageType/getAllPackageTypes")
-    const recipes = ajaxGetRequest("/recipe/getAllRecipes").filter((r) => r.status === "Active");
-
-    //Fill data into Flavours/PackageTypes/ Recipes
-    fillDataIntoSelect(
-                 addPIFlavour,
-                 "Select Flavour",
-                 flavours,
-                 "id",
-            );
-
-    fillDataIntoSelect(
-                 addPIPackage,
-                 "Select Package Type",
-                 packageTypes,
-                 "id",
-            );
-    fillDataIntoSelect(
-                 addPIRecipe,
-                 "Select Recipe",
-                 recipes,
-                 "recipeCode",
-            );
-}
-
-//Define function to validate the Production form
-const productionItemValidation =  () =>{
-
-    addProdItem.addEventListener('keyup', () => {
-          validation(addProdItem, '', 'productionItem', 'productionItemName');
-       });
-
-    addPIFlavour.addEventListener('change',  () => {
-            DynamicSelectValidationOnlyValue(addPIFlavour, 'productionItem', 'flavourId','id');
-        });
-
-    addPIPackage.addEventListener('change',  () => {
-                DynamicSelectValidationOnlyValue(addPIPackage, 'productionItem', 'packageTypeId','id');
-         });
-
-    addPIRecipe.addEventListener('change',  () => {
-                DynamicSelectValidationOnlyValue(addPIRecipe, 'productionItem', 'recipeCode','recipeCode');
-          });
-
-    addPIStatus.addEventListener('change', () =>{
-                selectFieldValidator(addPIStatus,'','productionItem','status')
-           });
-}
 
 //Define function to validate the Production form
 function validateBatchSize() {
@@ -305,79 +172,6 @@ function validateBatchSize() {
 
 
 
-//Define function to reload the Production Item table
-const reloadPITable = () => {
-    const productionItems = ajaxGetRequest("/productionItem/getAllPIs")
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/PRODUCTION_ITEM");
-
-    const getStatus = (ob) => {
-        if (ob.status === "Active") {
-            return '<p class="align-middle greenLabel mx-auto" style="width: 100px">Active</p>';
-        }
-        if (ob.status === "InActive") {
-            return '<p class="align-middle redLabel mx-auto" style="width: 100px">InActive</p>';
-        }
-
-    };
-    const displayProperty = [
-        {dataType: "text", propertyName: "productionItemNo"},
-        {dataType: "text", propertyName: "productionItemName"},
-        {dataType: "text", propertyName: "flavourId"},
-        {dataType: "text", propertyName: "packageTypeId"},
-        {dataType: "text", propertyName: "recipeCode"},
-        {dataType: "function", propertyName: getStatus},
-    ];
-    if (productionItemTableInstance) {
-        productionItemTableInstance.destroy();
-    }
-    $("#tablePIs tbody").empty();
-    tableDataBinder(
-        tablePIs,
-        productionItems,
-        displayProperty,
-        true,
-        generatePIDropDown,
-        getPrivilege
-    );
-    productionItemTableInstance = $("#tablePIs").DataTable({
-        responsive: true,
-        autoWidth: false,
-
-    });
-}
-
-//Define function to Generate the drop down
-const generatePIDropDown = (element,index) => {
-    const dropdownMenu = document.createElement("ul");
-    dropdownMenu.className = "dropdown-menu";
-
-    const buttonList = [
-        {
-            name: "Edit",
-            action: productionItemFormRefill,
-            icon: "fa-solid fa-edit me-2",
-        },
-        {name: "Delete", action: deleteProductionITem, icon: "fa-solid fa-trash me-2"},
-
-    ];
-
-//    if (element.status === 'Active') {
-//        buttonList.push({name: "Make a New Batch", action: makeNewBatch, icon: "fa-solid fa-hands-holding-circle me-2"})
-//    }
-
-    buttonList.forEach((button) => {
-        const buttonElement = document.createElement("button");
-        buttonElement.className = "dropdown-item btn";
-        buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
-        buttonElement.onclick =  () => {
-            button.action(element);
-        };
-        const liElement = document.createElement("li");
-        liElement.appendChild(buttonElement);
-        dropdownMenu.appendChild(liElement);
-    });
-    return dropdownMenu;
-};
 
 //Define function to Make new batch
 const makeNewProdBatch = () => {
@@ -430,11 +224,13 @@ const setupBatchFormEventListeners = () => {
     if (labourCostInput) {
         labourCostInput.removeEventListener('input', calculateTotalCost);
         labourCostInput.addEventListener('input', calculateTotalCost);
+        labourCostInput.addEventListener('input', validateCosts);
     }
     
     if (utilCostInput) {
         utilCostInput.removeEventListener('input', calculateTotalCost);
         utilCostInput.addEventListener('input', calculateTotalCost);
+        utilCostInput.addEventListener('input', validateCosts);
     }
     
     // Date validation
@@ -454,27 +250,41 @@ const setupBatchFormEventListeners = () => {
 
 // Update check button state based on form inputs
 const updateCheckButtonState = () => {
-    const batchSize = document.getElementById("add-batchSize").value;
-    const recipeSelect = document.getElementById("sel-recipe");
-    const checkBtn = document.getElementById("check-btn");
+
+        if(resultDiv){resultDiv.innerHTML = '';
+        resultDiv.classList.add('d-none');
+        if(viewResBtn){viewResBtn.classList.add('d-none');}
+    }
+
+        const batchSizeInput = document.getElementById("add-batchSize");
+        const recipeSelect = document.getElementById("sel-recipe");
+        const checkBtn = document.getElementById("check-btn");
     
-    if (checkBtn) {
-        const isValid = batchSize && batchSize > 0 && recipeSelect && recipeSelect.value;
-        checkBtn.disabled = !isValid;
-        
-        if (isValid) {
+        // Use the same validation as validatefdsywddBatchSize
+        const batchSize = parseFloat(batchSizeInput.value);
+        const batchValid = !isNaN(batchSize) && batchSize > 0 && batchSize <= 1000;
+    
+        const recipeValid = recipeSelect && recipeSelect.value;
+    
+        // Only enable if BOTH are valid
+        if (batchValid && recipeValid) {
+            checkBtn.disabled = false;
             checkBtn.classList.remove('btn-secondary');
             checkBtn.classList.add('addPrimaryBtn');
         } else {
+            checkBtn.disabled = true;
             checkBtn.classList.remove('addPrimaryBtn');
             checkBtn.classList.add('btn-secondary');
-        }
-    }
+        
+    };
 }
 
 // Handle recipe selection
 const handleRecipeChange = function () {
+    checkBtn.classList.remove('d-none');
     if (this.value) {
+        recipeSelect.classList.remove('is-invalid');
+        recipeSelect.classList.add('is-valid');
         let selectedData = this.value.split("|");
         recipeName = selectedData[0];
         recipeCode = selectedData[1];
@@ -489,6 +299,7 @@ const handleRecipeChange = function () {
 
 // Handle check ingredients button
 const handleCheckIngredients = () => {
+
     const batchSize = document.getElementById("add-batchSize").value;
     const recipeSelect = document.getElementById("sel-recipe");
     
@@ -529,35 +340,45 @@ const handleCheckIngredients = () => {
     const batchFormDiv = document.getElementById('batch-add-form');
     batchFormDiv.style.display = 'none';
     
-    const resultDiv = document.getElementById("check-result");
-    resultDiv.className = "d-flex flex-column align-items-center m-3 mt-5";
+    
+    resultDiv.className = "d-flex flex-column align-items-center m-2";
     resultDiv.innerHTML = '';
     
     if (!result.isIngAvailable) {
+        
+        checkBtn.classList.add('d-none');
+        
         let naMessage = document.createElement('div');
-        naMessage.style.color = "red";
-        naMessage.style.fontSize = "20px";
+        naMessage.className = "alert alert-warning w-100 text-center";
+        naMessage.role = "alert";
         naMessage.innerText = "Some or All Ingredients are not Available";
         
         let viewResBtn = document.createElement('button');
-        viewResBtn.className = "btn btn-primary mt-3";
-        viewResBtn.innerText = "View Details";
-        
+        viewResBtn.className = "btn btn-update w-100 mx-auto fw-semibold";
+        viewResBtn.style.color = "white";
+        viewResBtn.innerHTML = '<i class="fa-solid fa-eye me-2"></i>View Details';
+        viewResBtn.type = "button";
+        viewResBtn.id = "viewResBtn";
         resultDiv.appendChild(naMessage);
         resultDiv.appendChild(viewResBtn);
+        resultDiv.classList.remove('d-none');
+        viewResBtn.classList.remove('d-none');
         
         viewResBtn.addEventListener('click', () => {
             displayResult(result.availabilityDTOS, quotationRequests, quotations, purchaseOrders, grns);
         });
         
     } else {
+
+        checkBtn.classList.add('d-none');
+
         let avaMessage = document.createElement('div');
-        avaMessage.style.color = "green";
-        avaMessage.style.fontSize = "20px";
+        avaMessage.className = "alert alert-success w-100 text-center";
+        avaMessage.role = "alert";
         avaMessage.innerText = "All Ingredients are Available";
         
         let continueBtn = document.createElement('button');
-        continueBtn.className = "btn btn-success mt-3";
+        continueBtn.className = "btn addPrimaryBtn w-100 mx-auto fw-semibold";
         continueBtn.innerHTML = '<i class="fas fa-check me-2"></i>Continue to Batch Details';
         
         resultDiv.appendChild(avaMessage);
@@ -569,41 +390,107 @@ const handleCheckIngredients = () => {
             batchFormDiv.style.display = 'block';
             
             // Set ingredient cost
-            document.getElementById('add-bt-ingCost').value = result.totalCost.toLocaleString("en-US", {
-                style: "currency",
-                currency: "LKR",
-            });
+            document.getElementById('add-bt-ingCost').value = parseInt(result.totalCost);
             
             // Initialize total cost calculation
             calculateTotalCost();
+
+            //Set Batch Status
+            batchStatusSelect.value = "InProduction";
+            batchStatusSelect.classList.remove("invalid-feedback")
+            batchStatusSelect.disabled = true;
+
+            // Set min/max for Manufacture Date field (10 days before/after today)
+            const mfgDateInput = document.getElementById('add-bt-mnf');
+            const today = new Date();
+            const minDate = new Date(today);
+            minDate.setDate(today.getDate() - 10);
+            const maxDate = new Date(today);
+            maxDate.setDate(today.getDate() + 10);
+            // Format to yyyy-mm-dd
+            const fmt = d => d.toISOString().split('T')[0];
+            mfgDateInput.min = fmt(minDate);
+            mfgDateInput.max = fmt(maxDate);
+            // Optionally, set default value to today
+            mfgDateInput.value = fmt(today);
+        
         });
     }
 }
 
 // Calculate total cost
 const calculateTotalCost = () => {
-    const ingredientCost = parseFloat(document.getElementById('add-bt-ingCost').value.replace(/[^0-9.-]+/g, "")) || 0;
-    const labourCost = parseFloat(document.getElementById('add-bt-labourCost').value) || 0;
-    const utilityCost = parseFloat(document.getElementById('add-bt-utilCost').value) || 0;
+    const ingredientCost = parseInt(document.getElementById('add-bt-ingCost').value);
+    const labourCostInput = document.getElementById('add-bt-labourCost');
+    const utilityCostInput = document.getElementById('add-bt-utilCost');
+    const totalField = document.getElementById('add-bt-total');
+
+    const digitRegex = /^\d{1,5}$/;
+    // Only calculate if both are valid
+    if (digitRegex.test(labourCostInput.value) && digitRegex.test(utilityCostInput.value)) {
+        const labourCost = parseInt(labourCostInput.value);
+        const utilityCost = parseInt(utilityCostInput.value);
+         batchTotalCost = ingredientCost + labourCost + utilityCost;
+        totalField.value = parseInt(batchTotalCost);
+    } else {
+        // Optionally clear or mark total as invalid
+        totalField.value = '';
+    }
+}
+
+
+const validateCosts = () =>{
+    // Add input restrictions for Labour Cost and Utility Cost
+    const labourCostInput = document.getElementById('add-bt-labourCost');
+    const utilCostInput = document.getElementById('add-bt-utilCost');
     
-    totalCost = ingredientCost + labourCost + utilityCost;
-    
-    document.getElementById('add-bt-total').value = totalCost.toLocaleString("en-US", {
-        style: "currency",
-        currency: "LKR",
-    });
+    const digitRegex = /^\d{0,5}$/; // allows 0-5 digits for typing
+    [labourCostInput, utilCostInput].forEach(input => {
+        if (!input) return;
+        input.addEventListener('input', function(e) {
+            if (!digitRegex.test(this.value)) {
+                // Remove last entered character if it makes value invalid
+                input.classList.add('is-invalid');
+                input.classList.remove('is-valid');
+            } else {
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+            }
+        });
+        });
 }
 
 // Validate dates
 const validateDates = () => {
-    const mfgDate = document.getElementById('add-bt-mnf').value;
-    const expDate = document.getElementById('add-bt-exp').value;
-    
+    const mfgDateInput = document.getElementById('add-bt-mnf');
+    const expDateInput = document.getElementById('add-bt-exp');
+    const mfgDate = mfgDateInput.value;
+    const expDate = expDateInput.value;
+
+    if (mfgDate) {
+        expDateInput.classList.remove('is-invalid');
+        expDateInput.classList.add('is-valid');
+        const mfg = new Date(mfgDate);
+        // Min = manufacture date + 1 day
+        const minExp = new Date(mfg);
+        minExp.setDate(minExp.getDate() + 1);
+        // Max = manufacture date + 4 months
+        const maxExp = new Date(mfg);
+        maxExp.setMonth(maxExp.getMonth() + 4);
+        // Format yyyy-mm-dd
+        const fmt = d => d.toISOString().split('T')[0];
+        expDateInput.min = fmt(minExp);
+        expDateInput.max = fmt(maxExp);
+
+        expDateInput.classList.remove('is-invalid');
+        expDateInput.classList.add('is-valid');
+    }
+
     if (mfgDate && expDate) {
         if (new Date(expDate) <= new Date(mfgDate)) {
-            document.getElementById('add-bt-exp').setCustomValidity('Expiry date must be after manufacture date');
+            expDateInput.setCustomValidity('Expiry date must be after manufacture date');
         } else {
-            document.getElementById('add-bt-exp').setCustomValidity('');
+            expDateInput.setCustomValidity('');
         }
     }
 }
@@ -640,69 +527,13 @@ const resetBatchForm = () => {
     });
 }
 
-//Define function to Display Results
-//const displayResult = (result) => {
-//    const resultDiv = document.getElementById("check-result")
-//    resultDiv.className = "mt-5"
-//    resultDiv.innerHTML = ''
-//
-//    const titleDiv = document.createElement('h4');
-//    titleDiv.innerText = "Result"
-//
-//    resultDiv.appendChild(titleDiv)
-//
-//    result.forEach((res, index) => {
-//        const rowDiv = document.createElement('div');
-//        rowDiv.className = 'row mt-3';
-//
-//        const codeDiv = document.createElement('div');
-//        codeDiv.className = 'col';
-//        codeDiv.innerText = res.ingredientCode;
-//        rowDiv.appendChild(codeDiv);
-//
-//        const nameDiv = document.createElement('div');
-//        nameDiv.className = 'col';
-//        nameDiv.innerText = res.ingredientName;
-//        rowDiv.appendChild(nameDiv);
-//
-//        const quantityDiv = document.createElement('div');
-//        quantityDiv.className = 'col';
-//
-//        const resBtn = document.createElement("button")
-//        resBtn.className = res.isAvailable === true ? "btn  btn-outline-success btn-sm" : "btn  btn-outline-danger btn-sm";
-//        resBtn.disabled = true
-//        resBtn.style.cursor = "default"
-//        resBtn.style.width = '100%'
-//        resBtn.innerText = res.isAvailable === true ? "Stock Enough" : "Stock Not Enough";
-//        quantityDiv.appendChild(resBtn)
-//        rowDiv.appendChild(quantityDiv);
-//
-//
-//        const removeBtn = document.createElement('button');
-//        removeBtn.className = "btn btn-warning btn-sm ms-4"
-//        removeBtn.innerHTML = `<i class="fa-solid fa-file-lines me-2"></i> Send Quotation Request`
-//
-//        const btnDiv = document.createElement('div');
-//        btnDiv.className = 'col-4';
-//        if (!res.isAvailable === true) {
-//            btnDiv.appendChild(removeBtn)
-//        }
-//        rowDiv.appendChild(btnDiv);
-//        resultDiv.appendChild(rowDiv);
-//        resultDiv.appendChild(document.createElement('hr'))
-//    })
-//}
-
 const quotationRequests = ajaxGetRequest("/quotation-request/getAllRequests");
-const quotations = ajaxGetRequest("/quotation/getAllQuotations");
-const purchaseOrders = ajaxGetRequest("/purchaseOrder/getAllPurchaseOrders");
-const grns = ajaxGetRequest("/grn/getAllGRNs");
 
 // Function to handle and display the fetched result
-const displayResult = (ingredients, quotationRequests, quotations, purchaseOrders, grns) => {
+const displayResult = (ingredients) => {
 
     const resultDiv = document.getElementById("check-result");
-    resultDiv.className = "mt-5";
+    resultDiv.className = "mt-3";
     resultDiv.innerHTML = '';  // Clear any existing content
 
     const titleDiv = document.createElement('h4');
@@ -714,22 +545,20 @@ const displayResult = (ingredients, quotationRequests, quotations, purchaseOrder
         rowDiv.className = 'row mt-3';
 
         const codeDiv = document.createElement('div');
-        codeDiv.className = 'col';
+        codeDiv.className = 'col-2';
         codeDiv.innerText = res.ingredientCode;
         rowDiv.appendChild(codeDiv);
 
         const nameDiv = document.createElement('div');
-        nameDiv.className = 'col';
+        nameDiv.className = 'col-2';
         nameDiv.innerText = res.ingredientName;
         rowDiv.appendChild(nameDiv);
 
         const quantityDiv = document.createElement('div');
-        quantityDiv.className = 'col';
+        quantityDiv.className = 'col-2';
 
-        const resBtn = document.createElement("button");
-        resBtn.className = res.isAvailable === true ? "btn btn-outline-success btn-sm" : "btn btn-outline-danger btn-sm";
-        resBtn.disabled = true;
-        resBtn.style.cursor = "default";
+        const resBtn = document.createElement("p");
+        resBtn.className = res.isAvailable === true ? "btn align-middle greenLabel" : "btn align-middle redLabel";
         resBtn.style.width = '100%';
         resBtn.innerText = res.isAvailable === true ? "Stock Enough" : "Stock Not Enough";
         quantityDiv.appendChild(resBtn);
@@ -739,78 +568,8 @@ const displayResult = (ingredients, quotationRequests, quotations, purchaseOrder
         infoDiv.className = 'col-4';
 
         const btnDiv = document.createElement('div');
-        btnDiv.className = 'col-3';
+        btnDiv.className = 'col-2';
 
-        // if (!res.isAvailable === true) {
-        //     console.log(quotationRequests,res)
-        //     const relatedRequest = quotationRequests.find(
-        //         req => req.ingCode === res.ingredientCode && req.requestStatus === "Send"
-        //     );
-
-        //     const relatedQuotation = quotations.find(
-        //         quo => quo.ingredientCode === res.ingredientCode &&  relatedRequest?.requestNo=== quo.quotationRequestNo
-        //     );
-        //     const relatedOrder = purchaseOrders.find(order => order.ingredientCode === res.ingredientCode && order.purchaseOrderStatus === "Pending");
-
-
-        //     if (relatedOrder) {
-        //         const infoText = document.createElement('span');
-        //         infoText.textContent = `Please add a GRN for po ${relatedOrder.purchaseOrderNo}.`;
-        //         infoText.style.color = 'red';
-
-        //         const viewOrderBtn = document.createElement('button');
-        //         viewOrderBtn.textContent = "Add GRN";
-        //         viewOrderBtn.className = "btn btn-warning ms-2";
-        //         viewOrderBtn.onclick = () => {
-        //             window.location.href = `/purchase-order/${relatedOrder.id}`;
-        //         };
-
-        //         infoDiv.appendChild(infoText);
-        //         btnDiv.appendChild(viewOrderBtn);
-        //     } else if (relatedQuotation) {
-        //         const infoText = document.createElement('span');
-        //         infoText.textContent = `Please Send Purchase Order for ${relatedQuotation.quotationNo} .`;
-        //         infoText.style.color = 'red';
-
-        //         const viewQuotationBtn = document.createElement('button');
-        //         viewQuotationBtn.textContent = "Send Purchase Order";
-        //         viewQuotationBtn.className = "btn btn-warning ms-2";
-        //         viewQuotationBtn.onclick = () => {
-        //             window.location.href = `/quotation/${relatedQuotation.id}`;
-        //         };
-
-        //         infoDiv.appendChild(infoText);
-        //         btnDiv.appendChild(viewQuotationBtn);
-        //     } else if (relatedRequest) {
-        //         const infoText = document.createElement('span');
-        //         infoText.textContent = `Please add a quotation for Quotation Request No: ${relatedRequest.requestNo}.`;
-        //         infoText.style.color = 'red';
-
-        //         const viewRequestBtn = document.createElement('button');
-        //         viewRequestBtn.textContent = "Add Quotation";
-        //         viewRequestBtn.className = "btn btn-warning ms-2";
-        //         viewRequestBtn.onclick = () => {
-        //             window.location.href = `/quotation-request/${relatedRequest.id}`;
-        //         };
-
-        //         infoDiv.appendChild(infoText);
-        //         btnDiv.appendChild(viewRequestBtn);
-        //     } else {
-        //         const infoText = document.createElement('span');
-        //             infoText.textContent = `Please send Quotation Request for ingredient ${res.ingredientCode}.`;
-        //             infoText.style.color = 'red';
-
-        //             const sendQuoBtn = document.createElement('button');
-        //             sendQuoBtn.className = "btn btn-warning ms-2";
-        //             sendQuoBtn.innerHTML = `Send Quotation Request`;
-
-        //             sendQuoBtn.onclick = () => {
-        //             };
-
-        //             infoDiv.appendChild(infoText);
-        //             btnDiv.appendChild(sendQuoBtn);
-        //     }
-        // }
 
         if (!res.isAvailable === true) {
             const infoText = document.createElement('span');
@@ -824,7 +583,8 @@ const displayResult = (ingredients, quotationRequests, quotations, purchaseOrder
             // Add Notify button
             const notifyBtn = document.createElement('button');
             notifyBtn.type = "button";
-            notifyBtn.className = "btn btn-warning ms-2";
+            notifyBtn.style = "color: white;"
+            notifyBtn.className = "btn btn-update";
             notifyBtn.innerText = "Notify Procurement";
             notifyBtn.type = "button";
             notifyBtn.onclick = () => {
@@ -855,180 +615,6 @@ const displayResult = (ingredients, quotationRequests, quotations, purchaseOrder
 
 
 
-//Define function for Product update
-  const productionItemUpdate = () => {
-    event.preventDefault();
-    piAddForm.classList.add('needs-validation');
-
-    //Check form Error
-    let errors = checkProductionItemFormError();
-
-    if (errors === "") {
-      //Check form update
-      let updates = checkProductionItemUpdates();
-      console.log(updates);
-      piAddForm.classList.remove('was-validated')
-      $('#modalAddPI').modal("hide");
-      if (updates !== "") {
-        swal.fire({
-          title: "Do you want to Update " + productionItem.productionItemName  + "?",
-          html:updates,
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#cb421a",
-          cancelButtonColor: "#3f3f44",
-          confirmButtonText: "Yes, Update"
-        }).then((result) =>{
-          if(result.isConfirmed){
-            let updateServiceResponse = ajaxRequestBody("/productionItem", "PUT", productionItem);
-
-            if (updateServiceResponse.status === 200) {
-
-              // alert("Update successfully ...! \n");
-              Swal.fire({
-                title: "Update successfully ..! ",
-                text: "",
-                icon: "success"
-              });
-
-              //Need to refresh
-              piAddForm.reset();
-              reloadPITable();
-              refreshProductionItemForm();
-
-              // Remove 'is-valid' and 'is-invalid' classes from all input fields
-              document.querySelectorAll('.needs-validation input,.needs-validation select, .needs-validation textarea ').forEach((input) => {
-                input.classList.remove('is-valid', 'is-invalid');
-              });
-              piAddForm.classList.remove('was-validated');
-
-              //Need hide modal
-              $('#modalAddPI').modal("hide");
-            } else {
-              Swal.fire({
-                title: "Update Not Successfully ...!",
-                text: updateServiceResponse.responseText,
-                icon: "error"
-              });
-            }
-          }
-
-        })
-
-      } else {
-        $('#modalAddPI').modal("hide");
-        Swal.fire({
-          title: "No updates Found..!",
-          text: '',
-          icon: "question"
-        });
-      }
-
-    } else {
-      $('#modalAddPI').modal("hide");
-      Swal.fire({
-        title: "Form has following errors!",
-        text: errors,
-        icon: "error"
-      });
-    }
-  }
-
-//Define function to Check Updates
-const checkProductionItemUpdates = () =>{
-let updates = "";
-
-    if(productionItem.productionItemName !== oldProductionItem.productionItemName){
-      updates = updates + "Production Item Name is changed " + oldProductionItem.productionItemName + " into " + productionItem.productionItemName +"<br>";
-    }
-
-    if(productionItem.flavourId !== oldProductionItem.flavourId){
-      updates = updates + "Flavour is changed " + oldProductionItem.flavourId + " into " + productionItem.flavourId + "<br>";
-    }
-
-    if(productionItem.packageTypeId !== oldProductionItem.packageTypeId){
-      updates = updates + "Package Type is changed " + oldProductionItem.packageTypeId + " into " + productionItem.packageTypeId + "<br>";
-    }
-
-    if(productionItem.recipeCode !== oldProductionItem.recipeCode){
-          updates = updates + " Status is changed " + oldProductionItem.quotationStatus + " into " + productionItem.quotationStatus  + "<br>";
-        }
-
-    if(productionItem.status !== oldProductionItem.status){
-      updates = updates + " Status is changed " + oldProductionItem.status + " into " + productionItem.status  + "<br>";
-    }
-
-return updates;
-
-}
-//const editPI = (pi) => {
-//
-//    selectedPI = pi
-//    const flavourSelectElement = document.getElementById("edit_pi_flavourId");
-//    const ptSelectElement = document.getElementById("edit_pi_ptId");
-//    const recipeSelectElement = document.getElementById("edit_pi_recipeId");
-//    flavourSelectElement.innerHTML=''
-//    ptSelectElement.innerHTML=''
-//    recipeSelectElement.innerHTML=''
-//    flavours.forEach(flavour => {
-//        const option = document.createElement('option');
-//        option.value = flavour.id;
-//        option.textContent = `${flavour.name} (${flavour.id})` ;
-//        flavourSelectElement.appendChild(option);
-//    });
-//
-//    packageTypes.forEach(pt => {
-//        const option = document.createElement('option');
-//        option.value = pt.id;
-//        option.textContent = `${pt.name} (${pt.id})`;
-//        ptSelectElement.appendChild(option);
-//    });
-//
-//    recipes.forEach(rec => {
-//        const option = document.createElement('option');
-//        option.value = rec.recipeCode;
-//        option.textContent = rec.recipeCode;
-//        recipeSelectElement.appendChild(option);
-//    });
-//
-//    document.getElementById('edit-pi-name').value = pi.productionItemName;
-//    document.getElementById('edit_pi_flavourId').value = pi.flavourId;
-//    document.getElementById('edit_pi_ptId').value = pi.packageTypeId;
-//    document.getElementById('edit_pi_recipeId').value = pi.recipeCode;
-//    document.getElementById('edit-pi-status').value = pi.status;
-//
-//    $("#modalEditPI").modal("show");
-//
-//}
-
-//const deletePI = (pi) => {
-//    swal.fire({
-//        title: "Delete Production Item",
-//        text: "Are you sure, you want to delete this?",
-//        icon: "warning",
-//        showCancelButton: true,
-//        confirmButtonColor: "#cb421a",
-//        cancelButtonColor: "#3f3f44",
-//        confirmButtonText: "Yes, Delete"
-//    }).then((result) => {
-//        if (result.isConfirmed) {
-//            let response = ajaxDeleteRequest(`/productionItem/deletePI/${pi.id}`);
-//            if (response.status === 200) {
-//                swal.fire({
-//                    title: response.responseText,
-//                    icon: "success"
-//                });
-//                reloadPITable();
-//            } else {
-//                swal.fire({
-//                    title: "Something Went Wrong",
-//                    text: response.responseText,
-//                    icon: "error"
-//                });
-//            }
-//        }
-//    });
-//}
 
 //Define method for ProductionItem Delete
 const deleteProductionITem= (ob, rowIndex) => {
@@ -1072,103 +658,15 @@ const deleteProductionITem= (ob, rowIndex) => {
         }
     })
 }
-//Check production Item form errors
-const checkProductionItemFormError = () => {
-    let errors = '';
-
-    if (productionItem.productionItemName == null) {
-        errors = errors + "Production ItemNo can't be null \n";
-        addProdItem.classList.add('is-invalid')
-    }
-
-    if (productionItem.flavourId == null) {
-        errors = errors + "Flavour can't be null \n";
-        addPIFlavour.classList.add('is-invalid')
-    }
 
 
-    if (productionItem.packageTypeId == null) {
-        errors = errors + "Package Type can't be null \n";
-        addPIPackage.classList.add('is-invalid')
-    }
-
-
-    if (productionItem.recipeCode == null) {
-        errors = errors + "Recipe can't be null\n";
-        addPIRecipe.classList.add('is-invalid')
-    }
-
-
-    if (productionItem.status == null) {
-        errors = errors + "Status can't be null\n";
-        addPIStatus.classList.add('is-invalid');
-    }
-
-
-    return errors;
-}
-
-//Define Production Item submit Function
-const ProductionItemSubmit = () =>{
-
-    event.preventDefault();
-        console.log(productionItem);
-
-        // 1. Check form errors
-        const errors = checkProductionItemFormError();
-
-        if (errors === "") {
-            Swal.fire({
-                title: "Are you sure?",
-                text: "Do you want to add the production Item " + productionItem.productionItemName + "?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#E11D48",
-                cancelButtonColor: "#3f3f44",
-                confirmButtonText: "Yes, Add"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const postServiceRequestResponse = ajaxRequestBody("/productionItem", "POST", productionItem);
-
-                    // Check backend response
-                    if (postServiceRequestResponse.status === 200) {
-                        $("#modalAddPI").modal('hide');
-                        piAddForm.reset();
-                        reloadPITable();
-                        refreshProductionItemForm();
-
-                        // Reset validation classes
-                        Array.from(piAddForm.elements).forEach((field) => {
-                            field.classList.remove('is-valid', 'is-invalid');
-                        });
-
-                        Swal.fire({
-                            title: "Production Item Added Successfully!",
-                            icon: "success"
-                        });
-
-                    } else {
-                        console.error(postServiceRequestResponse);
-                        Swal.fire({
-                            title: "Error",
-                            text: postServiceRequestResponse.responseText,
-                            icon: "error"
-                        });
-                    }
-                }
-            });
-        } else {
-            Swal.fire({
-                title: "Production Item Not Added",
-                text: errors,
-                icon: "error"
-            });
-        }
-}
 
 function validateBatchSize() {
 
-    console.log("uuuuuuuuuuuu")
+    checkBtn.classList.remove('d-none');
+
+
+
     const batchSizeInput = document.getElementById("add-batchSize");
     const batchSize = parseFloat(batchSizeInput.value);
 
@@ -1181,58 +679,12 @@ function validateBatchSize() {
     }
 }
 
-//Refill Product form fields
-const productionItemFormRefill = (ob, rowIndex) => {
-
-
-  $("#modalAddPI").modal('show');
-  productionItem = JSON.parse(JSON.stringify(ob));
-  oldProductionItem = JSON.parse(JSON.stringify(ob));
-
-
-  addProdItem.value = productionItem.productionItemName ;
-  addPIStatus.value = productionItem.status;
-
-  //Get All Flavours/ PackageTypes/ Recipes
-      const flavours = ajaxGetRequest("/flavour/getAllFlavours");
-      const packageTypes = ajaxGetRequest("/packageType/getAllPackageTypes")
-      const recipes = ajaxGetRequest("/recipe/getAllRecipes").filter((r) => r.status === "Active");
-
-      //Fill data into Flavours/PackageTypes/ Recipes
-      fillDataIntoSelect(
-                   addPIFlavour,
-                   "Select Flavour",
-                   flavours,
-                   "id",
-                   productionItem.flavourId
-              );
-
-      fillDataIntoSelect(
-                   addPIPackage,
-                   "Select Package Type",
-                   packageTypes,
-                   "id",
-                   productionItem.packageTypeId
-              );
-      fillDataIntoSelect(
-                   addPIRecipe,
-                   "Select Recipe",
-                   recipes,
-                   "recipeCode",
-                   productionItem.recipeCode
-              );
-
-};
 
 function setupBatchSizeValidation() {
     const batchSizeInput = document.getElementById("add-batchSize");
     if (batchSizeInput) {
         batchSizeInput.addEventListener("input", validateBatchSize);
+        updateCheckButtonState();
+
     }
 }
-
-// If using Bootstrap modal:
-$('#modalMakeNewBatch').on('shown.bs.modal', function () {
-    setupBatchSizeValidation();
-});
-

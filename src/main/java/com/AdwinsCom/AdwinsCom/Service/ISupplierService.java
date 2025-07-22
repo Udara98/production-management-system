@@ -5,6 +5,7 @@ import com.AdwinsCom.AdwinsCom.entity.Supplier;
 import org.springframework.http.ResponseEntity;
 
 public interface ISupplierService {
+    Supplier getSupplierByRegNo(String regNo);
 
     public ResponseEntity<?> AddNewSupplier(SupplierDTO supplierDTO, String userName);
     public ResponseEntity<?> GetAllSuppliers();

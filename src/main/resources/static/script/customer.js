@@ -4,6 +4,8 @@
 
 // Reset and prepare the customer add form for new entry
 function reloadCustomerForm() {
+    console.log('reloadCustomerForm called');
+
     const form = document.getElementById('customerAddForm');
     if (!form) return;
 
@@ -34,7 +36,10 @@ function reloadCustomerForm() {
     if (address) address.value = '';
     if (creditLimit) creditLimit.value = '';
     if (email) email.value = '';
-    if (status) status.selectedIndex = 0;
+    status.value = 'Active';
+    status.selected = true;
+    
+    status.disabled = true;
     if (businessTypeSelect) businessTypeSelect.selectedIndex = 0;
 
     // Remove validation classes
@@ -42,38 +47,7 @@ function reloadCustomerForm() {
         if (f) f.classList.remove('is-invalid', 'is-valid');
     });
 
-    // Hide/show fields based on business type
-    if (businessTypeSelect) {
-        const companyFields = [companyName, brn, contactPerson];
-        const individualFields = [firstName, secondName, nic];
-        if (businessTypeSelect.value === 'COMPANY') {
-            companyFields.forEach(f => { if (f) f.parentElement.parentElement.style.display = ''; });
-            individualFields.forEach(f => { if (f) f.parentElement.parentElement.style.display = 'none'; });
-        } else {
-            companyFields.forEach(f => { if (f) f.parentElement.parentElement.style.display = 'none'; });
-            individualFields.forEach(f => { if (f) f.parentElement.parentElement.style.display = ''; });
-        }
-    }
-
-    // Clear selected customer state
-    selectedCustomer = null;
-}
-
-
-let customerTableInstance;
-let selectedCustomer;
-
-window.addEventListener('load', () => {
-    customerTableRefresh();
-    reloadCustomerForm();
-    customerFormValidation();
-
-    let userCustomerPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/CUSTOMER");
-
-    // --- Dynamic Business Type and Credit Limit Logic ---
-    const form = document.getElementById('customerAddForm');
-    if(form) {
-        const firstRow = form.querySelector('.row.mt-2');
+    const firstRow = form.querySelector('.row.mt-2');
         // Add business type selector if not present
         if (!document.getElementById('add-cus-businessType')) {
             const businessTypeDiv = document.createElement('div');
@@ -101,7 +75,22 @@ window.addEventListener('load', () => {
         document.getElementById('add-cus-businessType').addEventListener('change', function (e) {
             setCompanyFieldsVisible(e.target.value === 'COMPANY');
         });
-    }
+
+    // Clear selected customer state
+    selectedCustomer = null;
+}
+
+
+let customerTableInstance;
+let selectedCustomer;
+
+window.addEventListener('DOMContentLoaded', () => {
+    customerTableRefresh();
+    reloadCustomerForm();
+    customerFormValidation();
+
+    let userCustomerPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/CUSTOMER");
+
 })
 
 
@@ -168,40 +157,54 @@ const printCustomer = (customer) => {
     }, 300);
 };
 
-const generateCustomerDropDown = (element,index) => {
+// Dropdown menu for each customer row (refactored to match product.js pattern)
+const generateCustomerDropDown = (element, index, privilegeOb = null) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
         {
             name: "Edit",
-            action:customerFormRefill,
+            action: customerFormRefill,
             icon: "fa-solid fa-edit me-2",
+            enabled: privilegeOb ? !!privilegeOb.update : true,
         },
         {
             name: "View",
-            action:printCustomer,
+            action: printCustomer,
             icon: "fa-solid fa-eye me-2",
+            enabled: privilegeOb ? !!privilegeOb.select : true,
         },
-        {   name: "Delete",
+        {
+            name: "Delete",
             action: deleteCustomer,
             icon: "fa-solid fa-trash me-2",
-         },
+            enabled: privilegeOb ? !!privilegeOb.delete : true,
+        },
     ];
-    
+
     buttonList.forEach((button) => {
         const buttonElement = document.createElement("button");
         buttonElement.className = "dropdown-item btn";
         buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
+        buttonElement.type = "button";
+        buttonElement.disabled = !button.enabled;
+        if (!button.enabled) {
+            buttonElement.style.cursor = "not-allowed";
+            buttonElement.classList.add("text-muted");
+        }
         buttonElement.onclick = function () {
-            button.action(element,index);
+            if (button.enabled) {
+                button.action(element, index);
+            }
         };
-        const liElement = document.createElement("li");
-        liElement.appendChild(buttonElement);
-        dropdownMenu.appendChild(liElement);
+        const li = document.createElement("li");
+        li.appendChild(buttonElement);
+        dropdownMenu.appendChild(li);
     });
+
     return dropdownMenu;
-}
+};
 
 // Refresh Customer Table
 function customerTableRefresh() {
@@ -332,11 +335,7 @@ function prepareCustomerAddModal() {
     });
 }
 
-// Reload Customer Form (clear fields)
-function reloadCustomerForm() {
-    document.getElementById('customerAddForm').reset();
-    selectedCustomer = null;
-}
+
 
 // Form Validation and object binding
 function customerFormValidation() {
@@ -356,11 +355,10 @@ function customerFormValidation() {
     const email = document.getElementById('add-cus-email');
     const status = document.getElementById('add-cus-status');
 
-    // Modular event-driven validation (like supplierPayment.js)
+   
     // Company fields
-    if (companyName) companyName.addEventListener('input', () => validation(companyName, '^.{4,}$', 'customer', 'companyName'));
-    if (brn) brn.addEventListener('input', () => validation(brn, '^[A-Za-z0-9]{5,}$', 'customer', 'brn'));
-    if (contactPerson) contactPerson.addEventListener('input', () => validation(contactPerson, '^.{4,}$', 'customer', 'contactPerson'));
+    if (companyName) companyName.addEventListener('input', () => validation(companyName, "^(?=.{4,})(?=.*[A-Za-z])[A-Za-z0-9.,&'’-]+( [A-Za-z0-9.,&'’-]+)*$", 'customer', 'companyName'));    if (brn) brn.addEventListener('input', () => validation(brn, '^[A-Za-z0-9]{5,}$', 'customer', 'brn'));
+    if (contactPerson) contactPerson.addEventListener('input', () => validation(contactPerson, '^([A-Z][a-z]+)( [A-Z][a-z]+)+$', 'customer', 'contactPerson'));
     // Individual fields
     if (firstName) firstName.addEventListener('input', () => validation(firstName, '^.{4,}$', 'customer', 'firstName'));
     if (secondName) secondName.addEventListener('input', () => validation(secondName, '^.{4,}$', 'customer', 'secondName'));
@@ -368,28 +366,28 @@ function customerFormValidation() {
     // Common fields
     if (mobile) mobile.addEventListener('input', () => validation(mobile, '^[0][7][01245678][0-9]{7}$', 'customer', 'mobile'));
     if (landNo) landNo.addEventListener('input', () => validation(landNo, '^[0][1][01245678][0-9]{7}$', 'customer', 'landNo'));
-    if (address) address.addEventListener('input', () => validation(address, '^.{5,}$', 'customer', 'address'));
+    if (address) address.addEventListener('input', () => validation(address, '^(?=.{5,255})[0-9]+(\\/[0-9A-Za-z]+)?\\s+[A-Za-z0-9]+(\\s+[A-Za-z0-9]+)*$', 'customer', 'address'));
     if (creditLimit) creditLimit.addEventListener('input', () => validation(creditLimit, '^[0-9]{3,20}$', 'customer', 'creditLimit'));
-    if (email) email.addEventListener('input', () => validation(email, '^[A-Za-z0-9\-_]{6,20}[@][a-z]{3,10}[.][a-z]{2,3}$', 'customer', 'email'));
+    if (email) email.addEventListener('input', () => validation(email, '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$', 'customer', 'email'));
     if (status) status.addEventListener('change', () => selectFieldValidator(status, '', 'customer', 'customerStatus'));
     if (bankName) {
         bankName.addEventListener('input', () => {
-            validation(bankName, '^[A-Za-z0-9 .,&-]{2,50}$', 'customer.bankAccount', 'bankName');
+            validation(bankName, '^[A-Za-z]{3,50}$', 'customer.bankAccount', 'bankName');
         });
     }
     if (bankBranch) {
         bankBranch.addEventListener('input', () => {
-            validation(bankBranch, '^[A-Za-z0-9 .,&-]{2,50}$', 'customer.bankAccount', 'bankBranch');
+            validation(bankBranch, '^[A-Za-z]{3,50}$', 'customer.bankAccount', 'bankBranch');
         });
     }
     if (accountNo) {
         accountNo.addEventListener('input', () => {
-            validation(accountNo, '^.{4,30}$', 'customer.bankAccount', 'accountNo'); // Allows alphanumeric, min 4 chars
+            validation(accountNo, '^[0-9]{6,30}$', 'customer.bankAccount', 'accountNo'); 
         });
     }
     if (accountName) {
         accountName.addEventListener('input', () => {
-            validation(accountName, '^[A-Za-z ]{2,50}$', 'customer.bankAccount', 'accountName');
+            validation(accountName, '^([A-Z][a-z]+)( [A-Z][a-z]+)+$', 'customer.bankAccount', 'accountName');
         });
     }
 
@@ -440,8 +438,8 @@ function customerFormValidation() {
             if (!brn.value.trim()) {
                 errors += 'Business Registration Number is required.\n';
                 brn.classList.add('is-invalid');
-            } else if (!/^[A-Za-z0-9]{5,}$/.test(brn.value.trim())) {
-                errors += 'BRN must be at least 5 letters and numbers.\n';
+            } else if (!/^[A-Za-z0-9]{10,}$/.test(brn.value.trim())) {
+                errors += 'Please Enter Valid BRN.\n';
                 brn.classList.add('is-invalid');
             } else {
                 brn.classList.remove('is-invalid');
@@ -518,28 +516,42 @@ function customerFormValidation() {
             email.classList.remove('is-invalid');
             customer.email = email.value.trim();
 
+        }    // Bank Name Validation
+        if (!bankName.value.trim() || !/^[A-Za-z]{3,50}$/.test(bankName.value.trim())) {
+            errors += 'Valid Bank Name is required.\n';
+            bankName.classList.add('is-invalid');
+        } else {
+            bankName.classList.remove('is-invalid');
+            customer.bankName = bankName.value.trim();
         }
-        // --- Bank Account Fields Validation ---
-    const bankName = document.getElementById('bankName');
-    const bankBranch = document.getElementById('bankBranch');
-    const accountNo = document.getElementById('accountNo');
-    const accountName = document.getElementById('accountName');
-
-
-
+    
+        // Bank Branch Validation
+        if (!bankBranch.value.trim() || !/^[A-Za-z]{3,50}$/.test(bankBranch.value.trim())) {
+            errors += 'Valid Bank Branch is required.\n';
+            bankBranch.classList.add('is-invalid');
+        } else {
+            bankBranch.classList.remove('is-invalid');
+            customer.bankBranch = bankBranch.value.trim();
+        }
+    
+        // Account Number Validation
+        if (!accountNo.value.trim() || !/^[0-9]{6,30}$/.test(accountNo.value.trim())) {
+            errors += 'Valid Account Number is required.\n';
+            accountNo.classList.add('is-invalid');
+        } else {
+            accountNo.classList.remove('is-invalid');
+            customer.accountNo = accountNo.value.trim();
+        }
+    
+        // Account Name Validation (at least two words, each starting with capital)
+        if (!accountName.value.trim() || !/^([A-Z][a-z]+)( [A-Z][a-z]+)+$/.test(accountName.value.trim())) {
+            errors += 'Valid Account Name is required (at least two words, each starting with a capital letter).\n';
+            accountName.classList.add('is-invalid');
+        } else {
+            accountName.classList.remove('is-invalid');
+            customer.accountName = accountName.value.trim();
+        }
  
-        bankName.addEventListener('input', () => {
-            validation(bankName, '^[A-Za-z0-9 .,&-]{2,50}$', 'customer.bankAccount', 'bankName');
-        });
-        bankBranch.addEventListener('input', () => {
-            validation(bankBranch, '^[A-Za-z0-9 .,&-]{2,50}$', 'customer.bankAccount', 'bankBranch');
-        });
-        accountNo.addEventListener('input', () => {
-            validation(accountNo, '^.{4,30}$', 'customer.bankAccount', 'accountNo'); // Allows alphanumeric, min 4 chars
-        });
-        accountName.addEventListener('input', () => {
-            validation(accountName, '^[A-Za-z ]{2,50}$', 'customer.bankAccount', 'accountName');
-        });
 
 
     customer.customerStatus = status.value;

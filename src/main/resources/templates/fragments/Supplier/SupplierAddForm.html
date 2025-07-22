@@ -12,105 +12,130 @@
                         <span class="text-cus-red fw-medium">* required</span>
                     </div>
                 </div>
-                <!--    Supplier Reg No-->
-                <div class="row mt-2">
-                    <!--    Supplier Name-->
-                    <div class="col">
-                        <label class="form-label fw-medium" for="supplierName">
-                            Supplier name<span class="text-danger"> * </span>
-                        </label>
-                        <input
-                                class="form-control"
-                                id="supplierName"
-                                type="text"
-                                placeholder="Enter Supplier Name"
-                        />
-                        <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">
-                            Please enter supplier name ex: Udara Deshan
-                        </div>
-                    </div>
-                    <!--   Supplier Status-->
-                    <div class="col">
-                        <label class="form-label fw-medium" for="supplierStatus"
-                        >Supplier Status<span class="text-danger"> * </span></label
-                        >
-                        <select
-                                class="form-select"
-                                id="supplierStatus"
-                                onchange="selectDynamicFieldValidator(selectStatus,'','employee','employeestatus_id')"
-                                required
-                        >
-                            <option disabled selected value="">Select Status</option>
+                <!-- Business Type Selector -->
+<div class="row mt-2">
+    <div class="col">
+        <label class="form-label fw-medium" for="add-sup-businessType">Business Type<span class="text-danger"> * </span></label>
+        <select id="add-sup-businessType" class="form-select">
+            <option disabled selected value="">Select Business Type</option>
+            <option value="INDIVIDUAL">Individual</option>
+            <option value="COMPANY">Company</option>
+        </select>
+    </div>
+</div>
+<!--    Supplier Reg No-->
+                <!-- Company Fields -->
+<div>
+    <div class="row mt-2">
+        <!--    Supplier Name-->
+        <div class="col supplier-company-fields" style="display:none;">
+            <label class="form-label fw-medium" for="supplierName">
+                Company Name<span class="text-danger"> * </span>
+            </label>
+            <input
+                    class="form-control"
+                    id="supplierName"
+                    type="text"
+                    placeholder="Enter Company Name"
+            />
+            <div class="valid-feedback"></div>
+            <div class="invalid-feedback">
+                Please enter company name ex: ABC Pvt Ltd
+            </div>
+        </div>
+        <div class="col supplier-company-fields" style="display:none;">
+            <label class="form-label fw-medium" for="brn">BRN<span class="text-danger"> * </span></label>
+            <input class="form-control" id="brn" type="text" placeholder="Enter BRN" />
+            <div class="valid-feedback"></div>
+            <div class="invalid-feedback">Please enter valid BRN</div>
+        </div>
+    </div>
+    <!-- Individual Fields -->
+    <div class="supplier-individual-fields" style="display:none;">
+        <div class="row mt-2">
+            <div class="col">
+                <label class="form-label fw-medium" for="firstName">First Name<span class="text-danger"> * </span></label>
+                <input class="form-control" id="firstName" type="text" placeholder="Enter First Name" />
+                <div class="valid-feedback"></div>
+                <div class="invalid-feedback">Please enter valid first name</div>
+            </div>
+            <div class="col">
+                <label class="form-label fw-medium" for="secondName">Second Name<span class="text-danger"> * </span></label>
+                <input class="form-control" id="secondName" type="text" placeholder="Enter Second Name" />
+                <div class="valid-feedback"></div>
+                <div class="invalid-feedback">Please enter valid second name</div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col supplier-company-fields" style="display:none;">
+            <label class="form-label fw-medium" for="contactPersonName"
+            >Contact Person Name<span class="text-danger"> * </span>
+            </label>
+            <input
+                    class="form-control"
+                    id="contactPersonName"
+                    type="text"
+                    placeholder="Enter Contact Person Name"
+            />
+            <div class="valid-feedback"></div>
+            <div class="invalid-feedback">
+                Please enter contact person name ex: Udara Deshan
+            </div>
+        </div>
+        <div class="col">
+            <label class="form-label fw-medium" for="contactNo"
+            >Contact No<span class="text-danger"> * </span>
+            </label>
+            <input
+                    class="form-control"
+                    id="contactNo"
+                    type="text"
+                    placeholder="Enter Contact No"
+            />
+            <div class="valid-feedback"></div>
+            <div class="invalid-feedback">
+                Please Enter valid contact number
+            </div>
+        </div>
+        <div class="col supplier-individual-fields" style="display:none;" >
+            <label class="form-label fw-medium" for="nic">NIC<span class="text-danger"> * </span></label>
+            <input class="form-control" id="nic" type="text" placeholder="Enter NIC" />
+            <div class="valid-feedback"></div>
+            <div class="invalid-feedback">Please enter valid NIC</div>
+        </div>
+    </div>
+</div>
+<div class="row mt-2">
+    <div class="col">
+        <label class="form-label fw-medium" for="email"
+        >Email<span class="text-danger"> * </span>
+        </label>
+        <input
+                class="form-control"
+                id="email"
+                type="email"
+                placeholder="Enter email"
+        />
+        <div class="valid-feedback"></div>
+        <div class="invalid-feedback">
+            Please Enter Full name ex: Udara Deshan Udawatte
+        </div>
+    </div>
+    <div class="col">
+        <label class="form-label fw-medium" for="supplierStatus"
+        >Supplier Status<span class="text-danger"> * </span></label
+        >
+        <select
+                class="form-select"
+                id="supplierStatus"
+                onchange="selectDynamicFieldValidator(selectStatus,'','employee','employeestatus_id')"
+                required
+        >
+            <option disabled selected value="">Select Status</option>
                             <option value="Active">Active</option>
                             <option value="InActive">InActive</option>
                         </select>
-                    </div>
-                </div>
-                <!--    Contact person name-->
-                <div class="row mt-4">
-                    <div class="col">
-                        <label class="form-label fw-medium" for="contactPersonName"
-                        >Contact Person Name<span class="text-danger"> * </span>
-                        </label>
-                        <input
-                                class="form-control"
-                                id="contactPersonName"
-                                type="text"
-                                placeholder="Enter Contact Person Name"
-                        />
-                        <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">
-                            Please enter contact person name ex: Udara Deshan
-                        </div>
-                    </div>
-                    <div class="col">
-                        <label class="form-label fw-medium" for="contactNo"
-                        >Contact No<span class="text-danger"> * </span>
-                        </label>
-                        <input
-                                class="form-control"
-                                id="contactNo"
-                                type="text"
-                                placeholder="Enter Contact No"
-                        />
-                        <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">
-                            Please Enter Full name ex: Udara Deshan Udawatte
-                        </div>
-                    </div>
-                </div>
-                <!--    Email -->
-                <div class="row mt-4">
-                    <div class="col">
-                        <label class="form-label fw-medium" for="email"
-                        >Email<span class="text-danger"> * </span>
-                        </label>
-                        <input
-                                class="form-control"
-                                id="email"
-                                type="email"
-                                placeholder="Enter email"
-                        />
-                        <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">
-                            Please Enter Full name ex: Udara Deshan Udawatte
-                        </div>
-                    </div>
-                    <!--    Join date -->
-                    <div class="col">
-                        <label class="form-label fw-medium" for="joinDate"
-                        >Join Date<span class="text-danger"> * </span>
-                        </label>
-                        <input
-                                class="form-control"
-                                id="joinDate"
-                                type="date"
-                        />
-                        <div class="valid-feedback"></div>
-                        <div class="invalid-feedback">
-                            Please Select Joined date
-                        </div>
                     </div>
                 </div>
                 <!--    Address  -->
@@ -145,7 +170,7 @@
 
                 <div th:replace="~{fragments/Supplier/IngredientTransferList.html::add}"></div>
 <!-- Bank Account Details -->
-<div class="row mt-4">
+<div class="row mt-2">
     <div class="col">
         <label class="form-label fw-medium" for="bankName">
             Bank Name<span class="text-danger"> * </span>

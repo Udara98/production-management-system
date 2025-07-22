@@ -1,4 +1,4 @@
-<div class="modal-dialog modal-lg">
+<div class="modal-dialog modal-xl">
     <div class="modal-content">
         <div class="modal-header">
             <h4 class="modal-title">Add New Recipe</h4>
@@ -10,9 +10,15 @@
         </div>
         <div class="modal-body ">
             <form id="recipeAddForm" class="needs-validation">
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-primary py-2 px-3 mb-2" style="font-size: 1rem;">
+                        <span class="text-danger"><strong>Info:</strong> </span>This recipe is for <b>1L of finished product</b>.
+                    </div>
+                </div>
+            </div>
                 <div class="row mt-3">
                     <div class="col">
-                        <div class="col">
                             <label class="form-label fw-medium" for="add-recipe-name"
                             >Recipe Name<span class="text-danger"> * </span>
                             </label>
@@ -27,7 +33,12 @@
                                 Please Enter Valid Recipe Name
                             </div>
                         </div>
-                    </div>
+                        <div class="col">
+                            <label class="form-label fw-medium" for="add-recipe-flavour">Flavour<span class="text-danger"> * </span></label>
+                            <select id="add-recipe-flavour" class="form-select">
+                                <option value="" selected disabled>Select Flavour</option>
+                            </select>
+                        </div>
                     <div class="col">
                         <label class="form-label fw-medium" for="add-recipe-status">Status<span class="text-danger"> * </span></label>
                         <select id="add-recipe-status" class="form-select">
@@ -39,7 +50,7 @@
                 </div>
                 <div class="flex-lg-row row mt-4 mb-3 align-items-center justify-content-center">
                     <div class="col">
-                        <label class="form-label fw-medium" for="recipe-ing-code">Ingredient Code</label>
+                        <label class="form-label fw-medium" for="recipe-ing-code">Ingredient Code<span class="text-danger"> * </span></label>
                         <select id="recipe-ing-code" class="form-select">
                             <option value="" selected disabled>Select Ingredient</option>
                         </select>
@@ -47,6 +58,7 @@
                     <div class="col">
                         <label class="form-label fw-medium" for="recipe-ing-name">
                             Ingredient Name
+                            <span class="text-danger"> * </span>
                         </label>
                         <input
                                 class="form-control"
@@ -57,11 +69,12 @@
                         />
                     </div>
                     <div class="col">
-                        <label for="recipe-quantity" class="form-label">Quantity</label>
-                        <input type="number"  placeholder="Enter the quantity" class="form-control" id="recipe-quantity" required>
+                        <label for="recipe-quantity" class="form-label fw-medium">Quantity<span class="text-danger"> * </span></label>
+                        <input type="text"  placeholder="Enter the quantity" class="form-control" id="recipe-quantity" required>
+                        <div class="invalid-feedback"> Please enter a valid quantity </div>
                     </div>
                     <div class="col">
-                        <label for="recipe-unitType" class="form-label">Unit Type</label>
+                        <label for="recipe-unitType" class="form-label fw-medium">Unit Type<span class="text-danger"> * </span></label>
                         <select class="form-select" id="recipe-unitType" required>
                             <option value="" selected disabled>Select Unit Type</option>
                             <option value="KG">KG</option>
@@ -71,7 +84,7 @@
                         </select>
                     </div>
                     <div class="col mt-4">
-                        <button type="button" id="recipe-add-btn" class="btn btn-primary" onclick="addRecipe();"><i class="fa-solid fa-plus"></i> Add</button>
+                        <button type="button" id="recipe-add-btn" class="btn btn-submit" onclick="addRecipe();"><i class="fa-solid fa-plus"></i> Add</button>
 
                     </div>
                 </div>
@@ -87,21 +100,24 @@
                             Clear
                         </button>
                     </div>
-                    <div class="col-7"></div>
-                    <div class="col-4">
+                    <div class="col-5"></div>
+                    <div class="col-6 d-flex justify-content-end">
                         <button
                                 id="btnRecipeUpdate"
                                 onclick="recipeUpdate();"
                                 type="button"
+                                class="btn btn-update me-3"
                         >
                             <i class="fa-solid fa-edit me-2"></i>Update
                         </button>
                         <button
                                 id="btnRecipeSubmit"
                                 onclick="recipeSubmit();"
+                                class="btn btn-submit"
+                                style="width: 170px;"
                                 type="button"
                         >
-                            <i class="fa-solid fa-plus me-2"></i>Add
+                            <i class="fa-solid fa-plus me-3"></i>Submit Recipe
                         </button>
                     </div>
                 </div>

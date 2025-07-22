@@ -1,6 +1,7 @@
 package com.AdwinsCom.AdwinsCom.Service;
 
 import com.AdwinsCom.AdwinsCom.DTO.GoodReceiveNoteDTO;
+import com.AdwinsCom.AdwinsCom.DTO.GrnIngredientSummaryDTO;
 import com.AdwinsCom.AdwinsCom.Repository.GoodReceiveNoteRepository;
 import com.AdwinsCom.AdwinsCom.Repository.IngredientRepository;
 import com.AdwinsCom.AdwinsCom.Repository.PurchaseOrderRepository;
@@ -14,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
@@ -58,6 +58,17 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
         this.ingredientRepository = ingredientRepository;
         this.goodReceiveNoteRepository = goodReceiveNoteRepository;
         this.supplierRepository = supplierRepository;
+    }
+
+
+    private String generateNextGrnNo (){
+
+        String maxGrnNo = goodReceiveNoteRepository.findMaxGrnNo();
+        int maxNumber = 1;
+        if(maxGrnNo != null && maxGrnNo.startsWith("GRN-")){
+            maxNumber = Integer.parseInt(maxGrnNo.substring(4)) +1;
+        }
+        return String.format("GRN-%04d", maxNumber);
     }
 
     @Override
@@ -116,12 +127,20 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
         ingredient.setQuantity(currentQuantity + acceptedQty);
         ingredientRepository.save(ingredient);
 
-        GoodReceiveNote newGoodReceiveNote = new GoodReceiveNote().mapDTO(null, goodReceiveNoteDTO, auth.getName());
+        // Manually map fields from DTO to entity (no mapDTO)
+        GoodReceiveNote newGoodReceiveNote = new GoodReceiveNote();
+
+        newGoodReceiveNote.setGrnNo(generateNextGrnNo());
+        newGoodReceiveNote.setAddedUser(auth.getName());
+        newGoodReceiveNote.setAddedDate(java.time.LocalDateTime.now());
+        newGoodReceiveNote.setPurchaseOrder(purchaseOrder);
+        newGoodReceiveNote.setSupplier(supplier);
         newGoodReceiveNote.setAcceptedQuantity(goodReceiveNoteDTO.getAcceptedQuantity());
         newGoodReceiveNote.setRejectedQuantity(goodReceiveNoteDTO.getRejectedQuantity());
         newGoodReceiveNote.setBalance(goodReceiveNoteDTO.getTotalAmount());
         newGoodReceiveNote.setRejectReason(goodReceiveNoteDTO.getRejectReason());
         newGoodReceiveNote.setPaymentStatus(GoodReceiveNote.PaymentStatus.Pending);
+        newGoodReceiveNote.setReceivedDate(java.time.LocalDate.now());
         goodReceiveNoteRepository.save(newGoodReceiveNote);
 
         // --- Auto-complete PO if fully received ---
@@ -175,12 +194,38 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
 
     @Override
     public ResponseEntity<?> GetAllGRNs() {
+
+           // Authentication and authorization
+           Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+           // Get privileges for the logged-in user
+           HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "GRN");
+   
+           // If user doesn't have "insert" permission, return 403 Forbidden
+           if (!loguserPrivi.get("select")) {
+               return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                       .body("GRN GetAll not Completed: You don't have permission!");
+           }
+
         List<GoodReceiveNote> goodReceiveNotes = goodReceiveNoteRepository.findByGrnStatusNotRemoved();
         return ResponseEntity.ok(goodReceiveNotes);
     }
 
     @Override
     public ResponseEntity<?> DeleteGRN(Integer id) {
+
+           // Authentication and authorization
+           Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+           // Get privileges for the logged-in user
+           HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "GRN");
+   
+           // If user doesn't have "insert" permission, return 403 Forbidden
+           if (!loguserPrivi.get("delete")) {
+               return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                       .body("GRN Delete not Completed: You don't have permission!");
+           }
+
        GoodReceiveNote goodReceiveNote = goodReceiveNoteRepository.findById(id).get();
 
        if(goodReceiveNote.getGrnStatus() == GoodReceiveNote.GRNStatus.Pending){
@@ -194,6 +239,19 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
 
     @Override
     public ResponseEntity<?> getGRNsBySupplierId(Integer supplierId) {
+
+            // Authentication and authorization
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            // Get privileges for the logged-in user
+            HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "GRN");
+    
+            // If user doesn't have "insert" permission, return 403 Forbidden
+            if (!loguserPrivi.get("select")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("GRN Select not Completed: You don't have permission!");
+            }
+ 
         List<GoodReceiveNote> goodReceiveNotes = goodReceiveNoteRepository.findBySupplierId(supplierId);
 
         if (goodReceiveNotes.isEmpty()) {
@@ -206,6 +264,18 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
 
     @Override
     public ResponseEntity<?>  getGRNIdByGRNNo(String grnNo) {
+
+            // Authentication and authorization
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            // Get privileges for the logged-in user
+            HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "GRN");
+    
+            // If user doesn't have "insert" permission, return 403 Forbidden
+            if (!loguserPrivi.get("select")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("GRN Select not Completed: You don't have permission!");
+            }
         Integer grnId = goodReceiveNoteRepository.getGRNIdByGRNNo(grnNo);
         if (grnId != null) {
             return ResponseEntity.ok(grnId); // 200 OK with the GRNId
@@ -216,6 +286,18 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
 
     @Override
     public ResponseEntity<?> getActiveGRNBySupId(Integer supplierId) {
+
+            // Authentication and authorization
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            // Get privileges for the logged-in user
+            HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "GRN");
+    
+            // If user doesn't have "insert" permission, return 403 Forbidden
+            if (!loguserPrivi.get("select")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("GRN Select not Completed: You don't have permission!");
+            }
         List<GoodReceiveNote> grnList = goodReceiveNoteRepository.getActiveGRNBySupId(supplierId);
 
         if (grnList.isEmpty()) {
@@ -223,11 +305,11 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
         }
         return ResponseEntity.ok(grnList);
     }
-    public List<com.AdwinsCom.AdwinsCom.DTO.GrnIngredientSummaryDTO> getGrnIngredientSummary(java.time.LocalDate startDate, java.time.LocalDate endDate) {
+    public List<GrnIngredientSummaryDTO> getGrnIngredientSummary(java.time.LocalDate startDate, java.time.LocalDate endDate) {
         java.sql.Date sqlStartDate = java.sql.Date.valueOf(startDate);
         java.sql.Date sqlEndDate = java.sql.Date.valueOf(endDate);
         List<Object[]> rows = goodReceiveNoteRepository.getGrnIngredientSummary(sqlStartDate, sqlEndDate);
-        List<com.AdwinsCom.AdwinsCom.DTO.GrnIngredientSummaryDTO> result = new java.util.ArrayList<>();
+        List<GrnIngredientSummaryDTO> result = new java.util.ArrayList<>();
 
         // Calculate lead time as number of days in the range (inclusive)
         long leadTime = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
@@ -249,7 +331,7 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
             Double totalQuantity1 = row[2] != null ? Double.valueOf(row[2].toString()) : 0d;
             Double totalCost = row[3] != null ? Double.valueOf(row[3].toString()) : 0d;
             Double ropFromDb = row[4] != null ? Double.valueOf(row[4].toString()) : 0d;
-            com.AdwinsCom.AdwinsCom.DTO.GrnIngredientSummaryDTO dto = new com.AdwinsCom.AdwinsCom.DTO.GrnIngredientSummaryDTO();
+            GrnIngredientSummaryDTO dto = new GrnIngredientSummaryDTO();
             dto.setIngredientCode(ingredientCode);
             dto.setIngredientName(ingredientName);
             dto.setTotalQuantity(totalQuantity1);

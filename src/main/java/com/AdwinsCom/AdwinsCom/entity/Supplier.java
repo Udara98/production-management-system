@@ -34,13 +34,23 @@ public class Supplier {
     @NotNull
     private String regNo;
 
-    @Column(name = "supplier_name")
-    @NotNull
-    private String supplierName;
+    @Column(name = "business_type")
+    private String businessType; 
 
-    @Column(name = "contact_person_name")
-    @NotNull
-    private String contactPersonName;
+    @Column(name = "company_name")
+    private String companyName; 
+
+    @Column(name = "brn")
+    private String brn; 
+
+    @Column(name = "first_name")
+    private String firstName; 
+
+    @Column(name = "second_name")
+    private String secondName;
+
+    @Column(name = "nic")
+    private String nic;
 
     @Column(name = "contact_no")
     @NotNull
@@ -49,6 +59,9 @@ public class Supplier {
     @Column(name = "email", unique = true)
     @NotNull
     private String email;
+
+    @Column(name = "contact_person_name")
+    private String contactPersonName;
 
     @Column(name = "address")
     @NotNull
@@ -84,7 +97,11 @@ public class Supplier {
     private LocalDateTime updatedDate;
 
     @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, orphanRemoval = true)
-private List<BankAccount> bankAccounts = new ArrayList<>();
+    private List<BankAccount> bankAccounts = new ArrayList<>();
 
+    // Deprecated fields for backward compatibility (to be removed later)
+    @Column(name = "supplier_name")
+    private String supplierName;
 
 }
+

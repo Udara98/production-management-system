@@ -11,7 +11,8 @@ window.addEventListener("load", () => {
 //Define function for refresh the request table
 const reloadQRequestTable =  () =>{
     const qRequests = ajaxGetRequest("/quotation-request/getAllRequests")
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
+    qRequests.reverse(); 
+    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/QUOTATION_REQUEST");
 
     // Show Ingredient Name, Quantity with Unit, Deadline
     const getQuantityWithUnit = (ob) => `${ob.quantity} ${ob.unit}`;
@@ -42,25 +43,6 @@ const reloadQRequestTable =  () =>{
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //Define function to display status in quotation requests
 const getQRStatus = (ob) => {
         if (ob.requestStatus === "Send") {
@@ -72,25 +54,40 @@ const getQRStatus = (ob) => {
     };
 
 //Define button list function
-const generateQReqDropDown = (element) => {
+// Dropdown menu for each quotation request row (refactored to match product.js pattern)
+const generateQReqDropDown = (element, index, privilegeOb = null) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
-        {name: "Delete", action: deleteQRequest, icon: "fa-solid fa-trash me-2"},
+        {
+            name: "Delete",
+            action: deleteQRequest,
+            icon: "fa-solid fa-trash me-2",
+            enabled: privilegeOb ? !!privilegeOb.delete : true,
+        },
     ];
 
     buttonList.forEach((button) => {
         const buttonElement = document.createElement("button");
         buttonElement.className = "dropdown-item btn";
-        buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
+        buttonElement.innerHTML = `<i class=\"${button.icon}\"></i>${button.name}`;
+        buttonElement.type = "button";
+        buttonElement.disabled = !button.enabled;
+        if (!button.enabled) {
+            buttonElement.style.cursor = "not-allowed";
+            buttonElement.classList.add("text-muted");
+        }
         buttonElement.onclick = function () {
-            button.action(element);
+            if (button.enabled) {
+                button.action(element);
+            }
         };
-        const liElement = document.createElement("li");
-        liElement.appendChild(buttonElement);
-        dropdownMenu.appendChild(liElement);
+        const li = document.createElement("li");
+        li.appendChild(buttonElement);
+        dropdownMenu.appendChild(li);
     });
+
     return dropdownMenu;
 };
 

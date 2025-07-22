@@ -4,28 +4,19 @@ import java.util.*;
 import com.AdwinsCom.AdwinsCom.DTO.ProductBatchDTO;
 import com.AdwinsCom.AdwinsCom.DTO.ProductRestockRequestDTO;
 import com.AdwinsCom.AdwinsCom.Repository.*;
+import com.AdwinsCom.AdwinsCom.entity.CustomerOrder;
 import com.AdwinsCom.AdwinsCom.entity.Product;
-import com.AdwinsCom.AdwinsCom.entity.ProductBatchId;
 import com.AdwinsCom.AdwinsCom.entity.ProductHasBatch;
 import com.AdwinsCom.AdwinsCom.entity.Production.Batch;
-import com.AdwinsCom.AdwinsCom.entity.Production.ProductUnitType;
 import com.AdwinsCom.AdwinsCom.entity.QuotationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 
@@ -50,10 +41,32 @@ public class ProductService implements IProductService{
     @Autowired
     private IPrivilegeService privilegeService;
 
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    @Override
+
+
+private String generateNextInvoiceNo() {
+    String prefix = "PR-";
+    List<Product> allProducts = productRepository.findByProductCodeStartingWith(prefix);
+    int maxSeq = 0;
+    for (Product product : allProducts) {
+        String productCode = product.getProductCode();
+        if (productCode != null && productCode.startsWith(prefix)) {
+            String seqStr = productCode.substring(prefix.length());
+            try {
+                int seq = Integer.parseInt(seqStr);
+                if (seq > maxSeq) maxSeq = seq;
+            } catch (NumberFormatException e) {
+                // handle exception
+            }
+        }
+    }
+    return prefix + String.format("%04d", maxSeq + 1);
+}
+
+
+
+
+@Override
 @Transactional
 public ResponseEntity<?> AddNewProduct(ProductBatchDTO dto) {
 
@@ -106,15 +119,15 @@ public ResponseEntity<?> AddNewProduct(ProductBatchDTO dto) {
     product.setProductPhoto(dto.getProductPhoto());
     product.setProductStatus(Product.ProductStatus.InStock);
 
-    try {
-        product.setProductCode(QuotationRequest.generateUniqueId("PR-"));
-    } catch (NoSuchAlgorithmException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error generating unique product code.");
-    }
+    
 
-    product.setAddedUser(userRepository.getUserByUserName(auth.getName()).getId());
-    product.setAddedDate(LocalDateTime.now());
+    Integer userId = userRepository.getUserByUserName(auth.getName()).getId();
+    LocalDateTime now = LocalDateTime.now();
+    product.setAddedUser(userId);
+    product.setAddedDate(now);
+
+    product.setProductCode(generateNextInvoiceNo());
+    
 
     // Create ProductHasBatch and assign to product
     ProductHasBatch phb = new ProductHasBatch();
@@ -168,9 +181,11 @@ public ResponseEntity<?> AddNewProduct(ProductBatchDTO dto) {
            product.setProductPhoto(dto.getProductPhoto());
        }
 
-       // Set updated user and timestamp
-       product.setUpdatedUser(userRepository.getUserByUserName(auth.getName()).getId());
-       product.setUpdatedDate(LocalDateTime.now());
+       // Set last modified user and timestamp
+    Integer userId = userRepository.getUserByUserName(auth.getName()).getId();
+    LocalDateTime now = LocalDateTime.now();
+    product.setLastmodifieduser(userId);
+    product.setLastmodifieddatetime(now);
 
        productRepository.save(product);
        return ResponseEntity.ok("Product Updated Successfully");
@@ -178,6 +193,19 @@ public ResponseEntity<?> AddNewProduct(ProductBatchDTO dto) {
 
     @Override
 public ResponseEntity<?> GetAllProducts() {
+
+    // Authentication and authorization
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+    // Get privileges for the logged-in user
+    HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "PRODUCT");
+
+    if (!loguserPrivi.get("select")) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body("Product GetAll not Completed: You don't have permission!");
+    }
+
+
     List<Product> products = productRepository.findAll();
     List<ProductBatchDTO> productDTOs = new ArrayList<>();
     for (Product product : products) {
@@ -241,6 +269,12 @@ public ResponseEntity<?> GetAllProducts() {
                     .body("Cannot Delete product as it is associated with transactions.");
         }
 
+        // Set deletedUser and deleteddatetime (soft delete)
+        Integer userId = userRepository.getUserByUserName(auth.getName()).getId();
+        LocalDateTime now = LocalDateTime.now();
+        product.setDeletedUser(userId);
+        product.setDeleteddatetime(now);
+
         // For each batch associated with this product, return the quantity to the batch
         if (product.getBatches() != null) {
             for (ProductHasBatch phb : product.getBatches()) {
@@ -267,6 +301,18 @@ public ResponseEntity<?> GetAllProducts() {
 
     @Override
     public ResponseEntity<?> restockProduct(ProductRestockRequestDTO request) {
+
+        // Authentication and authorization
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        // Get privileges for the logged-in user
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "PRODUCT");
+
+        if (!loguserPrivi.get("insert")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Product Restock not Completed: You don't have permission!");
+    }
+
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
@@ -300,6 +346,10 @@ public ResponseEntity<?> GetAllProducts() {
         newProductHasBatch.setQuantity(request.getQuantity());
         newProductHasBatch.setSalesPrice(request.getSalesPrice());
         newProductHasBatch.setExpireDate(request.getExpireDate());
+        newProductHasBatch.setAddedUser(userRepository.getUserByUserName(auth.getName()).getId());
+        newProductHasBatch.setAddedDate(LocalDateTime.now());
+        newProductHasBatch.setManufacturingDate(batch.getManufactureDate());
+        newProductHasBatch.setExpireDate(batch.getExpireDate());
 
 
         // Save the ProductHasBatch entity to the database

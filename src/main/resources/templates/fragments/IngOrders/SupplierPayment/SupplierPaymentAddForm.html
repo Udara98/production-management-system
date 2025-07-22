@@ -7,13 +7,13 @@
         <div class="modal-body">
             <form id="spAddForm" class="needs-validation">
                 <!-- Supplier Selection -->
-                <div class="row mt-4">
+                <div class="row mt-3">
                     <div class="col">
                         <label class="form-label fw-medium" for="add_sp_supplier">
                             Supplier<span class="text-danger"> * </span>
                         </label>
                         <select id="add_sp_supplier" class="form-select" required>
-                            <option selected>Select Supplier</option>
+                            <option disabled selected>Select Supplier</option>
                         </select>
                     </div>
                 </div>
@@ -21,7 +21,7 @@
                     Supplier does not have any outstanding GRNs
                 </div>
                 <!-- GRN List Section -->
-                <div class="mt-4" id="grnListSection" style="display: none;">
+                <div class="mt-3" id="grnListSection" style="display: none;">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6>Outstanding GRNs</h6>
                         <div class="form-check">
@@ -52,7 +52,7 @@
                     </div>
 
                     <!-- Totals Section -->
-                    <div class="row mt-4">
+                    <div class="row mt-3">
                         <div class="col">
                             <label class="form-label fw-medium">Total Payable (LKR)</label>
                             <input type="text" class="form-control" id="totalPayable" disabled>
@@ -60,6 +60,7 @@
                         <div class="col">
                             <label class="form-label fw-medium">Total Paid (LKR)</label>
                             <input type="text" class="form-control" id="totalPaid" disabled>
+                            <div class="invalid-feedback">Need to Enter pay Amount to at least one above field</div>
                         </div>
                         <div class="col">
                             <label class="form-label fw-medium">Remaining Balance (LKR)</label>
@@ -69,24 +70,27 @@
                 </div>
 
                 <!-- Payment Details -->
-                <div class="row mt-4 d-none" id="PaymentDetailsSection">
+                <div class="row mt-3 d-none" id="PaymentDetailsSection">
                     <div class="col-md-6" id="paymentMethodCol">
                         <label class="form-label fw-medium" for="add-sp-paymentMethod">
                             Payment Method<span class="text-danger"> * </span>
                         </label>
                         <select id="add-sp-paymentMethod" class="form-select" onchange="showPaymentOptionByMethod();" required>
-                            <option selected value="VISA_CARD">VISA CARD</option>
+                            <option disabled selected value="">Select Payment Method</option>
+                            <option value="VISA_CARD">VISA CARD</option>
                             <option value="MASTER_CARD">MASTER CARD</option>
                             <option value="BANK_TRANSFER">BANK TRANSFER</option>
                             <option value="CASH">CASH</option>
                             <option value="CHEQUE">CHEQUE</option>
                         </select>
+                        <div class="invalid-feedback">Please select a payment method</div>
                     </div>
                     <div class="col-md-6" id="paymentDateCol">
                         <label class="form-label fw-medium" for="add-sp-payDate">
                             Payment Date<span class="text-danger"> * </span>
                         </label>
                         <input class="form-control" id="add-sp-payDate" type="date" required>
+                        <div class="invalid-feedback">Please select a payment date</div>
                     </div>
                 </div>
                 <!--               Bank Transfer Card-->
@@ -109,6 +113,7 @@
                                                 <input class="form-control" type="text"
                                                        id="inputBankTranferId"
                                                        style="background-color: #E6E6E6;" required>
+                                                       <div class="invalid-feedback">Please enter a valid transaction ID.</div>
                                             </div>
                                         </div>
                                     </div>
@@ -126,6 +131,7 @@
                                                        id="inputBankTransferredDateTime"
                                                        style="background-color: #E6E6E6;" required
                                                        onkeydown="return false">
+                                                       <div class="invalid-feedback">Please enter a valid transfer date.</div>
                                             </div>
                                         </div>
                                     </div>
@@ -157,6 +163,7 @@
                                                 <input class="form-control" type="text"
                                                        id="inputChequeNo" style="background-color: #E6E6E6;"
                                                        required>
+                                                       <div class="invalid-feedback">Please enter a valid cheque number.</div>
                                             </div>
                                         </div>
                                     </div>
@@ -172,6 +179,7 @@
                                                        id="inputChequeDate"
                                                        style="background-color: #E6E6E6;" required
                                                        onkeydown="return false">
+                                                       <div class="invalid-feedback">Please enter a valid cheque date.</div>
                                             </div>
                                         </div>
                                     </div>
@@ -200,6 +208,7 @@
                                                 <input class="form-control" type="text"
                                                        id="inputCardRefNo" style="background-color: #E6E6E6;"
                                                        required>
+                                                       <div class="invalid-feedback">Please enter a valid transaction ID.</div>
                                             </div>
                                         </div>
                                     </div>
@@ -215,6 +224,7 @@
                                                        id="inputCardDate"
                                                        style="background-color: #E6E6E6;" required
                                                        onkeydown="return false">
+                                                       <div class="invalid-feedback">Please enter a valid transfer date.</div>
                                             </div>
                                         </div>
                                     </div>
@@ -230,7 +240,7 @@
                         <button class="btn btn-secondary mx-2"
                                 data-bs-dismiss="modal"
                                 type="button">Cancel</button>
-                        <button  id="supplierPaymentSubmitBtn" onclick="supplierPaymentSubmit()" class="btn btn-primary">Submit Payment</button>
+                        <button  type="button" id="supplierPaymentSubmitBtn" onclick="supplierPaymentSubmit(event)" class="btn btn-submit mb-0 p-2" style="width: 150px;">Submit Payment</button>
                     </div>
                 </div>
             </form>

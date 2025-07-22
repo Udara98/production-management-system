@@ -1,10 +1,16 @@
 let grnTableInstance;
 let selectedGRN;
 let purchaseOrders;
+let addAcceptedQty;
+let addRejectedQty;
+
 
 window.addEventListener('load', () => {
 
     purchaseOrders = ajaxGetRequest("/purchaseOrder/getAllPurchaseOrders").filter((po) => po.purchaseOrderStatus === 'Pending');
+    addAcceptedQty = document.getElementById('addAcceptedQty');
+    addRejectedQty = document.getElementById('addRejectedQty');
+
 
     //Call function to reload the GRN table
     reloadGRN()
@@ -14,75 +20,11 @@ window.addEventListener('load', () => {
 
     //Call function to validate
     grnFormValidation();
-//    const purchaseOrders = ajaxGetRequest("/purchaseOrder/getAllPurchaseOrders").filter((po) => po.purchaseOrderStatus === 'Pending');
-//    const poSelectElement = document.getElementById("add_grn_poNo");
 
-//    purchaseOrders.forEach(po => {
-//        const option = document.createElement('option');
-//        option.value = po.purchaseOrderNo;
-//        option.textContent = po.purchaseOrderNo;
-//        poSelectElement.appendChild(option);
-//    });
-//    poSelectElement.addEventListener('change', (event) => {
-//        const val = event.target.value;
-//        selectedPO = purchaseOrders.filter((po) => po.purchaseOrderNo === val)[0];
-//        document.getElementById("add-grn-tot").value = parseInt(selectedPO.totalPrice).toLocaleString("en-US", {
-//            style: "currency",
-//            currency: "LKR",
-//        });
-//    });
-
-//    document.getElementById('grnAddForm').onsubmit =  (event) => {
-//        event.preventDefault();
-//        const grn = {
-//            purchaseOrder: selectedPO,
-//            totalAmount: selectedPO.totalPrice,
-//            grnStatus: document.getElementById('add-grn-status').value,
-//            receivedDate: new Date(document.getElementById('add-grn-recDate').value)
-//        }
-//
-//        let response = ajaxRequestBody("/grn/addNewGRN", "POST", grn);
-//        if (response.status === 200) {
-//            swal.fire({
-//                title: response.responseText,
-//                icon: "success",
-//            });
-//            reloadGRN()
-//            $("#modalGRNAdd").modal("hide");
-//
-//        } else {
-//            swal.fire({
-//                title: "Something Went Wrong",
-//                text: response.responseText,
-//                icon: "error",
-//            });
-//        }
-//    }
-
-
-//    document.getElementById('grnEditForm').onsubmit =  (event) => {
-//        event.preventDefault();
-//
-//        selectedGRN.receivedDate = new Date(document.getElementById('edit-grn-recDate').value);
-//        selectedGRN.grnStatus = document.getElementById('edit-grn-status').value
-//
-//        let response = ajaxRequestBody("/grn/updateGRN", "PUT", selectedGRN);
-//        if (response.status === 200) {
-//            swal.fire({
-//                title: response.responseText,
-//                icon: "success",
-//            });
-//            reloadGRN()
-//            $("#modalGRNEdit").modal("hide");
-//
-//        } else {
-//            swal.fire({
-//                title: "Something Went Wrong",
-//                text: response.responseText,
-//                icon: "error",
-//            });
-//        }
-//    }
+    addGrnRecDate.disabled = true;
+    addAcceptedQty.disabled = true;
+    addRejectedQty.disabled = true;
+    
 })
 
 //Call function for validation and object binding
@@ -92,7 +34,18 @@ const grnFormValidation = () => {
         // DynamicSelectValidation(addGrnPoNo, 'grn', 'purchaseOrder');
         // Bind selected PO object to grn.purchaseOrder
         const selectedPONo = addGrnPoNo.value;
-        grn.purchaseOrder = purchaseOrders.find(po => po.purchaseOrderNo === selectedPONo) || null;
+        const selectedPO = purchaseOrders.find(po => po.purchaseOrderNo === selectedPONo);
+        grn.purchaseOrder = selectedPO;
+        addGrnRecDate.disabled = false;
+        addAcceptedQty.disabled = false;
+        addRejectedQty.disabled = false;
+
+        const OrderDate = new Date(selectedPO.orderDate);
+        const today = new Date();
+
+        addGrnRecDate.setAttribute('min', OrderDate.toISOString().split('T')[0]);
+        addGrnRecDate.setAttribute('max', today.toISOString().split('T')[0]);
+
         addGrnPoNo.classList.remove('is-invalid')
         addGrnPoNo.classList.add('is-valid')
 
@@ -116,10 +69,11 @@ const grnFormValidation = () => {
         } else {
             addOrderedQty.value = '';
         }
+
+
     });
 
     // Validate and bind accepted/rejected qty
-    const addAcceptedQty = document.getElementById('addAcceptedQty');
     addAcceptedQty.addEventListener('input', () => {
         const acceptedQty = parseFloat(addAcceptedQty.value) || 0;
         const rejectedQty = parseFloat(addRejectedQty.value) || 0;
@@ -139,7 +93,6 @@ const grnFormValidation = () => {
         }
     });
     
-    const addRejectedQty = document.getElementById('addRejectedQty');
     addRejectedQty.addEventListener('input', () => {
         const acceptedQty = parseFloat(addAcceptedQty.value) || 0;
         const rejectedQty = parseFloat(addRejectedQty.value) || 0;
@@ -159,14 +112,6 @@ const grnFormValidation = () => {
         addRejectReason.classList.add('is-valid');
         grn.rejectReason = addRejectReason.value.trim();
     });
-
-    // // Bind total amount (auto-calculated)
-    // addAcceptedQty.addEventListener('input', () => {
-    //     if (grn.purchaseOrder && grn.purchaseOrder.pricePerUnit) {
-    //         grn.totalAmount = (parseFloat(addAcceptedQty.value) || 0) * grn.purchaseOrder.pricePerUnit;
-    //         addGrnTot.value = grn.totalAmount.toFixed(2);
-    //     }
-    // });
 
     // Bind received date
     addGrnRecDate.addEventListener('change', () => {
@@ -278,7 +223,6 @@ const reloadGRNForm = () =>{
 
     grn = new Object();
     oldGrn = null;
-    let selectedPO;
 
     //Get ONLY pending purchase orders
     const purchaseOrders = ajaxGetRequest("/purchaseOrder/getAllPurchaseOrders").filter((po) => po.purchaseOrderStatus === 'Pending');
@@ -291,20 +235,12 @@ const reloadGRNForm = () =>{
         addGrnPoNo.appendChild(option);
       });
 
-    //Fill Total Amount field on changing PO
-    // addGrnPoNo.addEventListener('change', (event) => {
-    //         const val = event.target.value;
-    //         const SelectedValue = JSON.parse(val)
-    //         console.log(SelectedValue.purchaseOrderNo)
-    //         selectedPO = purchaseOrders.filter((po) => po.purchaseOrderNo === SelectedValue.purchaseOrderNo)[0];
-    //         addGrnTot.value = parseInt(selectedPO.totalPrice).toLocaleString("en-US", {
-    //             style: "currency",
-    //             currency: "LKR",
-    //         });
-    //         //Add Total amount to GRN object
-    //         grn.totalAmount = parseInt(selectedPO.totalPrice);
-    //         addGrnTot.classList.add('is-valid');
-    //     });
+      //Select Status
+      const selectStatus = document.getElementById('addGrnStatus');
+      selectStatus.value = 'Approved';
+      addGrnStatus.disabled = true;
+
+
 
 }
 
@@ -470,34 +406,6 @@ const deleteGRN= (ob, rowIndex) => {
         }
     })
 }
-//const deleteGRN = (grn) => {
-//    swal.fire({
-//        title: "Delete GRN",
-//        text: "Are you sure, you want to delete " + grn.grnNo + "?",
-//        icon: "warning",
-//        showCancelButton: true,
-//        confirmButtonColor: "#cb421a",
-//        cancelButtonColor: "#3f3f44",
-//        confirmButtonText: "Yes, Delete"
-//    }).then((result) => {
-//        if (result.isConfirmed) {
-//            let response = ajaxDeleteRequest(`/grn/deleteGrn/${grn.id}`);
-//            if (response.status === 200) {
-//                swal.fire({
-//                    title: response.responseText,
-//                    icon: "success"
-//                });
-//                reloadGRN();
-//            } else {
-//                swal.fire({
-//                    title: "Something Went Wrong",
-//                    text: response.responseText,
-//                    icon: "error"
-//                });
-//            }
-//        }
-//    });
-//}
 
 //Function for refill the supplier form
 const grNFormRefill = (ob, rowIndex) => {

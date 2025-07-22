@@ -68,17 +68,16 @@ public class CustomerOrderController {
     }
     @GetMapping("/invoice/{orderId}")
     public ModelAndView printInvoice(@PathVariable Integer orderId) {
-        // Fetch order by ID (using repository directly for now)
-        // You can move this logic to the service layer if preferred
-        CustomerOrder order = null;
-        try {
-            order = customerOrderService.getOrderEntityById(orderId);
-        } catch (Exception e) {
+        ResponseEntity<?> response = customerOrderService.getOrderEntityById(orderId);
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            ModelAndView mv = new ModelAndView("fragments/Sales/CustomerOrder/CustomerOrderInvoice");
+            mv.addObject("order", response.getBody());
+            return mv;
+        } else if (response.getStatusCode().value() == 403) {
+            return new ModelAndView("error").addObject("message", "You don't have permission to view this order.");
+        } else {
             return new ModelAndView("error").addObject("message", "Order not found");
         }
-        ModelAndView mv = new ModelAndView("fragments/Sales/CustomerOrder/CustomerOrderInvoice");
-        mv.addObject("order", order);
-        return mv;
     }
 
     @GetMapping("/assign/{orderId}")

@@ -3,18 +3,24 @@ package com.AdwinsCom.AdwinsCom.Service;
 import com.AdwinsCom.AdwinsCom.DTO.CustomerDTO;
 import com.AdwinsCom.AdwinsCom.Repository.BankAccountRepository;
 import com.AdwinsCom.AdwinsCom.Repository.CustomerRepository;
+import com.AdwinsCom.AdwinsCom.Repository.PrivilegeRepository;
 import com.AdwinsCom.AdwinsCom.entity.BankAccount;
 import com.AdwinsCom.AdwinsCom.entity.Customer;
 import com.AdwinsCom.AdwinsCom.entity.QuotationRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import com.AdwinsCom.AdwinsCom.DTO.CustomerDTO;
 import com.AdwinsCom.AdwinsCom.DTO.BankAccountDTO;
 // If lombok @Setter is missing on CustomerDTO/BankAccountDTO, add it there.
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -25,18 +31,30 @@ public class CustomerService implements ICustomerService{
     @Autowired
     private BankAccountRepository bankAccountRepository;
 
-    public CustomerService(CustomerRepository customerRepository) {
+    @Autowired
+    private IPrivilegeService privilegeService;
+
+    public CustomerService(CustomerRepository customerRepository ) {
         this.customerRepository = customerRepository;
     }
 
     @Override
     public ResponseEntity<?> AddNewCustomer(CustomerDTO customerDTO, String userName) throws NoSuchAlgorithmException {
+
+        // Authentication and authorization
+          Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+          HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER");
+          if (!loguserPrivi.get("insert")) {
+              return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                      .body("Customer Add not Completed: You don't have permission!");
+          }
+
         Customer exCustomer = customerRepository.findByNicAndBrn(customerDTO.getNic(), customerDTO.getBrn());
         if(exCustomer != null){
             return ResponseEntity.badRequest().body("Customer Already Exist.");
         }
-        // Customer newCustomer = new Customer().mapDTO(null, customerDTO, userName);
-        // customerRepository.save(newCustomer);
+
+      
         Customer newCustomer = new Customer();
         // Generate RegNo automatically
         newCustomer.setRegNo(getNextCustomerRegNo());
@@ -86,6 +104,14 @@ public class CustomerService implements ICustomerService{
     }
     @Override
     public ResponseEntity<?> UpdateCustomer(CustomerDTO customerDTO, String userName) throws NoSuchAlgorithmException {
+          // Authentication and authorization
+          Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+          HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER");
+          if (!loguserPrivi.get("update")) {
+              return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                      .body("Customer Update not Completed: You don't have permission!");
+          }
+
         Customer customer = customerRepository.findById(customerDTO.getId()).get();
         Customer updatedCus = new Customer().mapDTO(customer, customerDTO, userName);
         customerRepository.save(updatedCus);
@@ -96,6 +122,14 @@ public class CustomerService implements ICustomerService{
 
     @Override
     public ResponseEntity<?> GetAllCustomers() {
+         // Authentication and authorization
+         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+         HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER");
+         if (!loguserPrivi.get("select")) {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                     .body("Customer GetAll not Completed: You don't have permission!");
+         }
+
         List<Customer> customers = customerRepository.findAll();
         List<CustomerDTO> customerDTOs = customers.stream().map(customer -> {
             CustomerDTO dto = new CustomerDTO();
@@ -131,6 +165,15 @@ public class CustomerService implements ICustomerService{
 
     @Override
     public ResponseEntity<?> DeleteCustomer(Integer id) {
-        return null;
+         // Authentication and authorization
+         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+         HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER");
+         if (!loguserPrivi.get("delete")) {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                     .body("Customer Delete not Completed: You don't have permission!");
+         }
+
+        customerRepository.deleteById(id);
+        return ResponseEntity.ok("Customer Deleted Successfully");
     }
 }

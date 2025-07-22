@@ -18,89 +18,8 @@ window.addEventListener('load', () => {
 
     const batchList = ajaxGetRequest('/batch/getAllBatches')
 
+    const selectedBatch = batchList.filter((b) => b.id === parseInt(document.getElementById('addProductBatch').value))[0]
 
-
-
-
-//    document.getElementById('productAddForm').onsubmit = (event) => {
-//        event.preventDefault();
-//        const formData = new FormData();
-//        const fileInput = document.getElementById('add-product-photo');
-//        const file = fileInput.files[0];
-//        console.log(file)
-//        if (file) {
-//            formData.append('file', file);
-//        }
-        const selectedBatch = batchList.filter((b) => b.id === parseInt(document.getElementById('addProductBatch').value))[0]
-//        formData.append('batchId', selectedBatch.id);
-//        formData.append('productName', document.getElementById('add-product-name').value);
-//        formData.append('reorderPoint', document.getElementById('add-product-rop').value);
-//        formData.append('reorderQuantity', document.getElementById('add-product-roq').value);
-//        formData.append('quantity', document.getElementById('add-product-qty').value);
-//        formData.append('salePrice', document.getElementById('add-product-price').value);
-//        formData.append('unitType', document.getElementById('add-product-unitType').value);
-//        formData.append('unitSize', document.getElementById('add-product-unitSize').value);
-//        formData.append('note', document.getElementById('add-product-note').value);
-//
-//        let response = ajaxFormDataBody("/product/addNewProduct", 'POST', formData)
-//        if (response.status === 200) {
-//            swal.fire({
-//                title: response.responseText,
-//                icon: "success",
-//            });
-//            itemTableRefresh();
-//            $("#modalAddProduct").modal("hide");
-//
-//        } else {
-//            swal.fire({
-//                title: "Something Went Wrong",
-//                text: response.responseText,
-//                icon: "error",
-//            });
-//        }
-//    }
-
-
-
-//    document.getElementById('productEditForm').onsubmit = (event) => {
-//        event.preventDefault();
-//        const formData = new FormData();
-//        const fileInput = document.getElementById('edit-product-photo');
-//        const file = fileInput.files[0];
-//        if (file) {
-//            formData.append('file', file);
-//        }else {
-//            formData.append('file', null);
-//        }
-//        const selectedBatch = batchList.filter((b) => b.id === parseInt(document.getElementById('add_product_batch').value))[0] || selectedProduct.batch
-//        formData.append('batchId', selectedBatch.id);
-//        formData.append('id', selectedProduct.id);
-//        formData.append('productName', document.getElementById('edit-product-name').value);
-//        formData.append('reorderPoint', document.getElementById('edit-product-rop').value);
-//        formData.append('reorderQuantity', document.getElementById('edit-product-roq').value);
-//        formData.append('quantity', document.getElementById('edit-product-qty').value);
-//        formData.append('salePrice', document.getElementById('edit-product-price').value);
-//        formData.append('unitType', document.getElementById('edit-product-unitType').value);
-//        formData.append('unitSize', document.getElementById('edit-product-unitSize').value);
-//        formData.append('note', document.getElementById('edit-product-note').value);
-//
-//        let response = ajaxFormDataBody("/product/updateProduct", 'PUT', formData)
-//        if (response.status === 200) {
-//            swal.fire({
-//                title: response.responseText,
-//                icon: "success",
-//            });
-//            itemTableRefresh();
-//            $("#modalEditProduct").modal("hide");
-//
-//        } else {
-//            swal.fire({
-//                title: "Something Went Wrong",
-//                text: response.responseText,
-//                icon: "error",
-//            });
-//        }
-//    }
 
 });
 
@@ -216,36 +135,45 @@ const reloadProductForm = () =>{
     const packageTypeSelect = document.getElementById('addPackageType')
 
     const flavourTypeSelect = document.getElementById('addFlavourType')
+    flavourTypeSelect.disabled = true;
 
-//    batchList.forEach((batch) => {
-//        const option = document.createElement('option');
-//        option.value = batch.id;
-//        option.textContent = batch.batchNo;
-//        batchSelect.appendChild(option);
-//    })
+
 //Auto refill all batches on dropdown
-   fillDataIntoSelect(
-       batchSelect,
-       "Select Batch",
-       batchList,
-       "batchNo",
- );
+    // Fill Batch dropdown as 'batchNo (flavor)'
+    batchSelect.innerHTML = '';
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select Batch';
+    batchSelect.appendChild(defaultOption);
+    batchList.forEach(batch => {
+        const option = document.createElement('option');
+        option.value = JSON.stringify(batch);
+        option.textContent = batch.batchNo + ' - ' + batch.recipeName;
+        batchSelect.appendChild(option);
+    });
 
-//Auto refill all PackageTypes on dropdown
-//  fillDataIntoSelect(
-//        packageTypeSelect,
-//        "Select Package Type",
-//        packageTypes,
-//        "name",
-//  );
 
-//Auto refill all PackageTypes on dropdown
-//    fillDataIntoSelect(
-//          flavourTypeSelect,
-//          "Select Flavour Type",
-//          flavourTypes.map(flavour => flavour.name ),
-//          "name",
-//    );
+    batchSelect.addEventListener('change', () => {
+
+        const selectedBatch = JSON.parse(batchSelect.value);
+
+        console.log(selectedBatch);
+
+        const flavourID = selectedBatch.flavourId;
+
+        console.log(flavourID);
+
+       
+        const flavour = flavourTypes.find(flavour => flavour.id === flavourID);
+
+        flavourTypeSelect.value = flavour.name;
+
+        
+
+
+        
+        
+    });
 
 //Auto refill all flavourTypes on dropdown
 flavourTypes.forEach(flavour => {
@@ -261,16 +189,6 @@ packageTypes.forEach(packageType => {
               option.textContent = packageType.name;
               packageTypeSelect.appendChild(option);
           });
-//    //Auto refill all PackageTypes on dropdown
-//        fillDataIntoSelect(
-//              flavourTypeSelect,
-//              "Select Flavour Type",
-//              packageTypes,
-//              "name",
-//        );
-
-
-
 
 }
 
@@ -327,14 +245,7 @@ const productFormRefill = (ob, rowIndex) => {
 
   const batchSelect = document.getElementById('addProductBatch')
 
-//   fillDataIntoSelect(
-//          batchSelect,
-//          "Select Batch",
-//          batchList,
-//          "batchNo",
-//          product.batch.batchNo
-//    );
-   addProductBatch.disabled = true;
+  addProductBatch.disabled = true;
 
 
    $("#modalAddProduct").modal('show');
@@ -362,7 +273,7 @@ const formValidation = () =>{
     });
 
     addProductUnitSize.addEventListener('input',  () => {
-                validation(addProductUnitSize, '^[1-9]$', 'product', 'unitSize');
+                validation(addProductUnitSize, '^[1-9][0-9]?$','product', 'unitSize');
     });
 
     addProductUnitType.addEventListener('input', () =>{
@@ -370,19 +281,19 @@ const formValidation = () =>{
     })
 
     addProductQty.addEventListener('input', () =>{
-        validation(addProductQty,'^(?:[1-9][0-9]?|1[0-9]{2}|200)$','product','quantity')
+        validation(addProductQty,'^[1-9][0-9]?[0-9]?$','product','quantity')
     })
 
     addProductROP.addEventListener('input', () =>{
-            validation(addProductROP,'^[1-9][0-9]?$','product','reorderPoint')
+            validation(addProductROP,'^[1-9]?[0-9]?[0-9]?$','product','reorderPoint')
         })
 
     addProductROQ.addEventListener('input', () =>{
-            validation(addProductROQ,'^(?:[1-9][0-9]?|1[0-9]{2}|200)$','product','reorderQuantity')
+            validation(addProductROQ,'^[1-9]?[0-9]?[0-9]?$','product','reorderQuantity')
         })
 
     addProductPrice.addEventListener('input', () =>{
-                validation(addProductPrice,'^(?:[1-9]|[1-9][0-9]|[1-9][0-9]{3}|[1-9][0-9]{2})$','product','salePrice')
+                validation(addProductPrice,'^[1-9][0-9][0-9]?[0-9]?[0-9]?[0-9]?$','product','salePrice')
          })
 
     addProductNote.addEventListener('input', () =>{
@@ -483,7 +394,7 @@ const itemTableRefresh = () => {
     product = new Object();
 
     const products = ajaxGetRequest("/product/getAllProducts")
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/PRODUCT");
+    let productPrivilegeOb = ajaxGetRequest("/privilege/byloggedusermodule/PRODUCT");
 
         const displayProperty = [
             {dataType: "photo", propertyName: "productPhoto"},
@@ -496,18 +407,6 @@ const itemTableRefresh = () => {
             {dataType: "function", propertyName: getStatus},
         ];
 
-//    let disProducts = []
-//    products.forEach((product) => {
-//        let prData = {...product};
-//        prData.batchNo = product.batch.batchNo;
-//        prData.unitAmount = product.unitSize + " " + product.unitType
-//
-//        disProducts.push(prData)
-//    })
-
-
-
-
     if (productTableInstance) {
         productTableInstance.destroy();
     }
@@ -519,7 +418,7 @@ const itemTableRefresh = () => {
         displayProperty,
         true,
         generateProductDropDown,
-        getPrivilege,
+        productPrivilegeOb,
         dummyProductPhotoSrc
     );
 
@@ -530,42 +429,58 @@ const itemTableRefresh = () => {
     });
 }
 
-//Define function for Generate the dropdown
-const generateProductDropDown = (element,index) => {
+
+const generateProductDropDown = (element, index, privilegeOb) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
+    console.log(privilegeOb)
 
     const buttonList = [
         {
             name: "Edit",
-            action:productFormRefill,
+            action: productFormRefill,
             icon: "fa-solid fa-edit me-2",
+            enabled: privilegeOb && privilegeOb.update,
         },
-        {   name: "Delete",
+        {
+            name: "Delete",
             action: deleteProduct,
             icon: "fa-solid fa-trash me-2",
-         },
-         {  name: "Add Stocks",
+            enabled: privilegeOb && privilegeOb.delete,
+        },
+        {
+            name: "Add Stocks",
             action: stockAdditionFormRefill,
             icon: "fa-solid fa-plus me-2",
-         },
-         {  name: "Detail View ",
-             action: viewProductDetailsTableRefill,
+            enabled: privilegeOb && privilegeOb.update,
+        },
+        {
+            name: "Detail View ",
+            action: viewProductDetailsTableRefill,
             icon: "fa-solid fa-eye me-2",
-          }
+            enabled: privilegeOb && privilegeOb.select,
+        }
     ];
 
     buttonList.forEach((button) => {
         const buttonElement = document.createElement("button");
         buttonElement.className = "dropdown-item btn";
         buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
+        buttonElement.disabled = !button.enabled;
+        if (!button.enabled) {
+            buttonElement.style.cursor = "not-allowed";
+            buttonElement.classList.add("text-muted");
+        }
         buttonElement.onclick = function () {
-            button.action(element,index);
+            if (button.enabled) {
+                button.action(element, index);
+            }
         };
-        const liElement = document.createElement("li");
-        liElement.appendChild(buttonElement);
-        dropdownMenu.appendChild(liElement);
+        const li = document.createElement("li");
+        li.appendChild(buttonElement);
+        dropdownMenu.appendChild(li);
     });
+
     return dropdownMenu;
 };
 
@@ -778,23 +693,11 @@ const checkUpdateProductFormError = () => {
           if(result.isConfirmed){
             // Create ProductDTO structure
             const productDTO = {
-                // productName: product.productName,
-                // quantity: product.quantity,
-                // salePrice: product.salePrice,
-                // unitType: product.unitType,
-                // unitSize: product.unitSize,
                 productId: product.productId,
                 reorderPoint: product.reorderPoint,
                 reorderQuantity: product.reorderQuantity,
                 note: product.note,
                 productPhoto: product.productPhoto,
-                // productPhotoName: product.productPhotoName,
-                // Create the batches array in DTO format
-                // batches: [{
-                //     batchId: product.batch.id,
-                //     quantity: product.quantity,
-                //     salesPrice: product.salePrice
-                // }]
             };
 
             let updateServiceResponse = ajaxRequestBody("/product", "PUT", productDTO);
@@ -851,22 +754,6 @@ const checkUpdateProductFormError = () => {
     const checkUpdates = () =>{
       let updates = "";
 
-    //   if(product.batch.batchNo !== oldProduct.batch.batchNo){
-    //     updates = updates + "Batch No is changed" + oldProduct.batchNo + " into " + product.batchNo + "<br>";
-    //   }
-
-    //   if(product.productName !== oldProduct.productName){
-    //     updates = updates + "Product Name is changed" + oldProduct.productName + " into " + product.productName +"<br>";
-    //   }
-
-    //   if(product.quantity !== oldProduct.quantity){
-    //     updates = updates + "Quantity is changed" + oldProduct.quantity + " into " + product.quantity + "<br>";
-    //   }
-
-    //   if(product.unitSize !== oldProduct.unitSize){
-    //     updates = updates + "UnitSize is changed" + oldProduct.unitSize + " into " + product.unitSize + "<br>";
-    //   }
-
       if(product.reorderPoint !== oldProduct.reorderPoint){
         updates = updates + "ROP is changed" + oldProduct.reorderPoint + " into " + product.reorderPoint + "<br>";
       }
@@ -874,10 +761,6 @@ const checkUpdateProductFormError = () => {
       if(product.reorderQuantity !== oldProduct.reorderQuantity){
         updates = updates + "ROQ is changed" + oldProduct.reorderQuantity + " into " + product.reorderQuantity + "<br>";
       }
-
-    //   if(product.salePrice !== oldProduct.salePrice){
-    //     updates = updates + "Sales Price is Change " + oldProduct.salePrice + " into "+ product.salePrice+  "<br>";
-    //   }
 
       if(product.note !== oldProduct.note){
         let oldNote = oldProduct.note == null ? '' : oldProduct.note;
@@ -895,6 +778,10 @@ const checkUpdateProductFormError = () => {
 
     //Refill Ingredient form fields
     const stockAdditionFormRefill = (ob, rowIndex) => {
+
+    stockAdd = new Object();
+    oldStockAdd = null;
+    
       $("#modalAddStockProduct").modal('show');
       product = JSON.parse(JSON.stringify(ob));
       console.log(product);
@@ -911,6 +798,12 @@ const checkUpdateProductFormError = () => {
 
      const restockBatchList = ajaxGetRequest(`batch/getBatchesForProduct/${product.productId}/true`)
 
+     stockUnitCost.value = product.salesPrice;
+     stockAdd.salesPrice = product.salesPrice;
+     
+     
+
+
      console.log(restockBatchList);
 
      //Fill Dropdown of  select Supplier
@@ -922,8 +815,7 @@ const checkUpdateProductFormError = () => {
         });
 
 
-      stockAdd = new Object();
-      oldStockAdd = null;
+      
 
       stockAdd.productId = product.productId;
 
@@ -936,6 +828,8 @@ const checkUpdateProductFormError = () => {
 
     };
 
+
+ //Restock form validation
   const restockFormValidation = () => {
     // Batch validation
     stockBatchSelect.addEventListener('change', () => {
@@ -944,12 +838,12 @@ const checkUpdateProductFormError = () => {
 
     // Quantity validation - must be between 1 and 200
     addStockQty.addEventListener('input', () => {
-        validation(addStockQty, '^(?:[1-9][0-9]?|1[0-9]{2}|200)$', 'stockAdd', 'quantity');
+        validation(addStockQty, '^[1-9][0-9]{0,2}$', 'stockAdd', 'quantity');
     });
 
     // Sales Price validation - must be a positive number
     stockUnitCost.addEventListener('input', () => {
-        validation(stockUnitCost, '^(?:[1-9]|[1-9][0-9]|[1-9][0-9]{3}|[1-9][0-9]{2})$', 'stockAdd', 'salesPrice');
+        validation(stockUnitCost, '^[1-9][0-9]{0,4}$', 'stockAdd', 'salesPrice');
     });
 
     // Notes validation - optional text field
@@ -1078,7 +972,7 @@ const viewProductDetailsTableRefill = (ob, rowIndex) => {
     detailQuantity.innerText = product.quantity ?? '';
 
     // Batch No function (null safe)
-    const getBatchNo = (ob) => ob.latestBatch && ob.latestBatch.batchNo ? ob.latestBatch.batchNo : '';
+    const getBatchNo = (ob) => ob.batch.batchNo;
 
     const displayProperty = [
         { dataType: "function", propertyName: getBatchNo },
@@ -1087,38 +981,19 @@ const viewProductDetailsTableRefill = (ob, rowIndex) => {
         { dataType: "price", propertyName: "salesPrice" },
     ];
 
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/PRODUCT");
+    let productPrivilegeOb = ajaxGetRequest("/privilege/byloggedusermodule/PRODUCT");
     const productHasBatches = ajaxGetRequest(`/productHasBatch/getByProductId/${product.productId || product.id}`);
+
+    console.log(productHasBatches);
 
     tableDataBinder(
         batchDetailsTable,
         productHasBatches,
         displayProperty,
+        false,
         null,
-        null,
-        getPrivilege,
-        null
+        productPrivilegeOb,
     );
 };
-//     //Fill Dropdown of  select Supplier
-//       restockBatchList.forEach(batch => {
-//               const option = document.createElement('option');
-//               option.value = batch.id;
-//               option.textContent = batch.batchNo;
-//               stockBatchSelect.appendChild(option);
-//        });
-//
-//
-//      stockAdd = new Object();
-//      oldStockAdd = null;
-//
-//      stockAdd.productId = product.id;
-//
-//
-//      stockProductName.value = product.productName;
-//      stockProductName.disabled = true;
-//
-//      currentStock.value = product.quantity;
-//      currentStock.disabled = true;
 
     

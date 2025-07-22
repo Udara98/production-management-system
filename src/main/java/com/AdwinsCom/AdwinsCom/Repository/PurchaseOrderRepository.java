@@ -16,4 +16,7 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, In
     @Query("SELECT po FROM PurchaseOrder po WHERE po.purchaseOrderStatus <> 'Removed'")
     List<PurchaseOrder> findByPurchaseOrderStatusNotRemoved();
 
+    @Query("SELECT MAX(po.purchaseOrderNo) FROM PurchaseOrder po")
+    String findMaxPurchaseOrderNo();
+
 }

@@ -5,6 +5,7 @@ let isEditMode = false;
 let editingRecipeCode = null;
 let oldRecipe;
 let recipeIngTableInstance;
+let receipeStatus;
 
 
 //Browser on load event
@@ -33,7 +34,7 @@ const refreshRecipeTable = () =>{
 
 const recipes = ajaxGetRequest("/recipe/getAllRecipes")
     console.log(recipes)
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
+    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/RECIPE");
     const getStatus = (ob) => {
         if (ob.status === "Active") {
             return '<p class="align-middle greenLabel mx-auto" style="width: 100px">Active</p>';
@@ -65,6 +66,11 @@ const recipes = ajaxGetRequest("/recipe/getAllRecipes")
         autoWidth: false,
     });
 
+    receipeStatus = document.getElementById("add-recipe-status");
+    receipeStatus.value = "Active";
+    receipeStatus.disabled = true;
+    
+
 
 }
 
@@ -74,6 +80,8 @@ const reloadRecipeForm = () =>{
     let selectedIng;
 
     let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients");
+
+    let flavourList = ajaxGetRequest("/flavour/getAllFlavours");
 
     const ingSelectElement = document.getElementById("recipe-ing-code");
     ingSelectElement.innerHTML = '';
@@ -96,7 +104,17 @@ const reloadRecipeForm = () =>{
         document.getElementById('recipe-ing-name').value = selectedIng.ingredientName
     })
 
+    const flavourSelectElement = document.getElementById("add-recipe-flavour");
+    flavourSelectElement.innerHTML = '<option value="" selected disabled>Select Flavour</option>';
+    flavourList.forEach(flavour => {
+        const option = document.createElement('option');
+        option.value = flavour.id;
+        option.textContent = flavour.name;
+        flavourSelectElement.appendChild(option);   
+    });
     document.getElementById('btnRecipeUpdate').disabled = true;
+
+
 
 
 
@@ -107,7 +125,7 @@ const formValidation = () =>{
      // Recipe Name validation (at least 2 characters)
      const addRecipeName = document.getElementById("add-recipe-name");
      addRecipeName.addEventListener('input', () => {
-         validation(addRecipeName, '^.{2,}$', 'recipe', 'recipeName');
+         validation(addRecipeName, '^[A-Z][a-z]{1,25}( [A-Z][a-z]{2,25})?$', 'recipe', 'recipeName');
      });
  
      // Status validation (must be selected)
@@ -127,7 +145,7 @@ const formValidation = () =>{
      // Quantity validation (must be positive number)
      const ingQty = document.getElementById("recipe-quantity");
      ingQty.addEventListener('input', () => {
-         validation(ingQty, '^[1-9][0-9]*$', 'recipe', 'qty');
+         validation(ingQty, '^[1-9]([0-9]{1,2})?$', 'recipe', 'qty');
      });
  
      // Unit Type validation (must be selected)
@@ -136,6 +154,11 @@ const formValidation = () =>{
          selectFieldValidator(unitType, '', 'recipe', 'unitType');
      });
 
+     // Flavour validation
+     const flavourSelect = document.getElementById("add-recipe-flavour");
+     flavourSelect.addEventListener('change', () => {
+         selectFieldValidator(flavourSelect, '', 'recipe', 'flavour');
+     });
 }
 
 const checkRecipeMainFormError = () => {
@@ -143,6 +166,7 @@ const checkRecipeMainFormError = () => {
 
     const recipeName = document.getElementById("add-recipe-name");
     const recipeStatus = document.getElementById("add-recipe-status");
+    const flavourSelect = document.getElementById("add-recipe-flavour");
 
     if (!recipeName.value || recipeName.value.trim().length < 2) {
         errors += "Recipe name is required and must be at least 2 characters.\n";
@@ -150,6 +174,13 @@ const checkRecipeMainFormError = () => {
     } else {
         recipeName.classList.remove('is-invalid');
         recipeName.classList.add('is-valid');
+    }
+    if(!flavourSelect.value){
+        errors += "Flavour is required.\n";
+        flavourSelect.classList.add('is-invalid');
+    } else {
+        flavourSelect.classList.remove('is-invalid');
+        flavourSelect.classList.add('is-valid');
     }
 
     if (!recipeStatus.value) {
@@ -170,6 +201,15 @@ const checkRecipeMainFormError = () => {
 function recipeSubmit() {
     event.preventDefault();
 
+    if(recipeItems.length <3){
+        Swal.fire({
+            title: "Recipe Not Added",
+            text: "Recipe must have at least 3 ingredients.",
+            icon: "error"
+        });
+        return;
+    }
+
     // Validate form
     const errors = checkRecipeMainFormError();
     if (errors !== "") {
@@ -185,8 +225,11 @@ function recipeSubmit() {
     const recipe = {
         recipeName: document.getElementById("add-recipe-name").value,
         status: document.getElementById("add-recipe-status").value,
+        flavourId: document.getElementById("add-recipe-flavour").value,
         recipeItems: recipeItems
     };
+
+    console.log(recipe);
 
     // Send to backend
     let response = ajaxRequestBody("/recipe/addNewRecipe", "POST", recipe);
@@ -308,13 +351,25 @@ const checkRecipeFormError = () =>{
     const ingName = document.getElementById("recipe-ing-name");
     const ingQty = document.getElementById("recipe-quantity");
     const unitType = document.getElementById("recipe-unitType");
+    const flavourSelect = document.getElementById("add-recipe-flavour");
 
+
+    //Check Recipe Name
     if (!recipeName.value || recipeName.value.trim().length < 2) {
         errors += "Recipe name is required and must be at least 2 characters.\n";
         recipeName.classList.add('is-invalid');
     } else {
         recipeName.classList.remove('is-invalid');
         recipeName.classList.add('is-valid');
+    }
+
+    //Check Flavour select
+    if(!flavourSelect.value){
+        errors += "Flavour is required.\n";
+        flavourSelect.classList.add('is-invalid');
+    } else {
+        flavourSelect.classList.remove('is-invalid');
+        flavourSelect.classList.add('is-valid');
     }
 
     // Ingredient Code
@@ -416,96 +471,6 @@ const addRecipe = () => {
     document.getElementById('btnRecipeUpdate').disabled = true;
     document.getElementById('btnRecipeSubmit').disabled = false;
 }
-
-const checkUpdates = () => {
-
-}
-
-window.addEventListener('load', function (){
-    // refreshRecipeTable();
-    // let selectedIng;
-
-    // let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients");
-
-    // const ingSelectElement = document.getElementById("recipe-ing-code");
-
-    // ingredientList.forEach(ing => {
-    //     const option = document.createElement('option');
-    //     option.value = ing.ingredientCode;
-    //     option.textContent = ing.ingredientCode;
-    //     ingSelectElement.appendChild(option);
-    // });
-
-    // ingSelectElement.addEventListener('change', (event)=>{
-    //     selectedIng = ingredientList.filter((i)=> i.ingredientCode === event.target.value)[0];
-    //     document.getElementById('recipe-ing-name').value = selectedIng.ingredientName
-    // })
-    // document.getElementById('recipe-add-btn').addEventListener('click',()=>{
-    //     const recipeItem ={
-    //         ingredientCode:document.getElementById("recipe-ing-code").value,
-    //         ingredientName:document.getElementById("recipe-ing-name").value,
-    //         qty:parseInt(document.getElementById("recipe-quantity").value),
-    //         unitType:document.getElementById("recipe-unitType").value,
-    //     }
-    //     const newRecipeItems = [...recipeItems, recipeItem]
-    //     displayRecipeItems("recipe-items",newRecipeItems)
-    //     recipeItems.push(recipeItem)
-    // })
-
-
-
-    document.getElementById('recipeAddForm').onsubmit=function (event){
-        event.preventDefault()
-        const recipe = {
-            recipeName:document.getElementById("add-recipe-name").value,
-            status:document.getElementById("add-recipe-status").value,
-            recipeItems:recipeItems
-        }
-
-        let response = ajaxRequestBody("/recipe/addNewRecipe", "POST", recipe);
-        if (response.status === 200) {
-            swal.fire({
-                title: response.responseText,
-                icon: "success"
-            });
-            refreshRecipeTable();
-            $("#modalAddRecipe").modal('hide');
-
-        } else {
-            swal.fire({
-                title: "Something Went Wrong",
-                text: response.responseText,
-                icon: "error"
-            });
-        }
-    }
-
-    document.getElementById('recipeEditForm').onsubmit=function (event){
-        event.preventDefault()
-
-        selectedRecipe.recipeName = document.getElementById('edit-recipe-name').value
-        selectedRecipe.status = document.getElementById('edit-recipe-status').value
-        selectedRecipe.recipeItems = recipeItems
-
-        let response = ajaxRequestBody("/recipe/updateRecipe", "PUT", selectedRecipe);
-        if (response.status === 200) {
-            swal.fire({
-                title: response.responseText,
-                icon: "success"
-            });
-            refreshRecipeTable();
-            $("#modalEditRecipe").modal('hide');
-
-        } else {
-            swal.fire({
-                title: "Something Went Wrong",
-                text: response.responseText,
-                icon: "error"
-            });
-        }
-    }
-
-})
 
 function checkRecipeUpdates() {
     let updates = "";
@@ -633,30 +598,45 @@ function refillRecipeForm(recipe) {
 }
 
 
-const generateRecipeDropDown = (element) => {
+const generateRecipeDropDown = (element, index, privilegeOb = null) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
         {
             name: "Edit",
-            action: refillRecipeForm,
+            action: editRecipe,
             icon: "fa-solid fa-edit me-2",
+            enabled: privilegeOb ? !!privilegeOb.update : true,
         },
-        {name: "Delete", action: deleteRecipe, icon: "fa-solid fa-trash me-2"},
+        {
+            name: "Delete",
+            action: deleteRecipe,
+            icon: "fa-solid fa-trash me-2",
+            enabled: privilegeOb ? !!privilegeOb.delete : true,
+        },
     ];
 
     buttonList.forEach((button) => {
         const buttonElement = document.createElement("button");
         buttonElement.className = "dropdown-item btn";
-        buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
+        buttonElement.innerHTML = `<i class=\"${button.icon}\"></i>${button.name}`;
+        buttonElement.type = "button";
+        buttonElement.disabled = !button.enabled;
+        if (!button.enabled) {
+            buttonElement.style.cursor = "not-allowed";
+            buttonElement.classList.add("text-muted");
+        }
         buttonElement.onclick = function () {
-            button.action(element);
+            if (button.enabled) {
+                button.action(element, index);
+            }
         };
-        const liElement = document.createElement("li");
-        liElement.appendChild(buttonElement);
-        dropdownMenu.appendChild(liElement);
+        const li = document.createElement("li");
+        li.appendChild(buttonElement);
+        dropdownMenu.appendChild(li);
     });
+
     return dropdownMenu;
 };
 

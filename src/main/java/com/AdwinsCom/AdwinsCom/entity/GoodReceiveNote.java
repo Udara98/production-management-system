@@ -1,13 +1,11 @@
 package com.AdwinsCom.AdwinsCom.entity;
 
-import com.AdwinsCom.AdwinsCom.DTO.GoodReceiveNoteDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -86,35 +84,5 @@ public class GoodReceiveNote {
     @JsonBackReference
     private List<SupplierPaymentHasGoodReceiveNote> payments = new ArrayList<>();
 
-    public GoodReceiveNote mapDTO(GoodReceiveNote goodReceiveNote, GoodReceiveNoteDTO goodReceiveNoteDTO, String userName) throws NoSuchAlgorithmException {
-        GoodReceiveNote newGoodReceiveNote = new GoodReceiveNote();
-
-        if (goodReceiveNote != null) {
-            newGoodReceiveNote = goodReceiveNote;
-            newGoodReceiveNote.setUpdatedUser(userName);
-            newGoodReceiveNote.setUpdatedDate(LocalDateTime.now());
-        } else {
-            newGoodReceiveNote.setGrnNo(QuotationRequest.generateUniqueId("GRN-"));
-            newGoodReceiveNote.setAddedUser(userName);
-            newGoodReceiveNote.setAddedDate(LocalDateTime.now());
-        }
-        newGoodReceiveNote.setPurchaseOrder(goodReceiveNoteDTO.getPurchaseOrder());
-        newGoodReceiveNote.setTotalAmount(goodReceiveNoteDTO.getTotalAmount());
-        newGoodReceiveNote.setReceivedDate(goodReceiveNoteDTO.getReceivedDate());
-        newGoodReceiveNote.setGrnStatus(goodReceiveNoteDTO.getGrnStatus());
-        newGoodReceiveNote.setPaymentStatus(goodReceiveNoteDTO.getPaymentStatus());
-
-        // Map new fields
-        newGoodReceiveNote.setAcceptedQuantity(goodReceiveNoteDTO.getAcceptedQuantity());
-        newGoodReceiveNote.setRejectedQuantity(goodReceiveNoteDTO.getRejectedQuantity());
-        newGoodReceiveNote.setRejectReason(goodReceiveNoteDTO.getRejectReason());
-
-        // Directly set the supplier (assuming supplierId is always provided by the controller)
-        Supplier supplier = new Supplier();
-        supplier.setId(goodReceiveNoteDTO.getSupplierId());
-        newGoodReceiveNote.setSupplier(supplier);
-
-        return newGoodReceiveNote;
-    }
 
 }

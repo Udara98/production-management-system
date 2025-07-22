@@ -1,18 +1,12 @@
 package com.AdwinsCom.AdwinsCom.entity.Production;
 
-import com.AdwinsCom.AdwinsCom.DTO.BatchDTO;
-import com.AdwinsCom.AdwinsCom.entity.Product;
 import com.AdwinsCom.AdwinsCom.entity.ProductHasBatch;
-import com.AdwinsCom.AdwinsCom.entity.QuotationRequest;
-import com.AdwinsCom.AdwinsCom.entity.SupplierPaymentHasGoodReceiveNote;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +34,9 @@ public class Batch {
 
     @Column(name = "recipe_Code")
     private String recipeCode;
+
+    @Column(name = "flavour_id")
+    private String flavourId;
 
     @Column(name = "recipe_name")
     private String recipeName;
@@ -89,33 +86,5 @@ public class Batch {
     private LocalDateTime updatedDate;
 
 
-    public Batch mapDTO(Batch batch, BatchDTO batchDTO,String userName) throws NoSuchAlgorithmException {
-        Batch newBatch = new Batch();
-        if(batch != null){
-            newBatch = batch;
-            newBatch.setDamagedQuantity(batchDTO.getDamagedQuantity());
-            newBatch.setAvailableQuantity(batchDTO.getAvailableQuantity());
-            newBatch.setUpdatedUser(userName);
-            newBatch.setUpdatedDate(LocalDateTime.now());
-        }else {
-            newBatch.setBatchNo(QuotationRequest.generateUniqueId("BCH-"));
-            newBatch.setDamagedQuantity(0.0);
-            newBatch.setTotalSale(0.0);
-            newBatch.setAvailableQuantity(batchDTO.getTotalQuantity());
-            newBatch.setAddedUser(userName);
-            newBatch.setAddedDate(LocalDateTime.now());
-        }
-        newBatch.setRecipeCode(batchDTO.getRecipeCode());
-        newBatch.setRecipeName(batchDTO.getRecipeName());
-        newBatch.setTotalQuantity(batchDTO.getTotalQuantity());
-        newBatch.setManufactureDate(batchDTO.getManufactureDate());
-        newBatch.setExpireDate(batchDTO.getExpireDate());
-        newBatch.setTotalCost(batchDTO.getTotalCost());
-        newBatch.setBatchStatus(batchDTO.getBatchStatus());
-        newBatch.setNote(batchDTO.getNote());
-
-        return newBatch;
-
-    }
 
 }

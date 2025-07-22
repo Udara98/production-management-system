@@ -17,8 +17,13 @@ import java.util.Set;
 public class SupplierDTO {
     private Integer id;
     private String regNo;
-    private String supplierName;
-    private String contactPersonName;
+    private String businessType; 
+    private String companyName; 
+    private String brn; 
+    private String contactPerson; 
+    private String firstName;   
+    private String secondName;
+    private String nic; 
     private String contactNo;
     private String email;
     private String address;
@@ -27,4 +32,7 @@ public class SupplierDTO {
     private Supplier.SupplierStatus supplierStatus;
     private Set<Ingredient> ingredients;
     private BankAccountDTO bankAccount;
+    private Double creditLimit;
+    private String supplierName;
+    private String contactPersonName;
 }

@@ -36,12 +36,23 @@ public class QuotationRequestService implements IQuotationRequestService {
     final SupplierIngredientService supplierIngredientService;
     final IngredientRepository ingredientRepository;
     final SupplierQuotationTokenService supplierQuotationTokenService;
+    
     public QuotationRequestService(QuotationRequestRepository quotationRequestRepository, SupplierRepository supplierRepository, SupplierIngredientService supplierIngredientService, IngredientRepository ingredientRepository, SupplierQuotationTokenService supplierQuotationTokenService) {
         this.quotationRequestRepository = quotationRequestRepository;
         this.supplierRepository = supplierRepository;
         this.supplierIngredientService = supplierIngredientService;
         this.ingredientRepository = ingredientRepository;
         this.supplierQuotationTokenService = supplierQuotationTokenService;
+    }
+
+
+    private String generateNextRequestNo(){
+        String maxRequestNo = quotationRequestRepository.getMaxRequestNo();
+        int nextNumber = 1;
+        if(maxRequestNo !=null && maxRequestNo.startsWith("QREQ-")){
+            nextNumber = Integer.parseInt(maxRequestNo.substring(5)) + 1;
+        }
+        return String.format("QREQ-%04d", nextNumber);
     }
 
     @Override
@@ -73,14 +84,20 @@ public class QuotationRequestService implements IQuotationRequestService {
         // Create a new QuotationRequest object
         QuotationRequest quotationRequest = new QuotationRequest();
         quotationRequest.setIngredientId(ingId);
-        quotationRequest.setRequestNo(QuotationRequest.generateUniqueId("QREQ-"));
+        quotationRequest.setRequestNo(generateNextRequestNo());
         quotationRequest.setRequestDate(LocalDateTime.now());
-        quotationRequest.setSuppliers(supplierIngredientService.GetSuppliersByIngredientId(ingId));
+        List<String> suppliers = supplierIngredientService.GetSuppliersByIngredientId(ingId);
+
+        //Check if there are any suppliers for the ingredient
+        if (suppliers ==null|| suppliers.isEmpty()){
+            return ResponseEntity.badRequest().body("Cannot create quotation request: No suppliers are available for this ingredient.");
+        }
+
+    quotationRequest.setSuppliers(suppliers);
         quotationRequest.setAddedUser(auth.getName());
         quotationRequest.setAddedDate(LocalDateTime.now());
         quotationRequest.setUnitType(request.getUnitType());
-
-        // Set additional fields from QRequestGetDTO
+        quotationRequest.setDeadline(request.getDeadline());
         quotationRequest.setQuantity(request.getQuantity());
         quotationRequest.setRequiredDeliveryDate(request.getRequiredDeliveryDate());
         quotationRequest.setNote(request.getNote());
@@ -109,7 +126,59 @@ public class QuotationRequestService implements IQuotationRequestService {
     @Override
     public ResponseEntity<?> GetAllQuotationRequests() {
 
+         // Authentication and authorization
+         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+         // Get privileges for the logged-in user
+         HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "QUOTATION_REQUEST");
+ 
+         // If user doesn't have "insert" permission, return 403 Forbidden
+         if (!loguserPrivi.get("select")) {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                     .body("Quotation Request GetAll not Completed: You don't have permission!");
+         }
+ 
+
         List<QuotationRequest> quotationRequests = quotationRequestRepository.findAllByRequestStatusNotRemoved();
+        List<QRequestGetDTO> requestGetDTOS = new ArrayList<>();
+
+        for (QuotationRequest qr : quotationRequests) {
+            Ingredient ingredient = ingredientRepository.findById(qr.getIngredientId()).orElse(null);
+            QRequestGetDTO requestGetDTO = new QRequestGetDTO();
+            requestGetDTO.setId(qr.getId());
+            requestGetDTO.setRequestNo(qr.getRequestNo());
+            requestGetDTO.setIngCode(ingredient != null ? ingredient.getIngredientCode() : null);
+            requestGetDTO.setRequestDate(qr.getRequestDate());
+            requestGetDTO.setSuppliers(qr.getSuppliers());
+            requestGetDTO.setRequestStatus(qr.getRequestStatus());
+            requestGetDTO.setRequiredDeliveryDate(qr.getRequiredDeliveryDate());
+            requestGetDTO.setDeadline(qr.getDeadline());
+            requestGetDTO.setQuantity(qr.getQuantity());
+            requestGetDTO.setNote(qr.getNote());
+            // Set ingredient name and unit for frontend
+            requestGetDTO.setIngredientName(ingredient != null ? ingredient.getIngredientName() : null);
+            requestGetDTO.setUnit(ingredient != null ? ingredient.getUnitType().toString() : null);
+            requestGetDTOS.add(requestGetDTO);
+        }
+
+        return ResponseEntity.ok(requestGetDTOS);
+    }
+
+    @Override
+    public ResponseEntity<?> GetAllSendQuotationRequests() {
+        // Authentication and authorization
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        // Get privileges for the logged-in user
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "QUOTATION_REQUEST");
+
+        // If user doesn't have "select" permission, return 403 Forbidden
+        if (!loguserPrivi.get("select")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Quotation Request GetAllSend not Completed: You don't have permission!");
+        }
+
+        List<QuotationRequest> quotationRequests = quotationRequestRepository.findAllSendRequestsOrderByAddedDateDesc();
         List<QRequestGetDTO> requestGetDTOS = new ArrayList<>();
 
         for (QuotationRequest qr : quotationRequests) {
@@ -141,6 +210,19 @@ public class QuotationRequestService implements IQuotationRequestService {
 
     @Override
     public ResponseEntity<?> DeleteQuotationRequest(Integer id) {
+
+         // Authentication and authorization
+         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+         // Get privileges for the logged-in user
+         HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "QUOTATION_REQUEST");
+ 
+         // If user doesn't have "insert" permission, return 403 Forbidden
+         if (!loguserPrivi.get("delete")) {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                     .body("Quotation Request Delete not Completed: You don't have permission!");
+         }
+
         QuotationRequest quotationRequest = quotationRequestRepository.findById(id).get();
         if(quotationRequest.getRequestStatus() == QuotationRequest.QRequestStatus.Send){
             return ResponseEntity.badRequest().body("Can't Delete Active Quotation Request");
@@ -156,6 +238,18 @@ public class QuotationRequestService implements IQuotationRequestService {
         // Ingredient ingredient = ingredientRepository.findById(emailDTO.getIngredientId()).orElse(null);
         // String ingredientName = ingredient != null ? ingredient.getIngredientName() : emailDTO.getIngredientName();
         // String unit = ingredient != null ? ingredient.getUnitType().toString() : emailDTO.getUnit();
+
+        // Authentication and authorization
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        // Get privileges for the logged-in user
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "QUOTATION_REQUEST");
+
+        // If user doesn't have "insert" permission, return 403 Forbidden
+        if (!loguserPrivi.get("select")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Quotation Request Send not Completed: You don't have permission!");
+        }
 
         // Find all suppliers for the ingredient by ID
         List<Supplier> suppliers = supplierRepository.findSuppliersByIngredientId(emailDTO.getIngredientId());

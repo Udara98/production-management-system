@@ -3,12 +3,7 @@ package com.AdwinsCom.AdwinsCom.controller;
 import com.AdwinsCom.AdwinsCom.DTO.QRequestGetDTO;
 import com.AdwinsCom.AdwinsCom.DTO.QuotationRequestEmailDTO;
 import com.AdwinsCom.AdwinsCom.Service.IQuotationRequestService;
-import com.AdwinsCom.AdwinsCom.entity.QuotationRequest;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -41,6 +36,15 @@ public class QuotationRequestController {
     @PostMapping("/sendToAllSuppliers")
     public ResponseEntity<?> sendToAllSuppliers(@RequestBody QuotationRequestEmailDTO emailDTO) {
         return quotationRequestService.sendQuotationRequestToAllSuppliers(emailDTO);
+    }
+
+    @GetMapping("/send")
+    public ResponseEntity<?> getAllSendQuotationRequests() {
+        try {
+            return quotationRequestService.GetAllSendQuotationRequests();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
     }
 
     @GetMapping("/getAllRequests")

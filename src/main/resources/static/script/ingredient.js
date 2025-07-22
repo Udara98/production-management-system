@@ -77,26 +77,51 @@ const ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
     $('#tableIngredient tbody').empty();
 
     //Define function for generate drop down
-    const generateDropDown = (element,index) => {
+    const generateIngredientDropDown = (element, index, privilegeOb = null) => {
         const dropdownMenu = document.createElement("ul");
         dropdownMenu.className = "dropdown-menu";
 
         const buttonList = [
-            {name: "Edit", action: ingredientFormRefill, icon: "fa-solid fa-edit me-2"},
-            {name: "Delete", action: deleteIngredient, icon: "fa-solid fa-trash me-2"},
-            {name: "Send Quotation Request", action: quoRequestFormRefill, icon: "fa-solid fa-file-lines me-2"}
+            {
+                name: "Edit",
+                action: ingredientFormRefill,
+                icon: "fa-solid fa-edit me-2",
+                enabled: privilegeOb ? !!privilegeOb.update : true,
+            },
+            {
+                name: "Delete",
+                action: deleteIngredient,
+                icon: "fa-solid fa-trash me-2",
+                enabled: privilegeOb ? !!privilegeOb.delete : true,
+            },
+            {
+                name: "Send Quotation Request",
+                action: quoRequestFormRefill,
+                icon: "fa-solid fa-file-lines me-2",
+                enabled: privilegeOb ? !!privilegeOb.insert : true,
+            }
         ];
+
         buttonList.forEach((button) => {
             const buttonElement = document.createElement("button");
             buttonElement.className = "dropdown-item btn";
-            buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
-            buttonElement.onclick =  () => {
-                button.action(element,index);
+            buttonElement.innerHTML = `<i class=\"${button.icon}\"></i>${button.name}`;
+            buttonElement.type = "button";
+            buttonElement.disabled = !button.enabled;
+            if (!button.enabled) {
+                buttonElement.style.cursor = "not-allowed";
+                buttonElement.classList.add("text-muted");
+            }
+            buttonElement.onclick = function () {
+                if (button.enabled) {
+                    button.action(element, index);
+                }
             };
-            const liElement = document.createElement("li");
-            liElement.appendChild(buttonElement);
-            dropdownMenu.appendChild(liElement);
+            const li = document.createElement("li");
+            li.appendChild(buttonElement);
+            dropdownMenu.appendChild(li);
         });
+
         return dropdownMenu;
     };
 
@@ -106,7 +131,7 @@ const ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
         ingredientList,
         displayProperty,
         true,
-        generateDropDown,
+        generateIngredientDropDown,
         getPrivilege
     );
 
@@ -131,35 +156,47 @@ function resetQuotationRequestValidation() {
 // Modular validation for Quotation Request form (quotationRequest.html)
 const quotationRequestFormValidation = () => {
     // Get all relevant fields
-    const quoIngredientCode = document.getElementById('quoIngredientCode');
     const quoIngredientName = document.getElementById('quoIngredientName');
     const quoQuantity = document.getElementById('quoQuantity');
     const quoUnitType = document.getElementById('quoUnitType');
     const requiredDeliveryDate = document.getElementById('requiredDeliveryDate');
     const quoDeadline = document.getElementById('QuoDeadline');
-    const quoNote = document.getElementById('Quonote');
 
-    // Ingredient Code validation (alphanumeric, required)
-    quoIngredientCode.addEventListener('input', () => {
-        validation(quoIngredientCode, '^[A-Za-z0-9]{3,20}$', 'quoRequest', 'ingredientCode');
-    });
+   
     // Ingredient Name validation (letters, min 2)
     quoIngredientName.addEventListener('input', () => {
-        validation(quoIngredientName, '^[A-Za-z ]{2,50}$', 'quoRequest', 'ingredientName');
+        validation(quoIngredientName, '^[A-Za-z]{2,25}( [A-Za-z]{2,25})?$', 'quoRequest', 'ingredientName');
     });
     // Quantity validation (positive number)
     quoQuantity.addEventListener('input', () => {
-        validation(quoQuantity, '^(?:[1-9][0-9]?|1[0-9]{2}|200)$', 'quoRequest', 'quantity');
+        validation(quoQuantity, '^([1-9][0-9]{0,3})$', 'quoRequest', 'quantity');
     });
     // Unit Type validation (select)
     quoUnitType.addEventListener('change', () => {
         selectFieldValidator(quoUnitType, '', 'quoRequest', 'unitType');
     });
 
-    // Note is optional, but could add length validation if needed
-    // quoNote.addEventListener('input', () => {
-    //     validation(quoNote, '^.{0,255}$', 'quoRequest', 'note');
-    // });
+    requiredDeliveryDate.addEventListener('change', () => {
+        dateFeildValidator(requiredDeliveryDate, '', 'quoRequest', 'requiredDeliveryDate');
+        let requiredDeliveryDateValue = requiredDeliveryDate.value;
+
+        console.log(requiredDeliveryDateValue)
+
+        let requiredDeliveryDateValueDate = new Date(requiredDeliveryDateValue);
+
+        requiredDeliveryDateValueDate.setDate(requiredDeliveryDateValueDate.getDate() -1);
+
+        let maxDeadline = requiredDeliveryDateValueDate.toISOString().split('T')[0];
+
+        quoDeadline.setAttribute('max', maxDeadline);
+
+    });
+    
+    quoDeadline.addEventListener('change', () => {
+        dateFeildValidator(quoDeadline, '', 'quoRequest', 'deadline');
+    });
+
+   
 };
 
 
@@ -173,11 +210,11 @@ const formValidation = () =>{
 // });
 
 quantity.addEventListener('input', () => {
-            validation(quantity, '^(?:[1-9][0-9]?|1[0-9]{2}|200)$', 'ingredient', 'quantity');
+            validation(quantity, '^([1-9][0-9]{0,3})$', 'ingredient', 'quantity');
 });
 
 ingredientName.addEventListener('input', () => {
-validation(ingredientName, '[A-Za-z]{2,50}$', 'ingredient', 'ingredientName');
+validation(ingredientName, '^[A-Z][a-z]{3,25}( [A-Z][a-z]{3,25})?$', 'ingredient', 'ingredientName');
  });
 
 unitType.addEventListener('change', () => {
@@ -185,11 +222,11 @@ selectFieldValidator(unitType,'','ingredient','unitType')
 })
 
 rop.addEventListener('input', () =>{
-        validation(rop,'^[1-9][0-9]?$','ingredient','rop')
+        validation(rop,'^([1-9][0-9]{0,3})$','ingredient','rop')
     })
 
 roq.addEventListener('input', () =>{
-        validation(roq,'^(?:[1-9][0-9]?|1[0-9]{2}|200)$','ingredient','roq')
+        validation(roq,'^([1-9][0-9]{0,3})$','ingredient','roq')
     })
 
 
@@ -197,47 +234,10 @@ note.addEventListener('input', () =>{
              validation(note,'','ingredient','note')
      })
      
-     requiredDeliveryDate.addEventListener('change', () => {
-    dateFeildValidator(requiredDeliveryDate, '', 'quoRequest', 'requiredDeliveryDate');
-});
 
-QuoDeadline.addEventListener('change', () => {
-    dateFeildValidator(QuoDeadline, '', 'quoRequest', 'deadline');
-});
 
 }
 
-
-
-//document.getElementById('ingredientAddForm').onsubmit = function (event) {
-//    event.preventDefault();
-//
-//    const ingredient = {
-//        ingredientCode: document.getElementById('ingredientCode').value,
-//        ingredientName: document.getElementById('ingredientName').value,
-//        note: document.getElementById('note').value,
-//        quantity: parseInt(document.getElementById('quantity').value, 10),
-//        unitType: document.getElementById('unitType').value,
-//        rop: parseInt(document.getElementById('rop').value, 10),
-//        roq: parseInt(document.getElementById('roq').value, 10),
-//    };
-//
-//    let response = ajaxRequestBody("/ingredient/addNewIngredient", "POST", ingredient);
-//    if (response.status === 200) {
-//        swal.fire({
-//            title: response.responseText,
-//            icon: "success"
-//        });
-//        $("#modelIngredientAdd").modal('hide');
-//        getAllIngredients();
-//    } else {
-//        swal.fire({
-//            title: "Something Went Wrong",
-//            text: response.responseText,
-//            icon: "error"
-//        });
-//    }
-//};
 
 //Check Ingredient form errors
 const checkIngredientFormError = () => {
@@ -583,6 +583,11 @@ const checkQRFormError = () =>{
          requiredDeliveryDate.classList.add('is-invalid');
     }
 
+    if (quoRequest.deadline == null) {
+        errors = errors + "Deadline can't be null \n";
+        quoDeadline.classList.add('is-invalid');
+   }
+
     return errors;
 
 }
@@ -666,7 +671,7 @@ const quoRequestFormRefill = (ob, rowIndex) => {
 
   const todayStr = new Date().toISOString().split('T')[0];
   document.getElementById('requiredDeliveryDate').setAttribute('min', todayStr);
-document.getElementById('QuoDeadline').setAttribute('min', todayStr);
+  document.getElementById('QuoDeadline').setAttribute('min', todayStr);
 
 
 };

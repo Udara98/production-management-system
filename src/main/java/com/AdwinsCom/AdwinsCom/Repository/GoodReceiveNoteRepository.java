@@ -50,4 +50,8 @@ public interface GoodReceiveNoteRepository extends JpaRepository<GoodReceiveNote
         "WHERE gr.grn_status = 'Approved' AND gr.received_date BETWEEN ?1 AND ?2 " +
         "GROUP BY i.name, i.ingredient_code", nativeQuery = true)
     List<Object[]> aggregateIngredientReceivedQty(Date sqlStartDate, Date sqlEndDate);
+
+
+    @Query("SELECT MAX(gr.grnNo) FROM GoodReceiveNote gr")
+    String findMaxGrnNo();
 }

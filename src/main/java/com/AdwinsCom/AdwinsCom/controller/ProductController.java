@@ -6,14 +6,11 @@ import com.AdwinsCom.AdwinsCom.Repository.ProductRepository;
 import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
 import com.AdwinsCom.AdwinsCom.Service.IPrivilegeService;
 import com.AdwinsCom.AdwinsCom.Service.IProductService;
-import com.AdwinsCom.AdwinsCom.entity.Product;
-import com.AdwinsCom.AdwinsCom.entity.Production.ProductUnitType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import java.util.HashMap;
 

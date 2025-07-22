@@ -18,16 +18,16 @@
                    <div class="col">
                        <label class="form-label fw-medium" for="add-cp-customer">Customer<span class="text-danger"> * </span></label>
                        <select id="add-cp-customer" class="form-select" required>
-                           <option value="" selected>Select Customer</option>
+                           <option  selected disabled>Select Customer</option>
                        </select>
                        <div class="invalid-feedback">Please select a Customer.</div>
                    </div>
                </div>
+               <div class="alert alert-warning text-center mt-3" id="noUnpaidOrdersAlert" style="display: none;">
+                Customer does not have any unpaid orders
+                </div>
                <div class="row mt-3" id="customer-orders-section" style="display:none;">
                    <div class="col-12">
-                       <div class="alert alert-warning d-none text-center mt-2" id="noUnpaidOrdersAlert">
-                            Customer does not have any unpaid orders
-                        </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <label class="form-label fw-medium">Unpaid Orders</label>
                             <div class="form-check">
@@ -63,6 +63,7 @@
                         <div class="col">
                             <label class="form-label fw-medium">Total Paid (LKR)</label>
                             <input type="text" class="form-control" id="totalPaid" disabled>
+                            <div class="invalid-feedback">Need to Enter pay Amount to at least one above field </div>
                         </div>
                         <div class="col">
                             <label class="form-label fw-medium">Remaining Balance (LKR)</label>
@@ -80,7 +81,8 @@
                            <option value="BANK_TRANSFER">BANK TRANSFER</option>
                            <option value="CASH">CASH</option>
                            <option value="CHEQUE">CHEQUE</option>
-</select>
+                        </select>
+                        <div class="invalid-feedback">Please select a Payment Method.</div>
                    </div>
 
 <div class="col">
@@ -94,11 +96,11 @@
 </div>
 <div class="col d-none" id="paymentDateRow">
     <label class="form-label fw-medium" for="add-cp-payDate">Payment Date<span class="text-danger"> * </span></label>
-    <input class="form-control" id="add-cp-payDate" type="date" required />
+    <input class="form-control" id="add-cp-payDate" type="date" required onkeydown="return false" />
     <div class="valid-feedback"></div>
     <div class="invalid-feedback">Please enter a valid payment date.</div>
 </div>
-               </div>
+</div>
                
 <!--               Bank Transfer Card-->
                <div class="row mt-3 mb-4 d-none" id="bankTranferDivRow">
@@ -120,6 +122,7 @@
                                                <input class="form-control" type="text"
                                                       id="inputBankTranferId"
                                                       style="background-color: #E6E6E6;" required>
+                                                      <div class="invalid-feedback">Need to Enter valid Transaction ID</div>
                                            </div>
                                        </div>
                                    </div>
@@ -133,10 +136,11 @@
 
                                        <div class="row">
                                            <div class="col-12">
-                                               <input class="form-control" type="datetime-local"
+                                               <input class="form-control" type="date"
                                                       id="inputBankTransferredDateTime"
                                                       style="background-color: #E6E6E6;" required
                                                       onkeydown="return false">
+                                                      <div class="invalid-feedback">Need to Enter valid Transfer Date & Time</div>
                                            </div>
                                        </div>
                                    </div>
@@ -168,6 +172,7 @@
                                                <input class="form-control" type="text"
                                                       id="inputChequeNo" style="background-color: #E6E6E6;"
                                                       required>
+                                                      <div class="invalid-feedback">Need to Enter valid Cheque No</div>
                                            </div>
                                        </div>
                                    </div>
@@ -183,6 +188,7 @@
                                                       id="inputChequeDate"
                                                       style="background-color: #E6E6E6;" required
                                                       onkeydown="return false">
+                                                      <div class="invalid-feedback">Need to Enter valid Cheque Date</div>
                                            </div>
                                        </div>
                                    </div>
@@ -211,6 +217,7 @@
                                                <input class="form-control" type="text"
                                                       id="inputCardRefNo" style="background-color: #E6E6E6;"
                                                       required>
+                                                      <div class="invalid-feedback">Need to Enter valid Transaction ID</div>
                                            </div>
                                        </div>
                                    </div>
@@ -226,6 +233,7 @@
                                                       id="inputCardDate"
                                                       style="background-color: #E6E6E6;" required
                                                       onkeydown="return false">
+                                                      <div class="invalid-feedback">Need to Enter valid Transfer Date & Time</div>
                                            </div>
                                        </div>
                                    </div>
@@ -263,18 +271,20 @@
                            Clear
                        </button>
                    </div>
-                   <div class="col-7"></div>
-                   <div class="col-4">
-                       <button
+                   <div class="col-5"></div>
+                   <div class="col-6 d-flex justify-content-end">
+                       <!-- <button
                                class="btn cusbutton btn-update"
                                id="add-cp-update"
                                type="submit"
                        >
                            <i class="fa-solid fa-edit me-2"></i>Update
-                       </button>
+                       </button> -->
                        <button
-                               class="btn cusbutton ms-4 btn-submit"
-                               id="add-cp-submit"                       >
+                               class="btn  btn-submit me-0"
+                               id="add-cp-submit"   
+                               type="button"
+                                                   >
                            <i class="fa-solid fa-plus me-2"></i>Add
                        </button>
                    </div>

@@ -1,7 +1,7 @@
-<div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title">Add New Customer Order</h5>
+            <h4 class="modal-title">Add New Customer Order</h5>
             <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
         </div>
         <div class="modal-body">
@@ -16,7 +16,7 @@
                     </div>
                     <div class="col">
                         <label class="form-label fw-medium" for="add-co-reqDate">Required Date<span class="text-danger"> * </span></label>
-                        <input class="form-control" id="add-co-reqDate" type="date" required />
+                        <input class="form-control" id="add-co-reqDate" type="date" onkeydown="return false;" required  />
                         <div class="valid-feedback"></div>
                         <div class="invalid-feedback">Please Enter Valid Date</div>
                     </div>
@@ -32,21 +32,21 @@
                     </div>
                 </div>
                 <div class="row mt-4 d-flex align-items-center">
-                    <div class="col-5">
+                    <div class="col">
                         <label class="form-label fw-medium" for="add-co-product">Product<span class="text-danger"> * </span></label>
                         <select id="add-co-product" class="form-select" required>
                             <option value="" selected>Select Product</option>
                         </select>
                         <div class="invalid-feedback">Please select a Product.</div>
                     </div>
-                    <div class="col-5">
+                    <div class="col">
                         <label class="form-label fw-medium" for="add-co-qty">Quantity<span
                                 class="text-danger"> * </span></label>
                         <input class="form-control" id="add-co-qty" type="number" placeholder="Enter Quantity" required/>
-                        <div class="invalid-feedback">Please Enter Valid Quantity (1-200)</div>
+                        <div class="invalid-feedback">Please Enter Valid Quantity</div>
                     </div>
                     <div class="col mt-4">
-                        <button id="product-add-btn" class="btn btn-primary" ><i class="fa-solid fa-cart-plus me-3"></i>Add</button>
+                        <button id="product-add-btn" class="btn addPrimaryBtn rounded-2" ><i class="fa-solid fa-plus me-2"></i>Add</button>
                     </div>
                     <h4 class="mt-5">Customer Order</h4>
                     <table
@@ -70,10 +70,7 @@
                             <button type="button" id="clear-all-btn" class="btn btn-outline-danger">Clear All</button>
                         </div>
                         <div class="col d-flex justify-content-end">
-                            <button  class="btn btn-secondary mx-2" 
-                                    data-bs-dismiss="modal"
-                                    type="button">Cancel</button>
-                            <button type="button" id="place-order-btn" class="btn btn-primary">Place Order</button>
+                            <button type="button" id="place-order-btn" class="btn addPrimaryBtn rounded-2"><i class="fa-solid fa-cart-plus me-3"></i>Place Order</button>
                         </div>
                     </div>
                 </div>

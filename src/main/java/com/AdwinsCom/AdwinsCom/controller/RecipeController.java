@@ -1,5 +1,6 @@
 package com.AdwinsCom.AdwinsCom.controller;
 
+import com.AdwinsCom.AdwinsCom.DTO.RecipeDTO;
 import com.AdwinsCom.AdwinsCom.Service.IRecipeService;
 import com.AdwinsCom.AdwinsCom.entity.Production.Recipe;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +19,10 @@ public class RecipeController {
     }
 
     @PostMapping("/addNewRecipe")
-    public ResponseEntity<?> AddNewRecipe(@RequestBody Recipe recipe) {
+    public ResponseEntity<?> AddNewRecipe(@RequestBody RecipeDTO recipeDTO) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            return recipeService.AddNewRecipe(recipe, auth.getName());
+            return recipeService.AddNewRecipe(recipeDTO, auth.getName());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }

@@ -20,9 +20,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 public class CustomerOrder {
 
     public enum OrderStatus{
-        NotAssigned, // Order accepted but not yet assigned for processing/deduction
-        Pending,
+        NotAssigned, 
         Completed,
+        Pending,
+        Assigned,
         Canceled
     }
 
@@ -52,23 +53,21 @@ public class CustomerOrder {
     @JsonManagedReference
     private List<CustomerOrderProduct> customerOrderProducts;
 
-    @Column(name = "added_user")
-    private String addedUser;
+    private Integer addeduser;
 
-    @Column(name = "added_date")
-    private LocalDateTime addedDate;
+    private LocalDateTime addeddate;
 
-    @Column(name = "updated_user")
-    private String updatedUser;
+    private Integer lastmodifieduser;
 
-    @Column(name = "updated_date")
-    private LocalDateTime updatedDate;
+    private LocalDateTime lastmodifieddatetime;
+
+    private Integer deleteduser;
+
+    private LocalDateTime deleteddatetime;
 
     @Column(name = "order_status")
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
-
-
 
     @Transient
     private Double outstanding;

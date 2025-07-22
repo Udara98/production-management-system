@@ -32,6 +32,19 @@ public class QuotationService implements IQuotationService {
         this.quotationRequestRepository = quotationRequestRepository;
     }
 
+
+    private String getMaxQuotationNo() {
+        
+        String maxQuotationNo = quotationRepository.getMaxQuotationNo();
+        int maxNumber = 1;
+
+        if(maxQuotationNo != null && maxQuotationNo.startsWith("QNO-")) {
+            maxNumber = Integer.parseInt(maxQuotationNo.substring(4) +1);
+        }
+
+        return "QNO-" + String.format("%04d", maxNumber);
+    }
+
     @Override
     public ResponseEntity<?> AddNewQuotation(QuotationDTO quotationDTO) throws NoSuchAlgorithmException {
 
@@ -76,7 +89,7 @@ public class QuotationService implements IQuotationService {
         newQuotation.setQuotationRequestNo(quotationDTO.getQuotationRequestNo());
         newQuotation.setIngredientCode(quotationDTO.getIngredientCode());
         newQuotation.setSupplierRegNo(quotationDTO.getSupplierRegNo());
-        newQuotation.setQuotationNo(QuotationRequest.generateUniqueId("QNO-"));
+        newQuotation.setQuotationNo(getMaxQuotationNo());
         newQuotation.setAddedUser(auth.getName());
         newQuotation.setAddedDate(java.time.LocalDateTime.now());
         newQuotation.setPricePerUnit(pricePerUnit);
@@ -90,11 +103,39 @@ public class QuotationService implements IQuotationService {
         newQuotation.setCreditDays(quotationDTO.getCreditDays());
         newQuotation.setProposedDeliveryDate(quotationDTO.getProposedDeliveryDate());
         quotationRepository.save(newQuotation);
+
+        // --- Auto-close logic for QuotationRequest ---
+        QuotationRequest qRequest = quotationRequestRepository.findByRequestNo(quotationDTO.getQuotationRequestNo());
+        if (qRequest != null && qRequest.getRequestStatus() == QuotationRequest.QRequestStatus.Send) {
+            List<String> supplierRegNos = qRequest.getSuppliers();
+            List<Quotation> submittedQuotations = quotationRepository.findByQuotationRequestNo(qRequest.getRequestNo());
+            boolean allSuppliersSubmitted = supplierRegNos.stream()
+                .allMatch(supRegNo -> submittedQuotations.stream()
+                    .anyMatch(q -> q.getSupplierRegNo().equals(supRegNo)));
+            java.time.LocalDate today = java.time.LocalDate.now();
+            if (allSuppliersSubmitted && qRequest.getDeadline() != null && !today.isBefore(qRequest.getDeadline())) {
+                qRequest.setRequestStatus(QuotationRequest.QRequestStatus.Closed);
+                quotationRequestRepository.save(qRequest);
+            }
+        }
         return ResponseEntity.ok("Quotation Added Successfully");
     }
 
     @Override
     public ResponseEntity<?> GetAllQuotations() {
+
+         // Authentication and authorization
+         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+         // Get privileges for the logged-in user
+         HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "QUOTATION");
+ 
+         // If user doesn't have "insert" permission, return 403 Forbidden
+         if (!loguserPrivi.get("select")) {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                     .body("Quotation Request Send not Completed: You don't have permission!");
+         }
+
         List<Quotation> quotationList = quotationRepository.findByQuotationStatusNotRemoved();
         List<QuotationDTO> dtoList = quotationList.stream().map(q -> {
             QuotationDTO dto = new QuotationDTO(
@@ -138,6 +179,23 @@ public class QuotationService implements IQuotationService {
         Quotation updatedQuotation = new Quotation().mapDTO(exQuotation, quotationDTO,auth.getName() );
 
         quotationRepository.save(updatedQuotation);
+        // If this quotation is being accepted, close the request and reject others
+        if (updatedQuotation.getQuotationStatus() == Quotation.QuotationStatus.Accepted) {
+            // Close the QuotationRequest
+            QuotationRequest qRequest = quotationRequestRepository.findByRequestNo(updatedQuotation.getQuotationRequestNo());
+            if (qRequest != null && qRequest.getRequestStatus() != QuotationRequest.QRequestStatus.Closed) {
+                qRequest.setRequestStatus(QuotationRequest.QRequestStatus.Closed);
+                quotationRequestRepository.save(qRequest);
+            }
+            // Reject all other quotations for this request
+            List<Quotation> allQuotations = quotationRepository.findByQuotationRequestNo(updatedQuotation.getQuotationRequestNo());
+            for (Quotation q : allQuotations) {
+                if (!q.getId().equals(updatedQuotation.getId()) && q.getQuotationStatus() != Quotation.QuotationStatus.Rejected) {
+                    q.setQuotationStatus(Quotation.QuotationStatus.Rejected);
+                    quotationRepository.save(q);
+                }
+            }
+        }
         return ResponseEntity.ok("Quotation Updated Successfully");
     }
 
@@ -161,7 +219,6 @@ public class QuotationService implements IQuotationService {
 
     @Override
     public void saveSupplierQuotation(SupplierQuotationDTO supplierQuotationDTO, String requestNo, String supplierEmail) {
-        // TODO: Implement logic to save supplier quotation
-        // This is a stub for compilation
+        
     }
 }

@@ -10,13 +10,14 @@
                     <div class="col">
                         <label class="form-label fw-medium" for="qRequest_no">Quotation Request No<span class="text-danger"> * </span></label>
                         <select id="qRequest_no" class="form-select" required>
-                            <option value="" selected>Select QRequest No</option>
                         </select>
                         <div class="invalid-feedback">Please select a Quotation Request No.</div>
                     </div>
                     <div class="col">
-                        <label class="form-label fw-medium" for="quo-ingId">Ingredient ID<span class="text-danger"> * </span></label>
-                        <input class="form-control" id="quo-ingId" type="text" placeholder="Ingredient ID" disabled />
+                        <label class="form-label fw-medium" for="quo-ingId">Ingredient<span class="text-danger"> * </span></label>
+                        <select class="form-select" id="quo-ingId" placeholder="Ingredient ID" disabled required>
+                            <option value="" selected>Select Ingredient ID</option>
+                        </select>
                     </div>
                     <div class="col">
                         <label class="form-label fw-medium" for="quo-supId">Supplier ID<span class="text-danger"> * </span></label>
@@ -29,22 +30,13 @@
                 <div class="row mt-4">
                     <div class="col">
                         <label class="form-label fw-medium" for="add-receivedDate">Received Date<span class="text-danger"> * </span></label>
-                        <input class="form-control" id="add-receivedDate" type="date" required />
+                        <input class="form-control" id="add-receivedDate" onkeydown="return false"  type="date" required />
                         <div class="invalid-feedback">Please enter the Received Date.</div>
                     </div>
-                    <div class="col">
-                        <label class="form-label fw-medium" for="add-advancePercentage">Advance Percentage<span class="text-danger"> * </span></label>
-                        <input class="form-control" id="add-advancePercentage" type="input" min="0" max="100" placeholder="Advance %" required />
-                        <div class="invalid-feedback">Please enter the advance percentage (0-100).</div>
-                    </div>
-                    <div class="col">
-                        <label class="form-label fw-medium" for="add-creditDays">Credit Days<span class="text-danger"> * </span></label>
-                        <input class="form-control" id="add-creditDays" type="input" min="0" placeholder="Credit Days" required />
-                        <div class="invalid-feedback">Please enter the credit days.</div>
-                    </div>
+                    
                     <div class="col">
                         <label class="form-label fw-medium" for="add-proposedDeliveryDate">Proposed Delivery Date<span class="text-danger"> * </span></label>
-                        <input class="form-control" id="add-proposedDeliveryDate" type="date" required />
+                        <input class="form-control" id="add-proposedDeliveryDate" onkeydown="return false"  type="date" required />
                         <div class="invalid-feedback">Please enter the proposed delivery date.</div>
                     </div>
                 </div>
@@ -54,7 +46,7 @@
                         <div class="input-group">
                             <span class="input-group-text">LKR</span>
                             <input class="form-control" id="add-pricePerUnit" type="text" placeholder="Enter Price Per Unit" pattern="^\d+(\.\d{1,2})?$" required />
-                            <div class="invalid-feedback">Please enter the Price Per Unit (e.g., 1234.56).</div>
+                            <div class="invalid-feedback">Please enter Valid Price Per Unit</div>
                         </div>
 
                     </div>

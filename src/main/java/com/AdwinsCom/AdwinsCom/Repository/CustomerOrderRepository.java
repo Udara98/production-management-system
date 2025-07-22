@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -22,8 +23,8 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, In
         "WHERE co.required_date BETWEEN :startDate AND :endDate " +
         "GROUP BY c.reg_no, c.company_name, c.first_name, c.second_name " +
         "ORDER BY totalAmount DESC", nativeQuery = true)
-    java.util.List<Object[]> getCustomerSalesSummary(@Param("startDate") java.time.LocalDate startDate,
-                                                    @Param("endDate") java.time.LocalDate endDate);
+    java.util.List<Object[]> getCustomerSalesSummary(@Param("startDate") LocalDate startDate,
+                                                    @Param("endDate") LocalDate endDate);
 
     List<CustomerOrder> findByInvoiceNoStartingWith(String prefix);
 
@@ -36,9 +37,15 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, In
 
     // Sum all unpaid order amounts for a specific customer
     @Query(value = "SELECT COALESCE(SUM(co.total_amount), 0) FROM customer_order co WHERE co.customer_id = :customerId AND (SELECT COALESCE(SUM(cpho.paid_amount), 0) FROM customer_payment_has_customer_order cpho WHERE cpho.customer_order_id = co.id) < co.total_amount", nativeQuery = true)
-    Double getTotalOutstandingByCustomerId(@org.springframework.data.repository.query.Param("customerId") Integer customerId);
+    Double getTotalOutstandingByCustomerId(@Param("customerId") Integer customerId);
+
+    @Query(value = "SELECT SUM(cpho.balance) FROM adwinscom.customer_payment_has_customer_order AS cpho JOIN adwinscom.customer_order AS co ON co.id = cpho.customer_order_id WHERE co.customer_id = :customerId", nativeQuery = true)
+    Double getTotalBalanceByCustomerId(@Param("customerId") Integer customerId);
 
     // Fetch orders with NotAssigned status for dashboard notifications
     @Query("SELECT co FROM CustomerOrder co WHERE co.orderStatus = :status")
     List<CustomerOrder> findNotAssignedOrders(@Param("status") CustomerOrder.OrderStatus status);
+
+    @Query("SELECT MAX(cusOrder.orderNo) FROM CustomerOrder cusOrder")
+    String getMaxRegNo();
 }

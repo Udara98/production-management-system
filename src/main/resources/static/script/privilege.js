@@ -107,31 +107,52 @@ const refreshPrivilegeForm = function() {
 
 }
 
-const generatePrivilegeDropDown = (element, rowIndex) => {
+// Dropdown menu for each privilege row (refactored to match product.js pattern)
+const generatePrivilegeDropDown = (element, index, privilegeOb = null) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
-        {name: "View", action: viewPrivilegeData, icon: "fa-solid fa-eye me-2"},
+        {
+            name: "View",
+            action: viewPrivilegeData,
+            icon: "fa-solid fa-eye me-2",
+            enabled: privilegeOb ? !!privilegeOb.select : true,
+        },
         {
             name: "Edit",
             action: PrivilegeFormRefill,
             icon: "fa-solid fa-edit me-2",
+            enabled: privilegeOb ? !!privilegeOb.update : true,
         },
-        {name: "Delete", action: deletePrivilege, icon: "fa-solid fa-trash me-2"},
+        {
+            name: "Delete",
+            action: deletePrivilege,
+            icon: "fa-solid fa-trash me-2",
+            enabled: privilegeOb ? !!privilegeOb.delete : true,
+        },
     ];
 
     buttonList.forEach((button) => {
         const buttonElement = document.createElement("button");
         buttonElement.className = "dropdown-item btn";
-        buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
+        buttonElement.innerHTML = `<i class=\"${button.icon}\"></i>${button.name}`;
+        buttonElement.type = "button";
+        buttonElement.disabled = !button.enabled;
+        if (!button.enabled) {
+            buttonElement.style.cursor = "not-allowed";
+            buttonElement.classList.add("text-muted");
+        }
         buttonElement.onclick = function () {
-            button.action(element, rowIndex);
+            if (button.enabled) {
+                button.action(element, index);
+            }
         };
-        const liElement = document.createElement("li");
-        liElement.appendChild(buttonElement);
-        dropdownMenu.appendChild(liElement);
+        const li = document.createElement("li");
+        li.appendChild(buttonElement);
+        dropdownMenu.appendChild(li);
     });
+
     return dropdownMenu;
 };
 const checkPrivilegeUpdates = function () {

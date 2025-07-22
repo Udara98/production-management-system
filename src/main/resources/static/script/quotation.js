@@ -8,7 +8,7 @@ window.addEventListener("load", function () {
     reloadQuotationTable();
 
     // Fetch all quotation requests via an AJAX GET request
-    const qRequests = ajaxGetRequest("/quotation-request/getAllRequests");
+    const qRequests = ajaxGetRequest("/quotation-request/send");
 
     const qrnSelectElement = document.getElementById("qRequest_no");
     const supIdSelectElement = document.getElementById("quo-supId");
@@ -20,40 +20,6 @@ window.addEventListener("load", function () {
    quotationValidation();
 
 
-    // Fill the quotation request number dropdown with options
-//    qRequests.forEach(req => {
-//        const option = document.createElement('option');
-//        option.value = req.requestNo;
-//        option.textContent = req.requestNo;
-//        qrnSelectElement.appendChild(option);
-//    });
-
-//    // Add an event listener to handle changes in the quotation request number dropdown
-//    qrnSelectElement.addEventListener('change', (event) => {
-//        const selectedValue = event.target.value;
-//        const request = qRequests.filter((r) => r.requestNo === selectedValue)[0];
-//        document.getElementById("quo-ingId").value = request.ingCode;
-//        supIdSelectElement.innerHTML = '';
-//        request.suppliers.forEach((sup) => {
-//            const option = document.createElement('option');
-//            option.value = sup;
-//            option.textContent = sup;
-//            supIdSelectElement.appendChild(option);
-//        });
-//    });
-
-//    const forms = document.querySelectorAll('.needs-validation');
-//
-//    Array.prototype.slice.call(forms).forEach(function (form) {
-//        form.addEventListener('submit', function (event) {
-//            if (!form.checkValidity()) {
-//                event.preventDefault();
-//                event.stopPropagation();
-//            }
-//            form.classList.add('was-validated');
-//        }, false);
-//    });
-
 });
 
 
@@ -64,7 +30,7 @@ const refreshQuotationForm = () =>{
     oldQuotation = null;
 
     // Fetch all quotation requests via an AJAX GET request
-    const qRequests = ajaxGetRequest("/quotation-request/getAllRequests");
+    const qRequests = ajaxGetRequest("/quotation-request/send");
 
     const qrnSelectElement = document.getElementById("qRequest_no");
     const supIdSelectElement = document.getElementById("quo-supId");
@@ -86,29 +52,66 @@ const refreshQuotationForm = () =>{
 
 
     // Add an event listener to handle changes in the quotation request number dropdown
-     qrnSelectElement.addEventListener('change', (event) => {
-         const selectedValue = JSON.parse(event.target.value);
+    qrnSelectElement.addEventListener('change', (event) => {
+        const selectedValue = JSON.parse(event.target.value);
+        const request = qRequests.find((r) => r.requestNo === selectedValue.requestNo);
 
-    const request = qRequests.filter((r) => r.requestNo === selectedValue.requestNo);
+        console.log(request);
 
-    //fill data to Ingredient ID field
-    document.getElementById("quo-ingId").value = request[0].ingCode;
+        // Set min/max for Received Date input
+        const receivedDateInput = document.getElementById('add-receivedDate');
+        const deadline = request.deadline ? new Date(request.deadline) : null;
+        const addedDate = request.requestDate ? new Date(request.requestDate) : null;
+        // Convert to yyyy-mm-dd
+        if (addedDate) {
+            console.log(addedDate);
+            receivedDateInput.setAttribute('min', addedDate.toISOString().split('T')[0]);
+        }
+        if (deadline) {
+            receivedDateInput.setAttribute('max', deadline.toISOString().split('T')[0]);
+        }
 
-    //Bind values into quotation object and validate
-    quotation.ingredientCode = request[0].ingCode;
-    document.getElementById("quo-ingId").classList.add('is-valid');
+        const proposedDeliveryDateInput = document.getElementById('add-proposedDeliveryDate');
+        const requiredDeliveryDate = request.requiredDeliveryDate ? new Date(request.requiredDeliveryDate) : null;
+        // Convert to yyyy-mm-dd
+        if (requiredDeliveryDate) {
+            console.log(requiredDeliveryDate);
+            proposedDeliveryDateInput.setAttribute('min', addedDate.toISOString().split('T')[0]);
+        }
+        if (requiredDeliveryDate) {
+            proposedDeliveryDateInput.setAttribute('max', requiredDeliveryDate.toISOString().split('T')[0]);
+        }
 
 
-    //fill data to supplier id select element
-    supIdSelectElement.innerHTML = '';
-    supIdSelectElement.innerHTML = '<option value="" selected>Select Supplier ID</option>';
-    request[0].suppliers.forEach((sup) => {
-        const option = document.createElement('option');
-        option.value = sup;
-        option.textContent = sup;
-        supIdSelectElement.appendChild(option);
+    // Fill data to Ingredient ID field: value = ingCode, textContent = 'ingCode - ingredientName'
+    const ingInput = document.getElementById("quo-ingId");
+    const option = document.createElement('option');
+    option.value = request.ingCode;
+    option.textContent = request.ingCode + " - " + request.ingredientName;
+    option.selected = true;
+    ingInput.appendChild(option);
+
+    // Bind values into quotation object and validate
+    quotation.ingredientCode = request.ingCode;
+
+    const qStatus = document.getElementById('add-quotationStatus');
+    qStatus.value = "Pending";
+        
+
+        // Fill data to supplier id select element
+        supIdSelectElement.innerHTML = '';
+        supIdSelectElement.innerHTML = '<option value="" selected>Select Supplier ID</option>';
+        request.suppliers.forEach((sup) => {
+            console.log(sup);
+            const option = document.createElement('option');
+            option.value = sup;
+
+            const supplier = ajaxGetRequest("/supplier/byRegNo/" + sup);
+            const supplierName = supplier.businessType?supplier.companyName:supplier.firstName + " " + supplier.lastName;
+            option.textContent = supplierName;
+            supIdSelectElement.appendChild(option);
+        });
     });
-     });
 
 }
 
@@ -131,15 +134,6 @@ const quotationValidation = () =>{
     addReceivedDate.addEventListener('change', () =>{
         dateFeildValidator(addReceivedDate,'','quotation','receivedDate')
     })
-    const addAdvancePercentage = document.getElementById('add-advancePercentage');
-    addAdvancePercentage.addEventListener('input', () => {
-        validation(addAdvancePercentage, '^(100|[1-9][0-9]?)$', 'quotation', 'advancePercentage');
-    });
-
-    const addCreditDays = document.getElementById('add-creditDays');
-    addCreditDays.addEventListener('input', () => {
-        validation(addCreditDays, '^[1-9][0-9]{0,3}$', 'quotation', 'creditDays');
-    });
 
     const addProposedDeliveryDate = document.getElementById('add-proposedDeliveryDate');
     addProposedDeliveryDate.addEventListener('change', () => {
@@ -148,7 +142,7 @@ const quotationValidation = () =>{
 
     const addPriceUnit = document.getElementById('add-pricePerUnit');
     addPriceUnit.addEventListener('input', () =>{
-            validation(addPriceUnit,'^(?:[1-9]|[1-9][0-9]|[1-9][0-9]{3}|[1-9][0-9]{2})$','quotation','pricePerUnit')
+            validation(addPriceUnit,'^(?:[1-9]|[1-9]{6})$','quotation','pricePerUnit')
     })
 
     const addQuotationStatus = document.getElementById('add-quotationStatus');
@@ -164,8 +158,6 @@ const checkQuotationFormError = () => {
     const qRequestNo = document.getElementById('qRequest_no');
     const qSupId = document.getElementById('quo-supId');
     const addReceivedDate = document.getElementById('add-receivedDate');
-    const addAdvancePercentage = document.getElementById('add-advancePercentage');
-    const addCreditDays = document.getElementById('add-creditDays');
     const addProposedDeliveryDate = document.getElementById('add-proposedDeliveryDate');
     const addPriceUnit = document.getElementById('add-pricePerUnit');
     const addQuotationStatus = document.getElementById('add-quotationStatus');
@@ -188,22 +180,6 @@ const checkQuotationFormError = () => {
     if (quotation.receivedDate == null) {
         errors += "Received Date can't be null\n";
         addReceivedDate.classList.add('is-invalid');
-    }
-
-    if (quotation.advancePercentage == null || quotation.advancePercentage === "") {
-        errors += "Advance Percentage can't be null\n";
-        addAdvancePercentage.classList.add('is-invalid');
-    } else if (isNaN(quotation.advancePercentage) || quotation.advancePercentage < 0 || quotation.advancePercentage > 100) {
-        errors += "Advance Percentage must be between 0 and 100\n";
-        addAdvancePercentage.classList.add('is-invalid');
-    }
-
-    if (quotation.creditDays == null || quotation.creditDays === "") {
-        errors += "Credit Days can't be null\n";
-        addCreditDays.classList.add('is-invalid');
-    } else if (isNaN(quotation.creditDays) || quotation.creditDays < 0) {
-        errors += "Credit Days must be a positive number\n";
-        addCreditDays.classList.add('is-invalid');
     }
 
     if (quotation.proposedDeliveryDate == null || quotation.proposedDeliveryDate === "") {
@@ -283,35 +259,6 @@ const checkQuotationFormError = () => {
     }
 };
 
-//document.getElementById("quotationEditForm").onsubmit = function (event) {
-//    event.preventDefault();
-//
-//    selectedQuotation.quotationRequestNo = document.getElementById("edit-qRequest_no").value;
-//    selectedQuotation.ingredientCode = document.getElementById("edit-quo-ingId").value;
-//    selectedQuotation.supplierRegNo = document.getElementById("edit-quo-supId").value;
-//    selectedQuotation.pricePerUnit = parseFloat(document.getElementById("edit-pricePerUnit").value);
-//    selectedQuotation.receivedDate = new Date(document.getElementById("edit-receivedDate").value);
-//    selectedQuotation.deadline = new Date(document.getElementById("edit-deadline").value);
-//    selectedQuotation.quotationStatus = document.getElementById("edit-quotationStatus").value;
-//
-//    let response = ajaxRequestBody("/quotation/editQuotation", "PUT", selectedQuotation);
-//    if (response.status === 200) {
-//        swal.fire({
-//            title: response.responseText,
-//            icon: "success",
-//        });
-//        reloadQuotationTable();
-//        $("#modalQuotationEdit").modal("hide");
-//
-//    } else {
-//        swal.fire({
-//            title: "Something Went Wrong",
-//            text: response.responseText,
-//            icon: "error",
-//        });
-//    }
-//};
-
 //Refill Product form fields
 const quotationFormRefill = (ob, rowIndex) => {
 
@@ -332,8 +279,6 @@ const quotationFormRefill = (ob, rowIndex) => {
   document.getElementById("add-receivedDate").value = convertDateTimeToDate(quotation.receivedDate);
   document.getElementById("add-pricePerUnit").value = quotation.pricePerUnit;
   document.getElementById("add-quotationStatus").value = quotation.quotationStatus;
-  document.getElementById("add-advancePercentage").value = quotation.advancePercentage;
-  document.getElementById("add-creditDays").value = quotation.creditDays;
   document.getElementById("add-proposedDeliveryDate").value = convertDateTimeToDate(quotation.proposedDeliveryDate);
 
   // Get the select element by its ID
@@ -480,14 +425,6 @@ const checkQuotationUpdates = () =>{
     updates += `Received Date is changed ${oldQuotation.receivedDate} into ${quotation.receivedDate}<br>`;
   }
 
-  if(quotation.advancePercentage !== oldQuotation.advancePercentage){
-    updates += `Advance Percentage is changed ${oldQuotation.advancePercentage} into ${quotation.advancePercentage}<br>`;
-  }
-
-  if(quotation.creditDays !== oldQuotation.creditDays){
-    updates += `Credit Days is changed ${oldQuotation.creditDays} into ${quotation.creditDays}<br>`;
-  }
-
   if(quotation.proposedDeliveryDate !== oldQuotation.proposedDeliveryDate){
     updates += `Proposed Delivery Date is changed ${oldQuotation.proposedDeliveryDate} into ${quotation.proposedDeliveryDate}<br>`;
   }
@@ -572,7 +509,7 @@ function getStatus(ob) {
 
 const reloadQuotationTable = function () {
     const quotations = ajaxGetRequest("/quotation/getAllQuotations");
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
+    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/QUOTATION");
 
         
 
@@ -580,14 +517,9 @@ const reloadQuotationTable = function () {
         {dataType: "text", propertyName: "quotationNo"},
         {dataType: "text", propertyName: "quotationRequestNo"},
         {dataType: "text", propertyName: "ingredientCode"},
-        // {dataType: "function", propertyName: getQuantityWithUnit},
         {dataType: "text", propertyName: "supplierRegNo"},
-        // {dataType: "price", propertyName: "totalPrice"},
-        {dataType: "function", propertyName: getAdvancePercentage},
-        {dataType: "function", propertyName: getCreditDays},
         {dataType: "function", propertyName: getProposedDeliveryDate},
         {dataType: "price", propertyName: "pricePerUnit"},
-        // {dataType: "date", propertyName: "receivedDate"},
         {dataType: "function", propertyName: getStatus},
     ];
 
@@ -646,35 +578,22 @@ const generateQuotationDropDown = (element, index) => {
 
 // Show Quotation Details in Modal
 function showQuotationDetails(quotation) {
+    console.log(quotation);
     document.getElementById("detailQuotationNo").textContent = quotation.quotationNo || '-';
     document.getElementById("detailQuotationRequestNo").textContent = quotation.quotationRequestNo || '-';
     document.getElementById("detailIngredientCode").textContent = quotation.ingredientCode || '-';
-    document.getElementById("detailQuantityWithUnit").textContent = getQuantityWithUnit(quotation);
     document.getElementById("detailSupplierRegNo").textContent = quotation.supplierRegNo || '-';
-    document.getElementById("detailAdvancePercentage").textContent = quotation.advancePercentage != null ? quotation.advancePercentage + '%' : '-';
-    document.getElementById("detailCreditDays").textContent = quotation.creditDays != null ? quotation.creditDays : '-';
     document.getElementById("detailProposedDeliveryDate").textContent = quotation.proposedDeliveryDate || '-';
     document.getElementById("detailPricePerUnit").textContent = quotation.pricePerUnit != null ? quotation.pricePerUnit : '-';
-    document.getElementById("detailTotalPrice").textContent = quotation.totalPrice != null ? quotation.totalPrice : '-';
-    document.getElementById("detailStatus").textContent = quotation.quotationStatus || '-';
     document.getElementById("detailReceivedDate").textContent = quotation.receivedDate || '-';
-    $("#modalViewQuotation").modal("show");
+    document.getElementById("detailQuotationStatus").textContent = quotation.quotationStatus || '-';
+    document.getElementById("detailQuantity").textContent = quotation.quantity != null ? quotation.quantity + " " + quotation.unitType : '-';
+    document.getElementById("detailTotalPrice").textContent = quotation.totalPrice != null ? quotation.totalPrice : '-';
+    document.getElementById("detailNote").textContent = quotation.note || '-';
+    $("#modalQuotationDetails").modal("show");
 }
 
 
-//const editQuotation = (quotation) => {
-//    selectedQuotation = quotation;
-//
-//    document.getElementById("edit-qRequest_no").value = quotation.quotationRequestNo;
-//    document.getElementById("edit-quo-ingId").value = quotation.ingredientCode;
-//    document.getElementById("edit-quo-supId").value = quotation.supplierRegNo;
-//    document.getElementById("edit-receivedDate").value = convertDateTimeToDate(quotation.receivedDate);
-//    document.getElementById("edit-deadline").value = convertDateTimeToDate(quotation.deadline);
-//    document.getElementById("edit-pricePerUnit").value = quotation.pricePerUnit;
-//    document.getElementById("edit-quotationStatus").value = quotation.quotationStatus;
-//
-//    $("#modalQuotationEdit").modal("show");
-//};
 
 const deleteQuotation = (quotation) => {
     swal.fire({

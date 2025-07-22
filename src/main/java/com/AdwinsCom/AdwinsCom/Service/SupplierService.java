@@ -23,9 +23,13 @@ import java.util.*;
 
 @Service
 public class SupplierService implements ISupplierService {
-
     @Autowired
     private SupplierRepository supplierRepository;
+
+    @Override
+    public Supplier getSupplierByRegNo(String regNo) {
+        return supplierRepository.getSupplierByRegNo(regNo);
+    }
 
     @Autowired
     private SupplierIngredientRepository supplierIngredientRepository;
@@ -61,8 +65,20 @@ public class SupplierService implements ISupplierService {
 
         Supplier newSupplier = new Supplier();
         newSupplier.setRegNo(supplierDTO.getRegNo());
-        newSupplier.setSupplierName(supplierDTO.getSupplierName());
+        // New business type logic
+        newSupplier.setBusinessType(supplierDTO.getBusinessType());
+        newSupplier.setCompanyName(supplierDTO.getCompanyName());
+        newSupplier.setBrn(supplierDTO.getBrn());
+        newSupplier.setFirstName(supplierDTO.getFirstName());
+        newSupplier.setSecondName(supplierDTO.getSecondName());
         newSupplier.setContactPersonName(supplierDTO.getContactPersonName());
+        newSupplier.setNic(supplierDTO.getNic());
+        newSupplier.setSupplierStatus(Supplier.SupplierStatus.Active);
+        newSupplier.setAddedUser(userName);
+        newSupplier.setAddedDate(LocalDateTime.now());
+        // Fallback for deprecated fields (for backward compatibility)
+        if (supplierDTO.getSupplierName() != null) newSupplier.setCompanyName(supplierDTO.getSupplierName());
+        // Common fields
         newSupplier.setContactNo(supplierDTO.getContactNo());
         newSupplier.setEmail(supplierDTO.getEmail());
         newSupplier.setAddress(supplierDTO.getAddress());
@@ -111,6 +127,19 @@ public class SupplierService implements ISupplierService {
 
     @Override
     public ResponseEntity<?> GetAllSuppliers() {
+
+         // Authentication and authorization
+         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+         // Get privileges for the logged-in user
+         HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "SUPPLIER");
+ 
+         // If user doesn't have "insert" permission, return 403 Forbidden
+         if (!loguserPrivi.get("select")) {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                     .body("Supplier GetAll not Completed: You don't have permission!");
+         }
+
         List<Supplier> supplierList = supplierRepository.findBySupplierStatusNotRemoved();
         List<SupplierWithIngredientsDTO> suppliers = supplierIngredientService.GetSuppliersWithIngredients(supplierList);
 
@@ -120,12 +149,24 @@ public class SupplierService implements ISupplierService {
     @Override
     public ResponseEntity<?> UpdateSupplier(SupplierDTO supplierDTO, String userName) {
 
+         // Authentication and authorization
+         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+         // Get privileges for the logged-in user
+         HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "SUPPLIER");
+ 
+         // If user doesn't have "insert" permission, return 403 Forbidden
+         if (!loguserPrivi.get("update")) {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                     .body("Supplier Update not Completed: You don't have permission!");
+         }
+
         Supplier supplier = supplierRepository.getSupplierByRegNo(supplierDTO.getRegNo());
         Supplier updatedSupplier = supplier;
         updatedSupplier.setSupplierName(supplierDTO.getSupplierName());
-        updatedSupplier.setContactPersonName(supplierDTO.getContactPersonName());
         updatedSupplier.setContactNo(supplierDTO.getContactNo());
         updatedSupplier.setEmail(supplierDTO.getEmail());
+        updatedSupplier.setContactPersonName(supplierDTO.getContactPersonName());
         updatedSupplier.setAddress(supplierDTO.getAddress());
         updatedSupplier.setJoinDate(supplierDTO.getJoinDate());
         updatedSupplier.setSupplierStatus(supplierDTO.getSupplierStatus());

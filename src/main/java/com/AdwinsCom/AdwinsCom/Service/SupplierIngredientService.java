@@ -29,6 +29,8 @@ public class SupplierIngredientService {
 
     public List<SupplierWithIngredientsDTO> GetSuppliersWithIngredients(List<Supplier> suppliers) {
 
+        
+
         List<SupplierWithIngredientsDTO> supplierList = new ArrayList<>();
         for (Supplier s : suppliers
         ) {
@@ -51,11 +53,17 @@ public class SupplierIngredientService {
         supplier.setId(s.getId());
         supplier.setRegNo(s.getRegNo());
         supplier.setSupplierName(s.getSupplierName());
-        supplier.setContactPersonName(s.getContactPersonName());
         supplier.setContactNo(s.getContactNo());
         supplier.setEmail(s.getEmail());
+        supplier.setBusinessType(s.getBusinessType());
+        supplier.setCompanyName(s.getCompanyName());
+        supplier.setBrn(s.getBrn());
+        supplier.setFirstName(s.getFirstName());
+        supplier.setSecondName(s.getSecondName());
+        supplier.setNic(s.getNic());
         supplier.setAddress(s.getAddress());
         supplier.setNote(s.getNote());
+        supplier.setContactPersonName(s.getContactPersonName());
         supplier.setJoinDate(s.getJoinDate());
         supplier.setSupplierStatus(s.getSupplierStatus());
         supplier.setAddedUser(s.getAddedUser());

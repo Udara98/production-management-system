@@ -11,6 +11,9 @@ public interface RecipeRepository extends JpaRepository<Recipe, Integer> {
 
     Recipe findByRecipeCode(String recCode);
 
+    @Query("SELECT MAX(r.recipeCode) FROM Recipe r")
+    String findMaxRecipeCode();
+
 
 
 

@@ -2,6 +2,8 @@ let OrderProductsTableInstance;
 let cusOrderTableInstance;
 let orderProducts = []
 let products = []
+let totalAmount = 0
+
 
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -62,13 +64,12 @@ window.addEventListener('DOMContentLoaded', () => {
     //Call function for validation
     customerOrderFormValidation();
 
-    let totalAmount = 0
 
     document.getElementById('product-add-btn').addEventListener('click', (event) => {
 
        event.preventDefault();
 
-
+       
         let errors = checkCusOrderFormEroor();
         console.log(errors);
         if(errors === ""){
@@ -85,6 +86,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 });
                 return;
             }
+
+            
 
             // Proceed with add logic
             const orderProduct = {
@@ -109,6 +112,14 @@ window.addEventListener('DOMContentLoaded', () => {
             })}</h5>`
             orderProducts.push(orderProduct);
         }
+
+        quantityElement.value = "";
+       quantityElement.classList.remove('is-invalid');
+       quantityElement.classList.remove('is-valid');
+
+       productSelectElement.value = "";
+       productSelectElement.classList.remove('is-invalid');
+       productSelectElement.classList.remove('is-valid');
     })
 
    
@@ -201,9 +212,7 @@ const customerOrderFormRefill = () => {
 
     const customerSelectElement = document.getElementById("add-co-cus");
     const productSelectElement = document.getElementById("add-co-product");
-    const requiredDateElement = document.getElementById("add-co-reqDate");
-    const orderStatusElement = document.getElementById("add-co-status");
-    const quantityElement = document.getElementById("add-co-qty");
+
 
 
       // For Add form
@@ -211,6 +220,11 @@ const customerOrderFormRefill = () => {
       if (addCOReqDate) {
           addCOReqDate.setAttribute('min', minDate);
       }
+
+      const cusOrderStatus = document.getElementById('add-co-status');
+      cusOrderStatus.value = "Pending";
+      cusOrderStatus.disabled = true;
+      
   
       // For Edit form
       const editCOReqDate = document.getElementById('edit-co-reqDate');
@@ -289,81 +303,45 @@ const displayOrderProducts = (products) => {
     });
 }
 
-// const deleteSelectedOrder = (element) => {
-//     const button = element.currentTarget;
-//     console.log(button);
-//     const row = button.closest('tr');
-//     const orderId = row ? row.getAttribute('data-order-id') : null;
-//     console.log(orderId);
-//     if (!row || !orderId) {
-//         return;
-//     }
 
-//     Swal.fire({
-//         title: 'Are you sure?',
-//         text: 'Do you want to remove this order from the table?',
-//         icon: 'warning',
-//         showCancelButton: true,
-//         confirmButtonText: 'Yes, remove',
-//         cancelButtonText: 'Cancel'
-//     }).then((result) => {
-//         if (result.isConfirmed) {
-//             // Remove from UI
-//             if (typeof OrderProductsTableInstance !== 'undefined') {
-//                 OrderProductsTableInstance.row(row).remove().draw();
-//             } else {
-//                 row.remove();
-//             }
-//             // Remove from products/orderProducts array if present
-//             if (typeof products !== 'undefined') {
-//                 const idx = products.findIndex(p => p.id == orderId);
-//                 if (idx > -1) products.splice(idx, 1);
-//             }
-//             if (typeof orderProducts !== 'undefined') {
-//                 const idx = orderProducts.findIndex(p => p.id == orderId);
-//                 if (idx > -1) orderProducts.splice(idx, 1);
-//             }
-//             Swal.fire({ title: "Removed!", text: "Order removed from table.", icon: "success" });
-//         }
-//     });
-// }
 
-const deleteSelectedProduct = (productObj) => {
-    console.log(productObj);
+const deleteSelectedProduct = (element) => {
+    console.log(element);
     Swal.fire({
         title: 'Are you sure?',
-        text: `Do you want to remove ${productObj.product.productName} from the table?`,
+        text: `Do you want to remove ${element.product.productName} from the table?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Yes, remove',
         cancelButtonText: 'Cancel'
     }).then((result) => {
         if (result.isConfirmed) {
-            // Remove from global orderProducts array
-            const idx = window.orderProducts.findIndex(p => p.productId === productObj.product.productId);
-            if (idx > -1) {
-                window.orderProducts.splice(idx, 1);
-            }
-            // Restore quantity in products array
-            const prodInProducts = window.products.find(p => 
-                (p.id || p.productId) === (productObj.product.id || productObj.product.productId)
-            );
-            if (prodInProducts) {
-                prodInProducts.quantity += productObj.quantity;
-            }
-            displayOrderProducts(window.orderProducts);
+            // Remove from orderProducts and restore quantity simply
+            orderProducts = orderProducts.filter(p => (p.product.productId) !== (element.product.productId));
+            totalAmount = totalAmount - (element.productPrice * element.quantity);
+            console.log(totalAmount);
+            document.getElementById('tot-amount').innerHTML = `<h5>Total Amount : ${(totalAmount).toLocaleString("en-US", {
+                style: "currency",
+                currency: "LKR",
+            })}</h5>`;
+
+            const prod = products.find(p => (p.productId) === (element.product.productId));
+            if (prod) prod.quantity += element.quantity;
+            displayOrderProducts(orderProducts);
+
             Swal.fire({ title: "Removed!", text: "Product removed from table.", icon: "success" });
         }
     });
 };
 
+// Dropdown menu for each row in the order products table
 const generateDropDown = (element) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
+    // Add a Delete button to remove product from order
     const buttonList = [
         {name: "Delete", action: deleteSelectedProduct, icon: "fa-solid fa-trash me-2"},
-        
     ];
     buttonList.forEach((button) => {
         const buttonElement = document.createElement("button");
@@ -380,9 +358,6 @@ const generateDropDown = (element) => {
     return dropdownMenu;
 };
 
-const generateInvoice = (element) => {
-    window.open(`/customerOrder/invoice/${element.id}`);
-}
 
 const assignOrder = (element) => {
     const rsponseOrder = ajaxGetRequest(`/customerOrder/assign/${element.id}`)
@@ -406,15 +381,35 @@ const assignOrder = (element) => {
 
 const reloadOrderTable=()=>{
     const cusOrders = ajaxGetRequest("/customerOrder/getAllCustomerOrders")
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
+    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/CUSTOMER_ORDER");
+    console.log(getPrivilege);
 
-    const getCustomer =(ob)=> ob.customer.regNo;
+    const getCustomer =(ob)=> ob.customer.companyName?ob.customer.companyName:ob.customer.firstName+" "+ob.customer.secondName;
+
+    const getOrderStatus = (ob) => {
+        if (ob.orderStatus === "Pending") {
+            return '<p class="align-middle yellowLabel mx-auto" style="width: 100px">Pending </p>';
+        }
+        if (ob.orderStatus === "Assigned") {
+            return '<p class="align-middle greenLabel mx-auto" style="width: 100px">Assigned</p>';
+        }
+        if (ob.orderStatus === "NotAssigned") {
+            return '<p class="align-middle yellowLabel mx-auto" style="width: 100px">NotAssigned</p>';
+        }
+        if (ob.orderStatus === "not") {
+            return '<p class="align-middle redLabel mx-auto" style="width: 100px">Canceled</p>';
+        }
+        if (ob.orderStatus === "Removed") {
+            return '<p class="align-middle GrayLabel mx-auto" style="width: 100px">Removed</p>';
+        }
+};
+
     const displayProperty = [
-        {dataType: "text", propertyName: "orderNo"},
+        {dataType: "text", propertyName: "invoiceNo"},
         {dataType: "function", propertyName: getCustomer},
         {dataType: "date", propertyName: "requiredDate"},
         {dataType: "price", propertyName: "totalAmount"},
-        {dataType: "text", propertyName: "orderStatus"},
+        {dataType: "function", propertyName: getOrderStatus},
     ];
     if (cusOrderTableInstance) {
         cusOrderTableInstance.destroy();
@@ -442,27 +437,49 @@ const printCustomerOrder = (element) => {
     window.open(`/customerOrder/invoice/${element.id}`);
 }
 
-const generateCODropDown = (element) => {
+// Dropdown menu for each customer order row (refactored to match product.js pattern)
+const generateCODropDown = (element, index, privilegeOb = null) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
+    // Example privilege object usage: privilegeOb && privilegeOb.print, privilegeOb && privilegeOb.assign
+    // If no privilegeOb is provided, default to enabled
     const buttonList = [
-        {name: "Print", action: printCustomerOrder, icon: "fa-solid fa-print me-2"},
-        {name: "Invoice", action: generateInvoice, icon: "fa-solid fa-file-invoice me-2"},
-        {name: "Assign", action: assignOrder, icon: "fa-solid fa-file-invoice me-2"},
+        {
+            name: "Print Invoice",
+            action: printCustomerOrder,
+            icon: "fa-solid fa-print me-2",
+            enabled: privilegeOb ? !!privilegeOb.select : true,
+        },
+        {
+            name: "Assign Order",
+            action: assignOrder,
+            icon: "fa-solid fa-file-invoice me-2",
+            enabled: privilegeOb ? !!privilegeOb.select : true,
+        },
+        // Future actions can be added here
     ];
 
     buttonList.forEach((button) => {
         const buttonElement = document.createElement("button");
         buttonElement.className = "dropdown-item btn";
         buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
+        buttonElement.type = "button";
+        buttonElement.disabled = !button.enabled;
+        if (!button.enabled) {
+            buttonElement.style.cursor = "not-allowed";
+            buttonElement.classList.add("text-muted");
+        }
         buttonElement.onclick = function () {
-            button.action(element);
+            if (button.enabled) {
+                button.action(element, index);
+            }
         };
-        const liElement = document.createElement("li");
-        liElement.appendChild(buttonElement);
-        dropdownMenu.appendChild(liElement);
+        const li = document.createElement("li");
+        li.appendChild(buttonElement);
+        dropdownMenu.appendChild(li);
     });
+
     return dropdownMenu;
 };
 
@@ -492,7 +509,7 @@ const customerOrderFormValidation = () =>{
     });
 
     quantityElement.addEventListener('input',  () => {
-                validation(quantityElement, '^[1-9][0-9]{0,4}$', 'customerOrderValidation', 'orderQuantity');
+                validation(quantityElement, '^[1-9][0-9]{0,3}$', 'customerOrderValidation', 'orderQuantity');
     });
 
 }
@@ -514,7 +531,7 @@ const checkCusOrderFormEroor = () => {
         customerSelectElement.classList.add('is-valid');
     }
     // Product validation
-    if (!productSelectElement.value) {
+    if (!productSelectElement.value && orderProducts.length<0) {
         errors += 'Product must be selected.\n';
         productSelectElement.classList.add('is-invalid');
     } else {
@@ -538,7 +555,7 @@ const checkCusOrderFormEroor = () => {
         orderStatusElement.classList.add('is-valid');
     }
     // Quantity validation
-    if (!quantityElement.value || isNaN(quantityElement.value) || Number(quantityElement.value) <= 0) {
+    if ( (!quantityElement.value && orderProducts.length<0) ) {
         errors += 'Quantity must be a positive number.\n';
         quantityElement.classList.add('is-invalid');
     } else {

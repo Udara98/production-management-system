@@ -530,13 +530,14 @@ const fillDataIntoTable5 = (
 
 //Define fill data into select element
 const fillDataIntoSelect = (fieldId, message, dataList, property, selectedValue) =>{
+
   fieldId.innerHTML = "";
   let optionMsg = document.createElement("option");
 
   if(message!=="") {
     optionMsg.value = '';
-    optionMsg.selected = "selected";
-    optionMsg.disabled = "Disabled";
+    optionMsg.selected = true;
+    optionMsg.disabled = true;
     optionMsg.innerText = message;
     fieldId.appendChild(optionMsg);
   }
@@ -544,7 +545,6 @@ const fillDataIntoSelect = (fieldId, message, dataList, property, selectedValue)
     const option = document.createElement("option");
     option.innerHTML = element[property];
     option.value = JSON.stringify(element);
-    console.log(option.value);
     if(selectedValue === element[property]){
       option.selected = 'selected';
 ``    }

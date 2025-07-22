@@ -38,6 +38,10 @@ public class Recipe {
     @Enumerated(EnumType.STRING)
     private RecipeStatus status;
 
+    @ManyToOne
+    @JoinColumn(name = "flavour_id")
+    private Flavour flavour;
+
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "recipe_id")
     private List<RecipeItem> recipeItems;

@@ -3,33 +3,6 @@ let selectedPO;
 window.addEventListener("load", function () {
     reloadPOTable();
 
-//    document.getElementById("purchaseOrderEditForm").onsubmit = function (event) {
-//        event.preventDefault();
-//        const total = selectedPO.pricePerUnit * parseInt(document.getElementById("edit-po-qty").value)
-//        selectedPO.qty = document.getElementById("edit-po-qty").value;
-//        selectedPO.totalPrice = total;
-//        selectedPO.requiredDate = new Date(document.getElementById("edit-po-reqDate").value);
-//        selectedPO.notes = document.getElementById("edit-po-note").value;
-//        selectedPO.purchaseOrderStatus = document.getElementById("edit-po-status").value;
-//
-//        let response = ajaxRequestBody("/purchaseOrder/updatePurchaseOrder", "PUT", selectedPO);
-//        if (response.status === 200) {
-//            swal.fire({
-//                title: response.responseText,
-//                icon: "success",
-//            });
-//            reloadPOTable();
-//            $("#modalPOEdit").modal("hide");
-//
-//        } else {
-//            swal.fire({
-//                title: "Something Went Wrong",
-//                text: response.responseText,
-//                icon: "error",
-//            });
-//        }
-//    }
-
 })
 
 //Declare function to refresh the table

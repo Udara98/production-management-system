@@ -1,11 +1,9 @@
 package com.AdwinsCom.AdwinsCom.entity;
 
 import java.math.BigDecimal;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.AdwinsCom.AdwinsCom.DTO.PurchaseOrderDTO;
 import jakarta.persistence.*;
 import org.hibernate.validator.constraints.Length;
 
@@ -86,30 +84,6 @@ public class PurchaseOrder {
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
 
-    public PurchaseOrder mapDTO(PurchaseOrder purchaseOrder, PurchaseOrderDTO orderDTO, String userName) throws NoSuchAlgorithmException {
-        PurchaseOrder newPurchaseOrder = new PurchaseOrder();
-        if(purchaseOrder != null){
-            newPurchaseOrder=purchaseOrder;
-            newPurchaseOrder.setUpdatedUser(userName);
-            newPurchaseOrder.setUpdatedDate(LocalDateTime.now());
-        }else{
-            newPurchaseOrder.setPurchaseOrderNo(QuotationRequest.generateUniqueId("PO-"));
-            newPurchaseOrder.setQuotationNo(orderDTO.getQuotationNo());
-            newPurchaseOrder.setIngredientCode(orderDTO.getIngredientCode());
-            newPurchaseOrder.setSupplierRegNo(orderDTO.getSupplierRegNo());
-            newPurchaseOrder.setPricePerUnit(orderDTO.getPricePerUnit());
-            newPurchaseOrder.setAddedUser(userName);
-            newPurchaseOrder.setAddedDate(LocalDateTime.now());
-        }
-
-        newPurchaseOrder.setQty(orderDTO.getQty());
-        newPurchaseOrder.setTotalPrice(orderDTO.getTotalPrice());
-        newPurchaseOrder.setProposedDeliveryDate(orderDTO.getProposedDeliveryDate());
-        newPurchaseOrder.setNotes(orderDTO.getNotes());
-        newPurchaseOrder.setPurchaseOrderStatus(orderDTO.getPurchaseOrderStatus());
-
-        return newPurchaseOrder;
-    }
 
     public void setPurchaseOrderStatus(PurchaseOrderStatus purchaseOrderStatus) {
         this.purchaseOrderStatus = purchaseOrderStatus;

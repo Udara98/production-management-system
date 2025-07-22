@@ -2,22 +2,31 @@ package com.AdwinsCom.AdwinsCom.Service;
 
 import com.AdwinsCom.AdwinsCom.DTO.CustomerOrderDTO;
 import com.AdwinsCom.AdwinsCom.DTO.CustomerSalesSummaryDTO;
+import com.AdwinsCom.AdwinsCom.DTO.ProductSalesSummaryDTO;
+import com.AdwinsCom.AdwinsCom.Repository.CustomerOrderProductRepository;
 import com.AdwinsCom.AdwinsCom.Repository.CustomerOrderRepository;
+import com.AdwinsCom.AdwinsCom.Repository.CustomerPaymentHasOrderRepository;
 import com.AdwinsCom.AdwinsCom.Repository.ProductHasBatchRepository;
 import com.AdwinsCom.AdwinsCom.Repository.CustomerRepository;
 import com.AdwinsCom.AdwinsCom.Repository.ProductRepository;
+import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
 import com.AdwinsCom.AdwinsCom.entity.CustomerOrder;
 import com.AdwinsCom.AdwinsCom.entity.CustomerOrderProduct;
 import com.AdwinsCom.AdwinsCom.entity.ProductHasBatch;
 import com.AdwinsCom.AdwinsCom.entity.Customer;
 import com.AdwinsCom.AdwinsCom.entity.Product;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.AdwinsCom.AdwinsCom.entity.QuotationRequest;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
 import java.util.Comparator;
@@ -27,8 +36,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.AdwinsCom.AdwinsCom.entity.Notification;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class CustomerOrderService implements ICustomerOrderService{
@@ -37,13 +46,19 @@ public class CustomerOrderService implements ICustomerOrderService{
     final ProductHasBatchRepository productHasBatchRepository;
     final CustomerRepository customerRepository;
     final ProductRepository productRepository;
-    final com.AdwinsCom.AdwinsCom.Repository.CustomerPaymentHasOrderRepository customerPaymentHasOrderRepository; // removed unnecessary orderProducts field
+    final CustomerPaymentHasOrderRepository customerPaymentHasOrderRepository; // removed unnecessary orderProducts field
 
     @Autowired
-    private com.AdwinsCom.AdwinsCom.Repository.CustomerOrderProductRepository customerOrderProductRepository;
+    private CustomerOrderProductRepository customerOrderProductRepository;
 
     @Autowired
-    private com.AdwinsCom.AdwinsCom.Service.NotificationService notificationService;
+    private UserRepository userRepository;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private IPrivilegeService privilegeService;
 
     public CustomerOrderService(CustomerOrderRepository customerOrderRepository, ProductHasBatchRepository productHasBatchRepository, CustomerRepository customerRepository, ProductRepository productRepository, com.AdwinsCom.AdwinsCom.Repository.CustomerPaymentHasOrderRepository customerPaymentHasOrderRepository) {
         this.customerOrderRepository = customerOrderRepository;
@@ -78,16 +93,27 @@ public class CustomerOrderService implements ICustomerOrderService{
     @Transactional
     public ResponseEntity<?> AddNewCustomerOrder(CustomerOrderDTO customerOrderDTO, String userName) throws NoSuchAlgorithmException {
 
-   
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER_ORDER");
+
+        if (!loguserPrivi.get("insert")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Customer Order Add not Completed: You don't have permission!");
+        }
+
+        
         // Fetch customer entity by ID
         Customer customer = customerRepository.findById(customerOrderDTO.getCustomerId())
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + customerOrderDTO.getCustomerId()));
 
+        Integer userId = userRepository.getUserByUserName(auth.getName()).getId();
+        
+
         CustomerOrder newCustomerOrder = new CustomerOrder();
-        newCustomerOrder.setOrderNo(QuotationRequest.generateUniqueId("ODR-"));
-        newCustomerOrder.setAddedDate(LocalDateTime.now());
-        newCustomerOrder.setAddedUser(userName);
+        newCustomerOrder.setOrderNo(getNextSupplierRegNo());
+        newCustomerOrder.setAddeddate(LocalDateTime.now());
+        newCustomerOrder.setAddeduser(userId);
         newCustomerOrder.setRequiredDate(customerOrderDTO.getRequiredDate());
         newCustomerOrder.setCustomer(customer);
         newCustomerOrder.setOrderStatus(customerOrderDTO.getOrderStatus());
@@ -172,7 +198,7 @@ public class CustomerOrderService implements ICustomerOrderService{
 
         // Set order status based on stock/credit
         if (allProductsHaveStock && hasSufficientCredit) {
-            newCustomerOrder.setOrderStatus(CustomerOrder.OrderStatus.Pending);
+            newCustomerOrder.setOrderStatus(CustomerOrder.OrderStatus.Assigned);
             // Deduct from batch quantities
             for (CustomerOrderProduct orderLine : orderProducts) {
                 ProductHasBatch batch = orderLine.getProductHasBatch();
@@ -214,11 +240,23 @@ public class CustomerOrderService implements ICustomerOrderService{
 
     @Override
     public ResponseEntity<?> GetAllCustomerOrders() {
+        
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER_ORDER");
+
+        if (!loguserPrivi.get("select")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Customer Order Get not Completed: You don't have permission!");
+        }
+
         List<CustomerOrder> customerOrders = customerOrderRepository.findAll();
         List<Map<String, Object>> dtoList = customerOrders.stream().map(order -> {
             Map<String, Object> dto = new HashMap<>();
             dto.put("id", order.getId());
+            dto.put("addeddate", order.getAddeddate());
             dto.put("orderNo", order.getOrderNo());
+            dto.put("invoiceNo", order.getInvoiceNo());
             dto.put("totalAmount", order.getTotalAmount());
             dto.put("requiredDate", order.getRequiredDate());
             dto.put("orderStatus", order.getOrderStatus());
@@ -256,11 +294,21 @@ public class CustomerOrderService implements ICustomerOrderService{
         }).collect(Collectors.toList());
         return ResponseEntity.ok(dtoList);
     }
+    public String getNextSupplierRegNo() {
+        String maxRegNo = customerOrderRepository.getMaxRegNo();
+        int nextNumber = 1;
+        if (maxRegNo != null && maxRegNo.startsWith("CUSOR-")) {
+            nextNumber = Integer.parseInt(maxRegNo.substring(6)) + 1;
+        }
+        return String.format("CUSOR-%04d", nextNumber);
+    }
 
     @Override
-    public java.util.List<com.AdwinsCom.AdwinsCom.DTO.CustomerSalesSummaryDTO> getCustomerSalesSummary(java.time.LocalDate startDate, java.time.LocalDate endDate) {
-        java.util.List<Object[]> rawList = customerOrderRepository.getCustomerSalesSummary(startDate, endDate);
-        java.util.List<com.AdwinsCom.AdwinsCom.DTO.CustomerSalesSummaryDTO> result = new java.util.ArrayList<>();
+    public List <CustomerSalesSummaryDTO> getCustomerSalesSummary(LocalDate startDate, LocalDate endDate) {
+
+
+        List<Object[]> rawList = customerOrderRepository.getCustomerSalesSummary(startDate, endDate);
+        List<CustomerSalesSummaryDTO> result = new ArrayList<>();
         System.out.println(rawList);
         for (Object[] row : rawList) {
             // regNo (String), customerName (String), totalAmount (Number), totalQuantity (Number)
@@ -292,18 +340,47 @@ public class CustomerOrderService implements ICustomerOrderService{
     }
 
 
-    public CustomerOrder getOrderEntityById(Integer id) {
-        return customerOrderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + id));
+    public ResponseEntity<?> getOrderEntityById(Integer id) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER_ORDER");
+
+        if (!loguserPrivi.get("select")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Customer Order Get not Completed: You don't have permission!");
+        }
+        return ResponseEntity.ok(customerOrderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + id)));
     }
 
     @Override
     public ResponseEntity<?> gtAllUnpaidCustomerOrders() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER_ORDER");
+
+        if (!loguserPrivi.get("select")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Customer Order Get not Completed: You don't have permission!");
+        }
+
         List<CustomerOrder> unpaidCustomerOrders = customerOrderRepository.gtAllUnpaidCustomerOrders();
         return ResponseEntity.ok(unpaidCustomerOrders);
     }
 
     @Override
     public ResponseEntity<?> getUnpaidOrdersByCustomer(Integer customerId) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER_ORDER");
+
+        if (!loguserPrivi.get("select")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Customer Order Get not Completed: You don't have permission!");
+        }
+
         List<CustomerOrder> unpaidOrders = customerOrderRepository.findUnpaidOrdersByCustomerId(customerId);
         for (CustomerOrder order : unpaidOrders) {
             Double paid = customerPaymentHasOrderRepository.sumPaidAmountByOrderId(order.getId());
@@ -319,23 +396,24 @@ public class CustomerOrderService implements ICustomerOrderService{
     }
 
     // Product Sales Summary
-    public java.util.List<com.AdwinsCom.AdwinsCom.DTO.ProductSalesSummaryDTO> getProductSalesSummary(java.time.LocalDate startDate, java.time.LocalDate endDate) {
-        java.util.List<Object[]> rawList = customerOrderProductRepository.getProductSalesSummary(startDate, endDate);
-        java.util.List<com.AdwinsCom.AdwinsCom.DTO.ProductSalesSummaryDTO> result = new java.util.ArrayList<>();
-        long leadTime = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
-for (Object[] row : rawList) {
-    String productName = row[0] != null ? row[0].toString() : "";
-    Integer totalQuantity = row[1] != null ? ((Number) row[1]).intValue() : 0;
-    Double totalAmount = row[2] != null ? ((Number) row[2]).doubleValue() : 0.0;
-    Double avgDailySales = leadTime > 0 ? totalQuantity / (double)leadTime : 0.0;
-    Double generatedRop = avgDailySales * (double)leadTime;
-    com.AdwinsCom.AdwinsCom.DTO.ProductSalesSummaryDTO dto = new com.AdwinsCom.AdwinsCom.DTO.ProductSalesSummaryDTO();
-    dto.setProductName(productName);
-    dto.setTotalAmount(totalAmount);
-    dto.setTotalQuantity(totalQuantity);
-    dto.setGeneratedRop(generatedRop);
-    result.add(dto);
-}
+    public List<ProductSalesSummaryDTO> getProductSalesSummary(LocalDate startDate, LocalDate endDate) {
+        List<Object[]> rawList = customerOrderProductRepository.getProductSalesSummary(startDate, endDate);
+        List<ProductSalesSummaryDTO> result = new ArrayList<>();
+        long leadTime = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+
+        for (Object[] row : rawList) {
+            String productName = row[0] != null ? row[0].toString() : "";
+            Integer totalQuantity = row[1] != null ? ((Number) row[1]).intValue() : 0;
+            Double totalAmount = row[2] != null ? ((Number) row[2]).doubleValue() : 0.0;
+            Double avgDailySales = leadTime > 0 ? totalQuantity / (double)leadTime : 0.0;
+            Double generatedRop = avgDailySales * (double)leadTime;
+            com.AdwinsCom.AdwinsCom.DTO.ProductSalesSummaryDTO dto = new com.AdwinsCom.AdwinsCom.DTO.ProductSalesSummaryDTO();
+            dto.setProductName(productName);
+            dto.setTotalAmount(totalAmount);
+            dto.setTotalQuantity(totalQuantity);
+            dto.setGeneratedRop(generatedRop);
+            result.add(dto);
+        }
         return result;
     }
 }

@@ -37,7 +37,6 @@ const refreshUserTable = () => {
     ]
 
 
-
     let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/USER")
 
      if (UserTableInstance) {
@@ -57,8 +56,6 @@ const refreshUserTable = () => {
         getPrivilege
 
     );
-
-
 
 
     users.forEach((element,index) =>{
@@ -133,8 +130,6 @@ const refillUserForm = (ob, rowIndex)=>{
 
     inputEmail.value = user.email;
     textNote.value = user.note;
-
-
 
     if(user.status){
         checkStatus.checked = true;
@@ -227,7 +222,6 @@ const deleteUser = (ob, rowIndex) => {
 
             // Delete Service
             let deleteServiceRequestResponse =  ajaxRequestBody("/user", "DELETE", ob)
-
 
             //Check Backend Service
             if (deleteServiceRequestResponse.status === 200) {
@@ -434,12 +428,6 @@ const refreshUserForm = ()=>{
             profilePhoto.src = atob(user.photo);
         }
 
-
-
-
-
-
-
 }
 
 //Password re type
@@ -564,9 +552,6 @@ const checkUserUpdate = () =>{
             }
         });
     }
-
-
-
     return updates;
 }
 

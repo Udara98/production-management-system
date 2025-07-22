@@ -12,11 +12,17 @@ import java.util.List;
 public interface QuotationRequestRepository extends JpaRepository<QuotationRequest, Integer> {
 
     List<QuotationRequest> findByIngredientId(Integer ingId);
-    @Query("SELECT qr FROM QuotationRequest qr WHERE qr.requestStatus <> 'Removed' ")
+    @Query("SELECT qr FROM QuotationRequest qr WHERE qr.requestStatus <> 'Removed' ORDER BY qr.addedDate DESC")
     List<QuotationRequest> findAllByRequestStatusNotRemoved();
 
+    @Query("SELECT qr FROM QuotationRequest qr WHERE qr.requestStatus = 'Send' ORDER BY qr.addedDate DESC")
+    List<QuotationRequest> findAllSendRequestsOrderByAddedDateDesc();
+
     @Query("SELECT qr FROM QuotationRequest qr WHERE qr.requestStatus = 'Send' AND qr.requestNo = :requestNo")
-QuotationRequest findByRequestNo(@Param("requestNo") String requestNo);
+    QuotationRequest findByRequestNo(@Param("requestNo") String requestNo);
+
+    @Query("SELECT MAX(qr.requestNo) FROM QuotationRequest qr")
+    String getMaxRequestNo();
 
     void deleteByIngredientId(Integer ingId);
 

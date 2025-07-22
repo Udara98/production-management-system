@@ -14,5 +14,6 @@ public interface IQuotationRequestService {
     ResponseEntity<?> UpdateQuotationRequest(QuotationRequest quotationRequest);
     ResponseEntity<?> DeleteQuotationRequest(Integer id);
     ResponseEntity<?> sendQuotationRequestToAllSuppliers(QuotationRequestEmailDTO emailDTO);
+    ResponseEntity<?> GetAllSendQuotationRequests();
 
 }

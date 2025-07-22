@@ -17,8 +17,17 @@ public class SupplierWithIngredientsDTO {
     private BankAccountDTO bankAccount;
     private Integer id;
     private String regNo;
-    private String supplierName;
-    private String contactPersonName;
+    // Business type logic (COMPANY or INDIVIDUAL)
+    private String businessType; // "COMPANY" or "INDIVIDUAL"
+    // Company fields
+    private String companyName; // Business Name (Company)
+    private String brn; // Business Registration Number (Company)
+    private String contactPerson; // Contact Person Name (Company)
+    // Individual fields
+    private String firstName; // First Name (Individual)
+    private String secondName; // Second Name (Individual)
+    private String nic; // NIC (Individual)
+    // Common fields
     private String contactNo;
     private String email;
     private String address;
@@ -30,5 +39,6 @@ public class SupplierWithIngredientsDTO {
     private String updatedUser;
     private LocalDateTime updatedDate;
     private List<Ingredient> ingredients;
-
+    private String supplierName;
+    private String contactPersonName;
 }

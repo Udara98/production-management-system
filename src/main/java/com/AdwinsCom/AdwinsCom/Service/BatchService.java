@@ -3,12 +3,10 @@ package com.AdwinsCom.AdwinsCom.Service;
 import com.AdwinsCom.AdwinsCom.DTO.BatchDTO;
 import com.AdwinsCom.AdwinsCom.DTO.BatchProductionReportDTO;
 import java.util.ArrayList;
-import com.AdwinsCom.AdwinsCom.DTO.BatchProductionReportDTO;
 import com.AdwinsCom.AdwinsCom.Repository.*;
 import com.AdwinsCom.AdwinsCom.entity.Ingredient;
 import com.AdwinsCom.AdwinsCom.entity.ProductHasBatch;
 import com.AdwinsCom.AdwinsCom.entity.Production.Batch;
-import com.AdwinsCom.AdwinsCom.entity.Production.ProductionItem;
 import com.AdwinsCom.AdwinsCom.entity.Production.Recipe;
 import com.AdwinsCom.AdwinsCom.entity.Production.RecipeItem;
 import org.springframework.http.HttpStatus;
@@ -18,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -40,12 +37,42 @@ public class BatchService implements IBatchService{
 
 
 
+    private String getMaxBatchNo(){
+
+        int maxNo = 1;
+        String maxBatchNo = batchRepository.findMaxBatchNo();
+
+        if (maxBatchNo !=null && maxBatchNo.startsWith("BCH-")){
+            maxNo = Integer.parseInt(maxBatchNo.substring(4)) + 1;
+        }
+
+        return String.format("BCH-%04d", maxNo);
+    }
+
+
+
     @Override
     @Transactional
     public ResponseEntity<?> AddNewBatch(BatchDTO batchDTO, String userName) throws NoSuchAlgorithmException {
-        Batch newBatch = new Batch().mapDTO(null,batchDTO,userName);
+        // Manually map fields from DTO to entity (no mapDTO)
+        Batch newBatch = new Batch();
+        newBatch.setBatchNo(getMaxBatchNo()); // Replace with sequential if needed
+        newBatch.setRecipeCode(batchDTO.getRecipeCode());
+        newBatch.setRecipeName(batchDTO.getRecipeName());
+        newBatch.setTotalQuantity(batchDTO.getTotalQuantity());
+        newBatch.setDamagedQuantity(batchDTO.getDamagedQuantity());
+        newBatch.setTotalSale(batchDTO.getTotalSale());
+        newBatch.setAvailableQuantity(batchDTO.getTotalQuantity());
+        newBatch.setManufactureDate(batchDTO.getManufactureDate());
+        newBatch.setExpireDate(batchDTO.getExpireDate());
+        newBatch.setTotalCost(batchDTO.getTotalCost());
+        newBatch.setBatchStatus(batchDTO.getBatchStatus());
+        newBatch.setNote(batchDTO.getNote());
+        newBatch.setAddedUser(userName);
+        newBatch.setAddedDate(java.time.LocalDateTime.now());
 
         Recipe recipe = recipeRepository.findByRecipeCode(batchDTO.getRecipeCode());
+        newBatch.setFlavourId(recipe.getFlavour().getId());
 
         for (RecipeItem ri: recipe.getRecipeItems()
              ) {
@@ -76,9 +103,20 @@ public class BatchService implements IBatchService{
     @Override
     public ResponseEntity<?> UpdateNewBatch(BatchDTO batchDTO, String userName) throws NoSuchAlgorithmException {
         Batch batch = batchRepository.findById(batchDTO.getId()).get();
-        Batch updatedBatch = new Batch().mapDTO(batch,batchDTO,userName);
-
-        batchRepository.save(updatedBatch);
+        // Manually map fields for update (no mapDTO)
+        batch.setRecipeCode(batchDTO.getRecipeCode());
+        batch.setRecipeName(batchDTO.getRecipeName());
+        batch.setTotalQuantity(batchDTO.getTotalQuantity());
+        batch.setAvailableQuantity(batchDTO.getAvailableQuantity());
+        batch.setDamagedQuantity(batchDTO.getDamagedQuantity());
+        batch.setManufactureDate(batchDTO.getManufactureDate());
+        batch.setExpireDate(batchDTO.getExpireDate());
+        batch.setTotalCost(batchDTO.getTotalCost());
+        batch.setBatchStatus(batchDTO.getBatchStatus());
+        batch.setNote(batchDTO.getNote());
+        batch.setUpdatedUser(userName);
+        batch.setUpdatedDate(java.time.LocalDateTime.now());
+        batchRepository.save(batch);
         return ResponseEntity.ok("Batch Updated Successfully");
     }
 

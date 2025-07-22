@@ -56,6 +56,7 @@ public class CustomerPaymentService implements ICustomerPaymentService{
 
     @Override
     public ResponseEntity<?> AddNewCustomerPayment(CustomerPaymentDTO customerPaymentDTO, String userName) {
+        
         // Authentication and authorization
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER_PAYMENT");
@@ -113,18 +114,45 @@ public class CustomerPaymentService implements ICustomerPaymentService{
 
     @Override
     public ResponseEntity<?> GetAllCustomerPayments() {
+
+          // Authentication and authorization
+          Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+          HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER_PAYMENT");
+          if (!loguserPrivi.get("select")) {
+              return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                      .body("Payment GetAll not Completed: You don't have permission!");
+          }
+  
         List<CustomerPayment> customerPayments = customerPaymentRepository.findAll();
         return ResponseEntity.ok(customerPayments);
     }
 
     @Override
     public ResponseEntity<?>GetAllUnpaidCustomerPayments(){
+
+          // Authentication and authorization
+          Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+          HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER_PAYMENT");
+          if (!loguserPrivi.get("select")) {
+              return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                      .body("Payment GetAll not Completed: You don't have permission!");
+          }
+
         List<CustomerPayment> unpaidCustomerPayments = customerPaymentRepository.gtAllUnpaidCustomerPayments();
         return ResponseEntity.ok(unpaidCustomerPayments);
     }
 
     @Override
     public ResponseEntity<?> getLatestCompletedPaymentByOrderId(Integer orderId) {
+
+          // Authentication and authorization
+          Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+          HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER_PAYMENT");
+          if (!loguserPrivi.get("select")) {
+              return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                      .body("Payment GetAll not Completed: You don't have permission!");
+          }
+  
         Optional<CustomerPayment> latestCompletedCP = customerPaymentRepository.getLatestCompletedPaymentByOrderId(orderId);
 
         if (latestCompletedCP == null) {
@@ -136,6 +164,7 @@ public class CustomerPaymentService implements ICustomerPaymentService{
     }
     @Override
     public CustomerPaymentDTO getCustomerPaymentById(int id) {
+        
         Optional<CustomerPayment> paymentOpt = customerPaymentRepository.findById(id);
         if (paymentOpt.isEmpty()) return null;
         CustomerPayment payment = paymentOpt.get();

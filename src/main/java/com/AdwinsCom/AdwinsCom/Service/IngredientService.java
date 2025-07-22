@@ -61,12 +61,38 @@ public class IngredientService implements IIngredientService {
 
     @Override
     public ResponseEntity<?> GetAllIngredients() {
+
+         // Authentication and authorization
+         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+         // Get privileges for the logged-in user
+         HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "INGREDIENT");
+ 
+         // If user doesn't have "insert" permission, return 403 Forbidden
+         if (!loguserPrivi.get("select")) {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                     .body("Ingredient GetAll not Completed: You don't have permission!");
+         }
+
         List<Ingredient> ingredientList = ingredientRepository.findAllByStatusNotRemoved();
         return ResponseEntity.ok(ingredientList);
     }
 
     @Override
     public ResponseEntity<?> UpdateIngredient(IngredientDTO ingredientDTO, String userName) {
+
+         // Authentication and authorization
+         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+         // Get privileges for the logged-in user
+         HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "INGREDIENT");
+ 
+         // If user doesn't have "insert" permission, return 403 Forbidden
+         if (!loguserPrivi.get("update")) {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                     .body("Ingredient Update not Completed: You don't have permission!");
+         }
+
         Ingredient ingredient = ingredientRepository.getIngredientByIngredientCode(ingredientDTO.getIngredientCode());
 
         Ingredient updatedIngredient = new Ingredient().mapDTO(ingredient, ingredientDTO, userName);
@@ -78,6 +104,18 @@ public class IngredientService implements IIngredientService {
     @Override
     @Transactional
     public ResponseEntity<?> DeleteIngredient(Integer id) {
+
+         // Authentication and authorization
+         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+         // Get privileges for the logged-in user
+         HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "INGREDIENT");
+ 
+         // If user doesn't have "insert" permission, return 403 Forbidden
+         if (!loguserPrivi.get("delete")) {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                     .body("Ingredient Delete not Completed: You don't have permission!");
+         }
 
         Ingredient ingredient = ingredientRepository.findById(id).orElse(null);
         if (ingredient == null) {

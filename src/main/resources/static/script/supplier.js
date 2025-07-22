@@ -15,84 +15,6 @@ window.addEventListener("load",  () => {
     //Call function for validation
    SupformValidation();
 
-//    //Call getTransfter list function
-//    getTransferList(ingredientList, [], getIng, 'add');
-
-//Supplier Submit Function
-//    document.getElementById("supplierAddForm").onsubmit = function (event) {
-//        event.preventDefault();
-//        const ingList = [];
-//        selectedIngredients.forEach((ing) => {
-//            const i = {...ing};
-//            delete i.suppliers;
-//            ingList.push(i);
-//        });
-//        const supplier = {
-//            regNo: document.getElementById("regNo").value,
-//            supplierName: document.getElementById("supplierName").value,
-//            contactPersonName: document.getElementById("contactPersonName").value,
-//            contactNo: document.getElementById("contactNo").value,
-//            email: document.getElementById("email").value,
-//            address: document.getElementById("address").value,
-//            note: document.getElementById("note").value,
-//            joinDate: new Date(document.getElementById("joinDate").value),
-//            supplierStatus: document.getElementById("supplierStatus").value,
-//            ingredients: ingList,
-//        };
-//        let response = ajaxRequestBody("/supplier/addNewSupplier", "POST", supplier);
-//        if (response.status === 200) {
-//            swal.fire({
-//                title: response.responseText,
-//                icon: "success",
-//            });
-//            $("#modalSupplierAdd").modal("hide");
-//            reloadSupTable();
-//        } else {
-//            swal.fire({
-//                title: "Something Went Wrong",
-//                text: response.responseText,
-//                icon: "error",
-//            });
-//        }
-//    };
-
-//Supplier Edit Function
-//    document.getElementById("supplierEditForm").onsubmit = function (event) {
-//        event.preventDefault();
-//        const ingList = [];
-//        selectedIngredients.forEach((ing) => {
-//            const i = {...ing};
-//            delete i.suppliers;
-//            ingList.push(i);
-//        });
-//        const supplier = {
-//            regNo: document.getElementById("edit-regNo").value,
-//            supplierName: document.getElementById("edit-supplierName").value,
-//            contactPersonName: document.getElementById("edit-contactPersonName").value,
-//            contactNo: document.getElementById("edit-contactNo").value,
-//            email: document.getElementById("edit-email").value,
-//            address: document.getElementById("edit-address").value,
-//            note: document.getElementById("edit-note").value,
-//            joinDate: new Date(document.getElementById("edit-joinDate").value),
-//            supplierStatus: document.getElementById("edit-supplierStatus").value,
-//            ingredients: ingList,
-//        };
-//        let response = ajaxRequestBody("/supplier/updateSupplier", "PUT", supplier);
-//        if (response.status === 200) {
-//            swal.fire({
-//                title: response.responseText,
-//                icon: "success",
-//            });
-//            $("#modalSupplierEdit").modal("hide");
-//            reloadSupTable();
-//        } else {
-//            swal.fire({
-//                title: "Something Went Wrong",
-//                text: response.responseText,
-//                icon: "error",
-//            });
-//        }
-//    };
 });
 
 //Define function to generate Supplier table
@@ -110,11 +32,19 @@ const reloadSupTable =  () => {
             return '<p class="align-middle redLabel mx-auto" style="width: 100px">InActive</p>';
         }
     };
+
+    const getSupplierName = (ob) => {
+        if (ob.businessType === "COMPANY") {
+            return ob.companyName;
+        } else {
+            return ob.firstName + " " + ob.secondName;
+        }
+    };
     const displayProperty = [
         {dataType: "text", propertyName: "regNo"},
         {
-            dataType: "text",
-            propertyName: "supplierName",
+            dataType: "function",
+            propertyName: getSupplierName,
         },
         {dataType: "date", propertyName: "joinDate"},
         {
@@ -142,71 +72,64 @@ const reloadSupTable =  () => {
 
 //Call function for validation and object binding
 const SupformValidation = () =>{
-    supplierName.addEventListener('input', () => {
-        validation(supplierName, '^[A-Za-z ]{2,50}$', 'supplier', 'supplierName');
-    });
-
-    supplierStatus.addEventListener('change', () => {
-        selectFieldValidator(supplierStatus, '', 'supplier', 'supplierStatus');
-    });
-
-    contactPersonName.addEventListener('input', () => {
-        validation(contactPersonName, '^[A-Za-z ]{2,50}$', 'supplier', 'contactPersonName');
-    });
-
-    contactNo.addEventListener('input', () => {
-        validation(contactNo, '^\\d{10}$', 'supplier', 'contactNo');
-    });
-
-    email.addEventListener('input', () => {
-        validation(email, '^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$', 'supplier', 'email');
-    });
-
-    joinDate.addEventListener('change', () => {
-        dateFeildValidator(joinDate, '', 'supplier', 'joinDate');
-    });
-
-    address.addEventListener('input', () => {
-        validation(address, '^.{5,}$', 'supplier', 'address');
-    });
-
-    note.addEventListener('input', () => {
-        validation(note, '^.{0,255}$', 'supplier', 'note');
-    });
-
-    // --- Bank Account Fields Validation ---
+    // Business type logic
+    const businessTypeSelect = document.getElementById('add-sup-businessType');
+    const supplierName = document.getElementById('supplierName');
+    const brn = document.getElementById('brn');
+    const contactPersonName = document.getElementById('contactPersonName');
+    const firstName = document.getElementById('firstName');
+    const secondName = document.getElementById('secondName');
+    const nic = document.getElementById('nic');
+    const supplierStatus = document.getElementById('supplierStatus');
+    const contactNo = document.getElementById('contactNo');
+    const email = document.getElementById('email');
+    const joinDate = document.getElementById('joinDate');
+    const address = document.getElementById('address');
+    const note = document.getElementById('note');
+    // Bank fields
     const bankName = document.getElementById('bankName');
     const bankBranch = document.getElementById('bankBranch');
     const accountNo = document.getElementById('accountNo');
     const accountName = document.getElementById('accountName');
 
-    if (!supplier.bankAccount) {
-        supplier.bankAccount = {
-            bankName: '',
-            bankBranch: '',
-            accountNo: '',
-            accountName: ''
-        };
+    function attachCompanyValidation() {
+        if (supplierName) supplierName.addEventListener('input', () => validation(supplierName, "^(?=.{4,})(?=.*[A-Za-z])[A-Za-z0-9.,&'’-]+( [A-Za-z0-9.,&'’-]+)*$", 'supplier', 'supplierName'));
+        if (brn) brn.addEventListener('input', () => validation(brn, '^[A-Za-z0-9]{5,}$', 'supplier', 'brn'));
+        if (contactPersonName) contactPersonName.addEventListener('input', () => validation(contactPersonName, '^([A-Z][a-z]+)( [A-Z][a-z]+)+$', 'supplier', 'contactPersonName'));
     }
-    if (bankName) {
-        bankName.addEventListener('input', () => {
-            validation(bankName, '^[A-Za-z0-9 .,&-]{2,50}$', 'supplier.bankAccount', 'bankName');
-        });
+    function attachIndividualValidation() {
+        if (firstName) firstName.addEventListener('input', () => validation(firstName, '^([A-Z][a-z]+)$', 'supplier', 'firstName'));
+        if (secondName) secondName.addEventListener('input', () => validation(secondName, '^([A-Z][a-z]+)$', 'supplier', 'secondName'));
+        if (nic) nic.addEventListener('input', () => validation(nic, '(^[0-9]{9}[VvXx]$)|(^[0-9]{12}$)', 'supplier', 'nic'));
     }
-    if (bankBranch) {
-        bankBranch.addEventListener('input', () => {
-            validation(bankBranch, '^[A-Za-z0-9 .,&-]{2,50}$', 'supplier.bankAccount', 'bankBranch');
-        });
+    // Common fields
+    if(businessTypeSelect) businessTypeSelect.addEventListener('change', () => {selectFieldValidator(businessTypeSelect, '', 'supplier', 'businessType')});
+    if (supplierStatus) supplierStatus.addEventListener('change', () => selectFieldValidator(supplierStatus, '', 'supplier', 'supplierStatus'));
+    if (contactNo) contactNo.addEventListener('input', () => validation(contactNo, '^[0-9]{10}$', 'supplier', 'contactNo'));
+    if (email) email.addEventListener('input', () => validation(email, '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$', 'supplier', 'email'));
+    if (joinDate) joinDate.addEventListener('change', () => dateFeildValidator(joinDate, '', 'supplier', 'joinDate'));
+    if (address) address.addEventListener('input', () => validation(address, '^(?=.{5,255})[0-9]+(\\/[0-9A-Za-z]+)?\\s+[A-Za-z0-9]+(\\s+[A-Za-z0-9]+)*$', 'supplier', 'address'));
+    if (note) note.addEventListener('input', () => validation(note, '^.{0,255}$', 'supplier', 'note'));
+    // Bank fields
+    // Bank Name: Only letters and spaces, 3-50 characters
+    if (bankName) bankName.addEventListener('input', () => validation(bankName, '^([A-Z][a-z]+)$', 'supplier.bankAccount', 'bankName'));
+    // Bank Branch: Only letters and spaces, 3-50 characters
+    if (bankBranch) bankBranch.addEventListener('input', () => validation(bankBranch, '^([A-Z][a-z]+)( [A-Z][a-z]+)*$', 'supplier.bankAccount', 'bankBranch'));
+    // Account Number: 6-30 digits
+    if (accountNo) accountNo.addEventListener('input', () => validation(accountNo, '^[0-9]{6,30}$', 'supplier.bankAccount', 'accountNo'));
+    // Account Name: Two or more words, each starting with a capital letter
+    if (accountName) accountName.addEventListener('input', () => validation(accountName, '^([A-Z][a-z]+)( [A-Z][a-z]+)*$', 'supplier.bankAccount', 'accountName'));
+
+    function updateValidation() {
+        if (businessTypeSelect.value === 'COMPANY') {
+            attachCompanyValidation();
+        } else {
+            attachIndividualValidation();
+        }
     }
-    if (accountNo) {
-        accountNo.addEventListener('input', () => {
-            validation(accountNo, '^.{4,30}$', 'supplier.bankAccount', 'accountNo'); // Allows alphanumeric, min 4 chars
-        });
-    }
-    if (accountName) {
-        accountName.addEventListener('input', () => {
-            validation(accountName, '^[A-Za-z ]{2,50}$', 'supplier.bankAccount', 'accountName');
-        });
+    if (businessTypeSelect) {
+        businessTypeSelect.addEventListener('change', updateValidation);
+        updateValidation();
     }
 }
 
@@ -288,18 +211,60 @@ const supplierSubmit = () => {
 
 //Define Supplier reg form function
 const reloadSupplierForm = () =>{
-
     supplier = new Object();
     oldSupplier = null;
 
-    //Get all suppliers
+    // Get all suppliers
     const suppliers = ajaxGetRequest("/supplier/getAllSuppliers");
 
-    //Call getTransfer list function
+    // Call getTransfer list function
     let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
     getTransferList(ingredientList, [], getIng, 'add');
 
+    // Reset all input fields
+    const businessTypeSelect = document.getElementById('add-sup-businessType');
+    const companyFields = document.getElementsByClassName('supplier-company-fields');
+    const individualFields = document.getElementsByClassName('supplier-individual-fields');
+    if (businessTypeSelect) businessTypeSelect.value = 'INDIVIDUAL';
+    // Hide all company fields by default
+    for (let elem of companyFields) {
+        elem.style.display = 'none';
+    }
+    // Show all individual fields by default
+    for (let elem of individualFields) {
+        elem.style.display = '';
+    }
+
+    //Auto Selected Supplier Status
+    const supplierStatusSelect = document.getElementById('supplierStatus');
+    if (supplierStatusSelect) supplierStatusSelect.value = 'Active';
+    supplierStatusSelect.disabled = true;
+
+
+    // Toggle field visibility based on business type
+    function updateFieldVisibility() {
+        if (businessTypeSelect.value === 'COMPANY') {
+            for (let elem of companyFields) {
+                elem.style.display = '';
+            }
+            for (let elem of individualFields) {
+                elem.style.display = 'none';
+            }
+        } else {
+            for (let elem of companyFields) {
+                elem.style.display = 'none';
+            }
+            for (let elem of individualFields) {
+                elem.style.display = '';
+            }
+        }
+    }
+    if (businessTypeSelect) {
+        businessTypeSelect.addEventListener('change', updateFieldVisibility);
+        updateFieldVisibility();
+    }
 }
+
 
 //Define function to generate dropdown
 const printSupplier = (supplier) => {
@@ -364,68 +329,143 @@ const printSupplier = (supplier) => {
     }, 300);
 };
 
-const generateSupDropDown = (element) => {
+// Dropdown menu for each supplier row (refactored to match product.js pattern)
+const generateSupDropDown = (element, index, privilegeOb = null) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
-        {name: "View", action: viewSupplierData, icon: "fa-solid fa-eye me-2"},
-        {name: "Print", action: printSupplier, icon: "fa-solid fa-print me-2"},
+        {
+            name: "Print",
+            action: printSupplier,
+            icon: "fa-solid fa-print me-2",
+            enabled: privilegeOb ? !!privilegeOb.select : true,
+        },
         {
             name: "Edit",
             action: editSupplier,
             icon: "fa-solid fa-edit me-2",
+            enabled: privilegeOb ? !!privilegeOb.update : true,
         },
-        {name: "Delete", action: deleteSupplier, icon: "fa-solid fa-trash me-2"},
+        {
+            name: "Delete",
+            action: deleteSupplier,
+            icon: "fa-solid fa-trash me-2",
+            enabled: privilegeOb ? !!privilegeOb.delete : true,
+        },
     ];
 
     buttonList.forEach((button) => {
         const buttonElement = document.createElement("button");
         buttonElement.className = "dropdown-item btn";
         buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
+        buttonElement.type = "button";
+        buttonElement.disabled = !button.enabled;
+        if (!button.enabled) {
+            buttonElement.style.cursor = "not-allowed";
+            buttonElement.classList.add("text-muted");
+        }
         buttonElement.onclick = function () {
-            button.action(element);
+            if (button.enabled) {
+                button.action(element, index);
+            }
         };
-        const liElement = document.createElement("li");
-        liElement.appendChild(buttonElement);
-        dropdownMenu.appendChild(liElement);
+        const li = document.createElement("li");
+        li.appendChild(buttonElement);
+        dropdownMenu.appendChild(li);
     });
+
     return dropdownMenu;
 };
 
 //Check Supplier form errors
 const checkSupplierFormError = () => {
     let errors = '';
+    const businessTypeSelect = document.getElementById('add-sup-businessType');
+    const supplierName = document.getElementById('supplierName');
+    const brn = document.getElementById('brn');
+    const contactPersonName = document.getElementById('contactPersonName');
+    const firstName = document.getElementById('firstName');
+    const secondName = document.getElementById('secondName');
+    const nic = document.getElementById('nic');
+    const supplierStatus = document.getElementById('supplierStatus');
+    const contactNo = document.getElementById('contactNo');
+    const email = document.getElementById('email');
+    const joinDate = document.getElementById('joinDate');
+    const address = document.getElementById('address');
+    const note = document.getElementById('note');
+    // Bank fields
+    const bankName = document.getElementById('bankName');
+    const bankBranch = document.getElementById('bankBranch');
+    const accountNo = document.getElementById('accountNo');
+    const accountName = document.getElementById('accountName');
 
-    if (supplierName.value.trim() === '') {
-        errors += "Supplier name can't be null\n";
-        supplierName.classList.add('is-invalid');
+    // Business type specific validation
+    if (businessTypeSelect.value === 'COMPANY') {
+        if (!supplierName.value.trim() || !/^(?=.{4,})(?=.*[A-Za-z])[A-Za-z0-9.,&'’-]+( [A-Za-z0-9.,&'’-]+)*$/.test(supplierName.value)) {
+            errors += "Company Name is required and must be valid.\n";
+            supplierName.classList.add('is-invalid');
+        }
+        if (!brn.value.trim() || !/^[A-Za-z0-9]{5,}$/.test(brn.value)) {
+            errors += "BRN is required and must be valid.\n";
+            brn.classList.add('is-invalid');
+        }
+        if (!contactPersonName.value.trim() || !/^([A-Z][a-z]+)( [A-Z][a-z]+)+$/.test(contactPersonName.value)) {
+            errors += "Contact Person Name is required.\n";
+            contactPersonName.classList.add('is-invalid');
+        }
+    } else {
+        if (!firstName.value.trim() || !/^([A-Z][a-z]+)$/.test(firstName.value)) {
+            errors += "First Name is required and must start with a capital letter.\n";
+            firstName.classList.add('is-invalid');
+        }
+        if (!secondName.value.trim() || !/^([A-Z][a-z]+)$/.test(secondName.value)) {
+            errors += "Second Name is required and must start with a capital letter.\n";
+            secondName.classList.add('is-invalid');
+        }
+        if (!nic.value.trim() || !/(^[0-9]{9}[VvXx]$)|(^[0-9]{12}$)/.test(nic.value)) {
+            errors += "NIC is required and must be valid.\n";
+            nic.classList.add('is-invalid');
+        }
     }
+    // Common fields
     if (!supplierStatus.value) {
         errors += "Supplier status can't be null\n";
         supplierStatus.classList.add('is-invalid');
     }
-    if (contactPersonName.value.trim() === '') {
-        errors += "Contact Person name can't be null\n";
-        contactPersonName.classList.add('is-invalid');
-    }
-    if (contactNo.value.trim() === '' || !/^\d{10}$/.test(contactNo.value)) {
+    if (!contactNo.value.trim() || !/^[0-9]{10}$/.test(contactNo.value)) {
         errors += "Contact No must be a 10-digit number\n";
         contactNo.classList.add('is-invalid');
     }
-    if (email.value.trim() === '' || !/^\S+@\S+\.\S+$/.test(email.value)) {
+    if (!email.value.trim() || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email.value)) {
         errors += "Email is invalid\n";
         email.classList.add('is-invalid');
     }
-    if (!joinDate.value) {
-        errors += "Join date can't be null\n";
-        joinDate.classList.add('is-invalid');
-    }
-    if (address.value.trim() === '') {
-        errors += "Address can't be null\n";
+    if (!address.value.trim() || !/^(?=.{5,255})[A-Za-z0-9.,/\- ]+$/.test(address.value)) {
+        errors += "Address is required and must be valid.\n";
         address.classList.add('is-invalid');
     }
-
+    if (note && note.value.length > 255) {
+        errors += "Note must be less than 255 characters.\n";
+        note.classList.add('is-invalid');
+    }
+    // Bank fields
+    if (!bankName.value.trim() || !/^[A-Za-z ]{3,50}$/.test(bankName.value)) {
+        errors += "Bank Name is required and must be 3-50 letters.\n";
+        bankName.classList.add('is-invalid');
+    }
+    if (!bankBranch.value.trim() || !/^[A-Za-z ]{3,50}$/.test(bankBranch.value)) {
+        errors += "Bank Branch is required and must be 3-50 letters.\n";
+        bankBranch.classList.add('is-invalid');
+    }
+    if (!accountNo.value.trim() || !/^[0-9]{6,30}$/.test(accountNo.value)) {
+        errors += "Account Number is required and must be 6-30 digits.\n";
+        accountNo.classList.add('is-invalid');
+    }
+    if (!accountName.value.trim() || !/^([A-Z][a-z]+)( [A-Z][a-z]+)+$/.test(accountName.value)) {
+        errors += "Account Name is required (two words, capitalized).\n";
+        accountName.classList.add('is-invalid');
+    }
     return errors;
 }
 
@@ -474,8 +514,16 @@ function openEditSupplierForm(supplier) {
     const modalTitle = document.querySelector('.modal-title');
     if (modalTitle) modalTitle.textContent = 'Edit Supplier';
 
+    const getSupplierName = (ob) => {
+        if (ob.businessType === "COMPANY") {
+            return ob.companyName;
+        } else {
+            return ob.firstName + " " + ob.secondName;
+        }
+    };
+
     // Fill form fields
-    supplierName.value = supplier.supplierName;
+    supplierName.value = getSupplierName(supplier);
     supplierStatus.value = supplier.supplierStatus;
     contactPersonName.value = supplier.contactPersonName;
     contactNo.value = supplier.contactNo;
@@ -573,7 +621,7 @@ function selected(data) {
     const supplierDetailsDiv = document.getElementById("supplierDetails");
     supplierDetailsDiv.innerHTML = `
 
-<div class="mb-3">
+            <div class="mb-3">
                 <h5><strong>Supplier Details</strong></h5>
                 <hr>
             </div>

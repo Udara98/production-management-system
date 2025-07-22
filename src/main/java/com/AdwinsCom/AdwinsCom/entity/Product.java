@@ -1,12 +1,10 @@
 package com.AdwinsCom.AdwinsCom.entity;
-import com.AdwinsCom.AdwinsCom.entity.Production.*;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,21 +57,21 @@ public class Product {
     @Column(name = "reorder_quantity")
     private Integer reorderQuantity;
 
-    public Integer getRop() {
-        return reorderPoint;
-    }
+    // public Integer getRop() {
+    //     return reorderPoint;
+    // }
 
-    public void setRop(Integer rop) {
-        this.reorderPoint = rop;
-    }
+    // public void setRop(Integer rop) {
+    //     this.reorderPoint = rop;
+    // }
 
-    public Integer getRoq() {
-        return reorderQuantity;
-    }
+    // public Integer getRoq() {
+    //     return reorderQuantity;
+    // }
 
-    public void setRoq(Integer roq) {
-        this.reorderQuantity = roq;
-    }
+    // public void setRoq(Integer roq) {
+    //     this.reorderQuantity = roq;
+    // }
 
     @Column(name = "quantity")
     private Integer quantity;
@@ -101,17 +99,25 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private ProductStatus productStatus;
 
-    @Column(name = "added_user")
+    @Column(name = "addeduser")
     private Integer addedUser;
 
-    @Column(name = "added_date")
+    @Column(name = "addeddate")
     private LocalDateTime addedDate;
 
-    @Column(name = "updated_user")
-    private Integer updatedUser;
+    @Column(name = "lastmodifieduser")
+    private Integer lastmodifieduser;
 
-    @Column(name = "updated_date")
-    private LocalDateTime updatedDate;
+    @Column(name = "Lastmodifieddatetime")
+    private LocalDateTime Lastmodifieddatetime;
+
+    @Column(name = "deleteduser")
+    private Integer deletedUser;
+
+    @Column(name = "deleteddatetime")
+    private LocalDateTime deleteddatetime;
+
+
 
     public enum ProductUnitType {
     ML,

@@ -122,7 +122,7 @@ public class ReportController {
                 if (productName != null && generatedRop != null) {
                     com.AdwinsCom.AdwinsCom.entity.Product product = productRepository.findByProductName(productName);
                     if (product != null) {
-                        product.setRop(generatedRop != null ? generatedRop.intValue() : null);
+                        product.setReorderPoint(generatedRop != null ? generatedRop.intValue() : null);
                         productRepository.save(product);
                     }
                 }

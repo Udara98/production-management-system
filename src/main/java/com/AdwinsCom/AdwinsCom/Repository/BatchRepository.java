@@ -28,5 +28,8 @@ public interface BatchRepository extends JpaRepository<Batch,Integer> {
 
     @Query("SELECT b.batchNo, b.totalQuantity, b.availableQuantity, b.damagedQuantity, b.totalCost FROM Batch b WHERE b.batchStatus <> 'Removed'")
     List<Object[]> getBatchProductionReport();
+
+    @Query("SELECT MAX(b.batchNo) FROM Batch b")
+    String findMaxBatchNo();
 }
 

@@ -18,6 +18,7 @@ public class CustomerOrderDTO {
     private LocalDateTime requiredDate;
     private List<CustomerOrderProductDTO> customerOrderProducts;
     private CustomerOrder.OrderStatus orderStatus;
+    private LocalDateTime added;
 
     @Data
     @NoArgsConstructor

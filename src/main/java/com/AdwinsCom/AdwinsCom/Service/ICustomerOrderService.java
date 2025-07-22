@@ -3,6 +3,7 @@ package com.AdwinsCom.AdwinsCom.Service;
 import com.AdwinsCom.AdwinsCom.DTO.CustomerOrderDTO;
 import com.AdwinsCom.AdwinsCom.DTO.CustomerSalesSummaryDTO;
 import com.AdwinsCom.AdwinsCom.DTO.ProductSalesSummaryDTO;
+
 import org.springframework.http.ResponseEntity;
 
 import java.security.NoSuchAlgorithmException;
@@ -18,6 +19,6 @@ public interface ICustomerOrderService {
     ResponseEntity<?> DeleteCustomerOrder(Integer id);
     ResponseEntity<?> gtAllUnpaidCustomerOrders();
     ResponseEntity<?> getUnpaidOrdersByCustomer(Integer customerId);
-    com.AdwinsCom.AdwinsCom.entity.CustomerOrder getOrderEntityById(Integer id);
+    ResponseEntity<?> getOrderEntityById(Integer id);
 
 }
