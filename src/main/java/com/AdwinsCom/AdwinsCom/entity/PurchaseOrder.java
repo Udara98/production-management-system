@@ -44,25 +44,32 @@ public class PurchaseOrder {
     private String quotationNo;
 
     @Column(name = "ingredient_code")
+    @NotNull
     private String ingredientCode;
 
     @Column(name = "supplier_reg_no")
+    @NotNull
     private String supplierRegNo;
 
     @Column(name = "price_per_unit")
+    @NotNull
     private Double pricePerUnit;
 
     @Column(name = "qty")
+    @NotNull
     private Integer qty;
 
     @Column(name = "total_price")
+    @NotNull
     private Double totalPrice;
 
     @Column(name = "proposed_delivery_date")
+    @NotNull
     private LocalDate proposedDeliveryDate;
 
     @Column(name = "ordered_date")
-    private LocalDate orderedDate;
+    @NotNull
+    private LocalDateTime orderedDate;
 
     @Column(name = "notes")
     private String notes;
@@ -76,6 +83,7 @@ public class PurchaseOrder {
     private String addedUser;
 
     @Column(name = "added_date")
+    @NotNull
     private LocalDateTime addedDate;
 
     @Column(name = "updated_user")

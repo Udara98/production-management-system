@@ -11,8 +11,8 @@
             <button
                     class="btn ms-auto me-4 addPrimaryBtn"
                     type="button"
-                    data-bs-toggle="modal"
-                    data-bs-target="#modalUser"
+                    id="addUserBtn"
+                    onclick="prepareUserModal();"
             >
                 Add User
             </button>
@@ -50,7 +50,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">User Registration</h4>
+                <h4 id = "userModalTitle" class="modal-title">User Registration</h4>
                 <button
                         class="btn-close"
                         data-bs-dismiss="modal"

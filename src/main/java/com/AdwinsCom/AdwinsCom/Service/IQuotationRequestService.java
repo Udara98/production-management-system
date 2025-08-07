@@ -11,6 +11,7 @@ public interface IQuotationRequestService {
 
     ResponseEntity<?> AddNewQuotationRequest(Integer ingId, QRequestGetDTO request) throws NoSuchAlgorithmException;
     ResponseEntity<?> GetAllQuotationRequests();
+    ResponseEntity<?> findQuotationRequestByStatusNotRemoved();
     ResponseEntity<?> UpdateQuotationRequest(QuotationRequest quotationRequest);
     ResponseEntity<?> DeleteQuotationRequest(Integer id);
     ResponseEntity<?> sendQuotationRequestToAllSuppliers(QuotationRequestEmailDTO emailDTO);

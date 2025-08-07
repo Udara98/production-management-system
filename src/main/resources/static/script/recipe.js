@@ -6,10 +6,17 @@ let editingRecipeCode = null;
 let oldRecipe;
 let recipeIngTableInstance;
 let receipeStatus;
+let getPrivilege;
 
 
 //Browser on load event
 window.addEventListener("load",()=>{
+
+    getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/RECIPE");
+    
+    if (!getPrivilege.insert) {
+        $("#addRecipeBtn").prop("disabled", true);
+    }
 
     let recipeTableInstance;
 
@@ -34,7 +41,6 @@ const refreshRecipeTable = () =>{
 
 const recipes = ajaxGetRequest("/recipe/getAllRecipes")
     console.log(recipes)
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/RECIPE");
     const getStatus = (ob) => {
         if (ob.status === "Active") {
             return '<p class="align-middle greenLabel mx-auto" style="width: 100px">Active</p>';
@@ -100,8 +106,18 @@ const reloadRecipeForm = () =>{
     });
 
     ingSelectElement.addEventListener('change', (event)=>{
+        const  unitType = document.getElementById('recipe-unitType');
         selectedIng = ingredientList.filter((i)=> i.ingredientCode === event.target.value)[0];
-        document.getElementById('recipe-ing-name').value = selectedIng.ingredientName
+        let selectedUnit = selectedIng.unitType;
+        document.getElementById('recipe-ing-name').value = selectedIng.ingredientName;
+         document.getElementById('recipe-ing-name').disabled = true;
+        console.log(selectedUnit);
+        if(selectedUnit==="L") {
+            unitType.value = "ML";
+        } else if(selectedUnit==="KG") {
+            unitType.value= "G";
+        }
+        unitType.disabled = true;
     })
 
     const flavourSelectElement = document.getElementById("add-recipe-flavour");
@@ -125,7 +141,7 @@ const formValidation = () =>{
      // Recipe Name validation (at least 2 characters)
      const addRecipeName = document.getElementById("add-recipe-name");
      addRecipeName.addEventListener('input', () => {
-         validation(addRecipeName, '^[A-Z][a-z]{1,25}( [A-Z][a-z]{2,25})?$', 'recipe', 'recipeName');
+         validation(addRecipeName, '^[A-Z][a-z]{1,25}( [A-Z][a-z]{1,25}){0,4}?$', 'recipe', 'recipeName');
      });
  
      // Status validation (must be selected)
@@ -316,12 +332,14 @@ function resetAddRecipeForm() {
     document.getElementById("recipe-ing-code").selectedIndex = 0;
     document.getElementById("recipe-ing-name").value = "";
     document.getElementById("recipe-quantity").value = "";
+    document.getElementById("add-recipe-flavour").value = "";
     document.getElementById("recipe-unitType").selectedIndex = 0;
 
     // Remove validation classes
     [
         "add-recipe-name",
         "add-recipe-status",
+        "add-recipe-flavour",
         "recipe-ing-code",
         "recipe-ing-name",
         "recipe-quantity",
@@ -542,61 +560,6 @@ const removeIng = (id,index)=>{
     displayRecipeItems(id,recipeItems)
 }
 
-function refillRecipeForm(recipe) {
-    isEditMode = true;
-    editingRecipeCode = recipe.recipeCode;
-    oldRecipe = JSON.parse(JSON.stringify(recipe));
-    selectedRecipe = recipe;
-
-    // Fill form fields
-    document.getElementById('add-recipe-name').value = recipe.recipeName;
-    document.getElementById('add-recipe-status').value = recipe.status;
-    recipeItems = [...recipe.recipeItems];
-    displayRecipeItems("recipe-items", recipeItems);
-
-    // Enable Update, Disable Add
-    document.getElementById('btnRecipeUpdate').disabled = false;
-    document.getElementById('btnRecipeSubmit').disabled = true;
-
-
-    // Remove validation classes
-    [
-        "add-recipe-name",
-        "add-recipe-status",
-        "recipe-ing-code",
-        "recipe-ing-name",
-        "recipe-quantity",
-        "recipe-unitType"
-    ].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.classList.remove("is-valid", "is-invalid");
-            el.style.border = "";
-        }
-    });
-
-    $("#modalAddRecipe").modal('show');
-
-    // Repopulate ingredient dropdown with name - code
-    let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients");
-    const ingSelectElement = document.getElementById("recipe-ing-code");
-    if (ingSelectElement) {
-        ingSelectElement.innerHTML = '';
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.disabled = true;
-        defaultOption.selected = true;
-        defaultOption.textContent = 'Select Ingredient';
-        ingSelectElement.appendChild(defaultOption);
-        ingredientList.forEach(ing => {
-            const option = document.createElement('option');
-            option.value = ing.ingredientCode;
-            option.textContent = `${ing.ingredientName} - ${ing.ingredientCode}`;
-            ingSelectElement.appendChild(option);
-        });
-    }
-}
-
 
 const generateRecipeDropDown = (element, index, privilegeOb = null) => {
     const dropdownMenu = document.createElement("ul");
@@ -705,15 +668,75 @@ const editRecipe = (recipe) => {
     editingRecipeCode = recipe.recipeCode;
     oldRecipe = JSON.parse(JSON.stringify(recipe));
     selectedRecipe = recipe;
+
+    console.log(recipe)
+
+    document.getElementById('modalTitleRec').innerText = `Edit Recipe`;
+
+    document.getElementById('btnRecipeUpdate').disabled = false;
+    document.getElementById('btnRecipeSubmit').disabled = true;
+
+    // Enable/disable relevant fields
+    document.getElementById('add-recipe-flavour').disabled = true;
+    document.getElementById('add-recipe-status').disabled = false;
+    document.getElementById('add-recipe-name').disabled = false;
+
     // Fill form fields
     document.getElementById('add-recipe-name').value = recipe.recipeName;
     document.getElementById('add-recipe-status').value = recipe.status;
-    // Fill ingredients
+    document.getElementById('add-recipe-flavour').value = recipe.flavour.id;
+
+    // Remove validation classes and reset borders
+    [
+        "add-recipe-name",
+        "add-recipe-status",
+        "add-recipe-flavour",
+        "recipe-ing-code",
+        "recipe-ing-name",
+        "recipe-quantity",
+        "recipe-unitType"
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.classList.remove("is-valid", "is-invalid");
+            el.style.border = "";
+        }
+    });
+
+    // Fill ingredients and display
     recipeItems = [...recipe.recipeItems];
     displayRecipeItems("recipe-items", recipeItems);
 
-    // Change button text
+    // Set ingredient dropdown and unit type if editing a specific ingredient (optional)
+    // If you want to pre-fill ingredient fields for the first item:
+    if (recipeItems.length > 0) {
+        const firstIng = recipeItems[0];
+        const ingSelect = document.getElementById('recipe-ing-code');
+        if (ingSelect) ingSelect.value = firstIng.ingredientCode;
+        const ingName = document.getElementById('recipe-ing-name');
+        if (ingName) {
+            ingName.value = firstIng.ingredientName;
+            ingName.disabled = true;
+        }
+        const unitType = document.getElementById('recipe-unitType');
+        if (unitType) {
+            if (firstIng.unitType === "L") unitType.value = "ML";
+            else if (firstIng.unitType === "KG") unitType.value = "G";
+            else unitType.value = firstIng.unitType;
+            unitType.disabled = true;
+        }
+    } else {
+        // Reset ingredient fields if no items
+        document.getElementById('recipe-ing-code').selectedIndex = 0;
+        document.getElementById('recipe-ing-name').value = "";
+        document.getElementById('recipe-quantity').value = "";
+        document.getElementById('recipe-unitType').selectedIndex = 0;
+    }
+
+    // Change button text and enable/disable buttons
     document.querySelector('.btn-submit').innerHTML = '<i class="fa-solid fa-edit me-2"></i>Update';
+    document.getElementById('btnRecipeUpdate').disabled = false;
+    document.getElementById('btnRecipeSubmit').disabled = true;
 
     // Show modal
     $("#modalAddRecipe").modal('show');

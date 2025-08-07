@@ -1,10 +1,13 @@
 package com.AdwinsCom.AdwinsCom.controller;
 
 import com.AdwinsCom.AdwinsCom.DTO.CustomerOrderDTO;
+import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
 import com.AdwinsCom.AdwinsCom.Service.ICustomerOrderService;
 import com.AdwinsCom.AdwinsCom.Service.OrderAssignmentService;
 import com.AdwinsCom.AdwinsCom.entity.CustomerOrder;
 
+import com.AdwinsCom.AdwinsCom.entity.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +17,10 @@ import org.springframework.web.servlet.ModelAndView;
 @RestController
 @RequestMapping(value = "/customerOrder")
 public class CustomerOrderController {
+
+    @Autowired
+    private UserRepository userRepository;
+
 
     final ICustomerOrderService customerOrderService;
     final OrderAssignmentService orderAssignmentService;
@@ -25,7 +32,14 @@ public class CustomerOrderController {
 
     @GetMapping
     public ModelAndView customerOrderModelAndView() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        User loggedUser = userRepository.getUserByUserName(auth.getName());
+
+
         ModelAndView customerOrderMV = new ModelAndView();
+        customerOrderMV.addObject("loggedUserName", auth.getName());
+        customerOrderMV.addObject("loggedUserRole",loggedUser.getRoles().iterator().next().getName());
         customerOrderMV.setViewName("sales.html");
         return customerOrderMV;
     }

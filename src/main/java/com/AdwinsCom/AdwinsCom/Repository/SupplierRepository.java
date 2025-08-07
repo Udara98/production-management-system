@@ -24,4 +24,17 @@ public interface SupplierRepository extends JpaRepository<Supplier, Integer>{
     @Query("SELECT s FROM Supplier s JOIN s.ingredients i WHERE i.id = :ingredientId")
     List<Supplier> findSuppliersByIngredientId(@Param("ingredientId") Integer ingredientId);
 
+    @Query("SELECT s.regNo FROM Supplier s JOIN s.ingredients i WHERE s.supplierStatus = 'Active' AND i.id = :ingredientId")
+    List<String> findActiveSuppliersByIngredientId(@Param("ingredientId") Integer ingredientId);
+
+
+
+
+
+    Boolean existsByRegNo(String regNo);
+    Boolean existsByContactNo(String contactNo);
+    Boolean existsByEmail(String email);
+    Boolean existsByBrn(String brn);
+    Boolean existsByCompanyName(String companyName);
+
 }

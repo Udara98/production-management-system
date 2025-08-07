@@ -564,6 +564,42 @@ div.dt-container .dt-input {
 }
 /* --- End Notification Dropdown Styles --- */
 
+/* Disabled button: show not-allowed cursor and dim on hover */
+button:disabled,
+[disabled],
+.btn[disabled],
+input[type="button"][disabled],
+input[type="submit"][disabled] {
+  cursor: not-allowed !important;
+  opacity: 0.6;
+  pointer-events: auto;
+  color: #302f2f;
+}
+
+button:disabled:hover,
+[disabled]:hover,
+.btn[disabled]:hover,
+input[type="button"][disabled]:hover,
+input[type="submit"][disabled]:hover {
+  background-color: #cccccc !important;
+  cursor: not-allowed !important;
+  color: #3d3d3d !important;
+  opacity: 0.6;
+  /* Optionally add a tooltip via JS or use title="Access Denied" in HTML */
+}
+
+button:disabled:click,
+[disabled]:click,
+.btn[disabled]:click,
+input[type="button"][disabled]:click,
+input[type="submit"][disabled]:click {
+  background-color: #b69696;
+  cursor: not-allowed !important;
+  color: #302f2f !important;
+  opacity: 0.6;
+  /* Optionally add a tooltip via JS or use title="Access Denied" in HTML */
+}
+
 /* Adjust main content to account for sidebar
 .flex-grow-1 {
     margin-left: 250px;

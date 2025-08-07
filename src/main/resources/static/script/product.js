@@ -1,6 +1,14 @@
 let productTableInstance;
 let selectedProduct;
+let batchList;
+let userPrivilege;
+let selectedBatch;
+
 window.addEventListener('load', () => {
+
+    //Get all DoneProductionBatches
+    batchList = ajaxGetRequest('/batch/getAllDoneBatches').reverse();
+
 
     //Call table Refresh function
     itemTableRefresh();
@@ -14,11 +22,10 @@ window.addEventListener('load', () => {
     //Call function for validation restock
     restockFormValidation();
 
-    let userPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/ITEM");
+    userPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/ITEM");
 
-    const batchList = ajaxGetRequest('/batch/getAllBatches')
 
-    const selectedBatch = batchList.filter((b) => b.id === parseInt(document.getElementById('addProductBatch').value))[0]
+    selectedBatch = batchList.filter((b) => b.id === parseInt(document.getElementById('addProductBatch').value))[0]
 
 
 });
@@ -120,10 +127,6 @@ const reloadProductForm = () =>{
     //Get all products
     const products = ajaxGetRequest("/product/getAllProducts")
 
-
-    //Get all batches
-    const batchList = ajaxGetRequest('/batch/getAllBatches')
-
     //Get all package types
      const packageTypes = ajaxGetRequest('/packageType/getAllPackageTypes')
 
@@ -212,6 +215,7 @@ const productFormRefill = (ob, rowIndex) => {
   addProductUnitType.disabled = true;
   document.getElementById('addFlavourType').disabled = true;
   document.getElementById('addPackageType').disabled = true;
+  document.getElementById('productModalTitle').textContent = 'Update Product';
 
 
   if(product.productPhoto !=null){
@@ -245,7 +249,8 @@ const productFormRefill = (ob, rowIndex) => {
 
   const batchSelect = document.getElementById('addProductBatch')
 
-  addProductBatch.disabled = true;
+  btnProductUpdate.disabled = false;
+    btnProductSubmit.disabled = true;
 
 
    $("#modalAddProduct").modal('show');
@@ -796,7 +801,7 @@ const checkUpdateProductFormError = () => {
         const stockUnitCost = document.getElementById('stockUnitCost');
 
 
-     const restockBatchList = ajaxGetRequest(`batch/getBatchesForProduct/${product.productId}/true`)
+     const restockBatchList = ajaxGetRequest(`batch/getBatchesForProduct/${product.productId}`)
 
      stockUnitCost.value = product.salesPrice;
      stockAdd.salesPrice = product.salesPrice;
@@ -804,7 +809,6 @@ const checkUpdateProductFormError = () => {
      
 
 
-     console.log(restockBatchList);
 
      //Fill Dropdown of  select Supplier
        restockBatchList.forEach(batch => {
@@ -977,7 +981,7 @@ const viewProductDetailsTableRefill = (ob, rowIndex) => {
     const displayProperty = [
         { dataType: "function", propertyName: getBatchNo },
         { dataType: "text", propertyName: "quantity" },
-        { dataType: "text", propertyName: "expireDate" },
+        { dataType: "date", propertyName: "expireDate" },
         { dataType: "price", propertyName: "salesPrice" },
     ];
 
@@ -995,5 +999,84 @@ const viewProductDetailsTableRefill = (ob, rowIndex) => {
         productPrivilegeOb,
     );
 };
+
+
+// Prepare modal for Add New Product
+const prepareProductnModal = () => {
+    // Set modal title and button states
+    const modalTitle = document.getElementById('productModalTitle');
+    if (modalTitle) modalTitle.textContent = 'Add New Product';
+    const btnUpdate = document.getElementById('btnProductUpdate');
+    const btnSubmit = document.getElementById('btnProductSubmit');
+    if (btnProductUpdate) btnProductUpdate.disabled = true;
+    if (btnProductSubmit) btnProductSubmit.disabled = false;
+
+    // Enable all relevant fields for add
+    [
+        'addProductName',
+        'addProductUnitSize',
+        'addProductQty',
+        'addProductPrice',
+        'addProductUnitType',
+        'addFlavourType',
+        'addPackageType',
+        'addProductBatch',
+        'addProductROP',
+        'addProductROQ',
+        'addProductNote'
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+    });
+
+    // Clear all values and validation classes
+    [
+        'addProductName',
+        'addProductUnitSize',
+        'addProductQty',
+        'addProductPrice',
+        'addProductUnitType',
+        'addFlavourType',
+        'addPackageType',
+        'addProductBatch',
+        'addProductROP',
+        'addProductROQ',
+        'addProductNote'
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (el.tagName === 'SELECT') el.selectedIndex = 0;
+            else el.value = '';
+            el.classList.remove('is-valid', 'is-invalid');
+            el.style.border = '';
+        }
+    });
+
+
+
+    // Reset product photo preview if present
+    const productPhoto = document.getElementById('productPhoto');
+    if (productPhoto) productPhoto.src = '/image/productimages/photo-icon-picture-icon.jpg';
+    const filePhoto = document.getElementById('filePhoto');
+    if (filePhoto) filePhoto.value = '';
+
+    
+
+    // Reset JS product objects
+    product = new Object();
+    oldProduct = null;
+
+    addPackageType.innerHTML = '';
+
+    // Reload dropdowns and dynamic data
+    if (typeof reloadProductForm === 'function') reloadProductForm();
+
+    // Show the modal
+    if (typeof $ !== 'undefined') {
+        $('#modalAddProduct').modal('show');
+    }
+
+}
+
 
     

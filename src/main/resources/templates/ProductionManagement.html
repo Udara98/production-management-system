@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+<title>Production Management</title>
+</head> 
 <head th:replace="~{fragments/head.html:: productionItem}"></head>
 <body>
 <div th:replace="~{fragments/topnav.html :: navbar}"></div>
@@ -8,20 +11,6 @@
   <div class="flex-grow-1 container-fluid settingsTabContent px-4">
       <div>
         <ul class="nav nav-tabs d-flex" id="" role="tablist">
-<!--          <li class="nav-item" role="presentation">-->
-<!--            <button-->
-<!--                    aria-controls="pi-tab-pane"-->
-<!--                    aria-selected="true"-->
-<!--                    class="nav-link active"-->
-<!--                    data-bs-target="#pi-tab-pane"-->
-<!--                    data-bs-toggle="tab"-->
-<!--                    id="pi-tab"-->
-<!--                    role="tab"-->
-<!--                    type="button"-->
-<!--            >-->
-<!--              Production Item-->
-<!--            </button>-->
-<!--          </li>-->
           <li class="nav-item" role="presentation">
             <button
                     aria-controls="pb-tab-pane"
@@ -38,6 +27,20 @@
           </li>
           <li class="nav-item" role="presentation">
             <button
+                    aria-controls="pr-tab-pane"
+                    aria-selected="false"
+                    class="nav-link"
+                    data-bs-target="#pr-tab-pane"
+                    data-bs-toggle="tab"
+                    id="pr-tab"
+                    role="tab"
+                    type="button"
+            >
+              Production Request
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
                     aria-controls="recipe-tab-pane"
                     aria-selected="false"
                     class="nav-link"
@@ -50,34 +53,22 @@
               Recipe
             </button>
           </li>
-<!--          <li class="nav-item" role="presentation">-->
-<!--            <button-->
-<!--                    aria-controls="setting-tab-pane"-->
-<!--                    aria-selected="false"-->
-<!--                    class="nav-link"-->
-<!--                    data-bs-target="#setting-tab-pane"-->
-<!--                    data-bs-toggle="tab"-->
-<!--                    id="setting-tab"-->
-<!--                    role="tab"-->
-<!--                    type="button"-->
-<!--            >-->
-<!--             Production Setting-->
-<!--            </button>-->
-<!--          </li>-->
         </ul>
       </div>
       <div class="tab-content" id="myTabContent">
-<!--        <div th:replace = "~{fragments/Production/ProductionItem.html}"></div>-->
-        <div th:replace = "~{fragments/Production/ProductionBatch.html}"></div>
         <div th:replace = "~{fragments/Production/Recipe.html}"></div>
-<!--        <div th:replace = "~{fragments/Production/ProductionSetting.html}"></div>-->
+        <div th:replace = "~{fragments/Production/ProductionBatch.html}"></div>
+        <div th:replace = "~{fragments/Production/ProductionRequest.html}"></div>
       </div>
     </div>
   </div>
 </div>
 <script src="/script/recipe.js"></script>
-<!--<script src="/script/productionSettings.js"></script>-->
-<script src="/script/productionItem.js"></script>
 <script src="/script/batch.js"></script>
+<script src="/script/productionItem.js"></script>
+<script src="/script/productionRequest.js"></script>
+<script th:inline="javascript">
+  var loggedUserName = /*[[${loggedUserName}]]*/ '';
+</script>
 </body>
 </html>

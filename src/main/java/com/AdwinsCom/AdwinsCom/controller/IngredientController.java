@@ -1,9 +1,10 @@
 package com.AdwinsCom.AdwinsCom.controller;
 
 import com.AdwinsCom.AdwinsCom.DTO.IngredientDTO;
+import com.AdwinsCom.AdwinsCom.Repository.PrivilegeRepository;
+import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
 import com.AdwinsCom.AdwinsCom.Service.IIngredientService;
-import com.AdwinsCom.AdwinsCom.Repository.IngredientRepository;
-import com.AdwinsCom.AdwinsCom.entity.Ingredient;
+import com.AdwinsCom.AdwinsCom.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -11,27 +12,35 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.HashMap;
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "/ingredient")
 public class IngredientController {
 
     @Autowired
-    private IngredientRepository ingredientRepository;
-
-    @Autowired
-    private PrivilegeController privilegeController;
-
-    @Autowired
     private IIngredientService ingredientService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping
     public ModelAndView supplierModelAndView() {
-        ModelAndView supplierMV = new ModelAndView();
-        supplierMV.setViewName("ingredient.html");
-        return supplierMV;
+
+        //Get authenticated logged user authentication  object using security contest
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        //Get authenticated logged user authentication  object using security contest
+        User loggedUser = userRepository.getUserByUserName(auth.getName());
+
+        ModelAndView loginView = new ModelAndView();
+
+        ModelAndView ingredientMV = new ModelAndView();
+        ingredientMV.setViewName("ingredient.html");
+        ingredientMV.addObject("loggedUserName", auth.getName());
+        ingredientMV.addObject("loggedUserRole", loggedUser.getRoles().iterator().next().getName());
+
+
+
+        return ingredientMV;
     }
 
     @PostMapping()

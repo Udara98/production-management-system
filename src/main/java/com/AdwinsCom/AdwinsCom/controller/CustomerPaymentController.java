@@ -37,15 +37,6 @@ public class CustomerPaymentController {
         }
     }
 
-    @GetMapping("/gtAllUnpaidCustomerPayments")
-    public ResponseEntity<?> gtAllUnpaidCustomerPayments(){
-        try {
-            return customerPaymentService.GetAllUnpaidCustomerPayments();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
-    }
-
     // Endpoint to get the latest completed payment by order ID
     @GetMapping(value = "/latest-completed", produces = "application/json")
     public ResponseEntity<?> getLatestCompletedPaymentByOrderId(@RequestParam("orderid") int orderid) {

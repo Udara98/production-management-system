@@ -1,7 +1,8 @@
 package com.AdwinsCom.AdwinsCom.controller;
-
-import com.AdwinsCom.AdwinsCom.DTO.ProductionItemDTO;
+import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
 import com.AdwinsCom.AdwinsCom.Service.IProductionItemService;
+import com.AdwinsCom.AdwinsCom.entity.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,29 +19,23 @@ public class ProductionItemController {
         this.productionItemService = productionItemService;
     }
 
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping
     public ModelAndView productionItemModel() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User loggedUser = userRepository.getUserByUserName(auth.getName());
+
+        ModelAndView productionItemMV = new ModelAndView();
+        productionItemMV.setViewName("productionItem.html");
+        productionItemMV.addObject("loggedUserName", loggedUser);
+        productionItemMV.addObject("loggedUserRole", loggedUser.getRoles().iterator().next().getName());
 
         return productionItemService.GetProductionItemUI();
     }
 
-    @PostMapping()
-    public ResponseEntity<?> AddNewProductionItem(@RequestBody ProductionItemDTO productionItemDTO){
-        try {
-            return productionItemService.AddNewProductionItem(productionItemDTO);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
-    }
-
-    @GetMapping("/getAllPIs")
-    public ResponseEntity<?> GetAllProductionItems() {
-        try {
-            return productionItemService.GetAllProductionItems();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
-    }
 
     @GetMapping("/checkIngAvailability/{recipeCode}/{batchSize}")
     public ResponseEntity<?> CheckIngAvailability(@PathVariable String recipeCode, @PathVariable Integer batchSize ){
@@ -51,22 +46,6 @@ public class ProductionItemController {
         }
     }
 
-    @PutMapping()
-    public ResponseEntity<?> UpdatePI(@RequestBody ProductionItemDTO productionItemDTO){
-        try {
-            return productionItemService.UpdateProductionItem(productionItemDTO);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/deletePI/{id}")
-    public ResponseEntity<?> DeletePI(@PathVariable Integer id){
-        try{
-            return productionItemService.DeleteProductionItem(id);
-        }catch (Exception e){
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
-    }
+ 
 
 }

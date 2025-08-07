@@ -22,8 +22,10 @@ public class QRequestGetDTO {
     private LocalDateTime requestDate;
     private List<String> suppliers;
     private QuotationRequest.QRequestStatus requestStatus;
-    private LocalDate requiredDeliveryDate; // Date when the quantity is required
-    private Double quantity; // Quantity requested
+    private LocalDate requiredDeliveryDate;
+    private Double quantity;
     private String note;
-    private LocalDate deadline; // Deadline for the quotation request
+    private LocalDate deadline;
+    private String supplierName;
+    private String supplierRegNo;
 }

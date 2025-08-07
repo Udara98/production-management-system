@@ -36,6 +36,15 @@ public class BatchController {
         }
     }
 
+    @GetMapping("/getAllDoneBatches")
+    public ResponseEntity<?> GetAllDoneBatches(){
+        try {
+            return batchService.GetAllDoneBatches();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
     @PutMapping("/updateBatch")
     public ResponseEntity<?> UpdateBatch(@RequestBody BatchDTO batchDTO){
         try {
@@ -55,12 +64,11 @@ public class BatchController {
         }
     }
 
-    @GetMapping("/getBatchesForProduct/{productId}/{fifo}")
+    @GetMapping("/getBatchesForProduct/{productId}")
     public ResponseEntity<?> getBatchesForProduct(
-            @PathVariable Integer productId,
-            @PathVariable boolean fifo) {
+            @PathVariable Integer productId) {
         try {
-            return batchService.getBatchesForProduct(productId, fifo);
+            return batchService.getBatchesForProduct(productId);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }

@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<head>
+<title>Quotations</title>
+</head>   
 <html lang="en">
 <head th:replace="~{fragments/head.html:: headQuotation}"></head>
 <body>
@@ -13,6 +16,7 @@
                         data-bs-target="#modalQuotationAdd"
                         data-bs-toggle="modal"
                         type="button"
+                        id="addQuotationBtn"
                         onclick="openAddQuotationForm();"
                 >
                     <i class="fa-solid fa-plus me-2"></i>
@@ -48,16 +52,6 @@
                 <div th:replace="~{fragments/Quotation/QuotationAddForm.html}"  ></div>
             </div>
             <div th:replace="~{fragments/Quotation/QuotationDetailsView.html}" ></div>
-
-            <div
-                    class="modal fade"
-                    data-bs-backdrop="static"
-                    data-bs-keyboard="false"
-                    id="modalQuotationEdit"
-            >
-                <div th:replace="~{fragments/Quotation/QuotationEditForm.html}"  ></div>
-            </div>
-
             <div
                     class="modal fade"
                     data-bs-backdrop="static"
@@ -71,4 +65,7 @@
 </div>
 <script src="/script/quotation.js" ></script>
 </body>
+<script th:inline="javascript">
+    var loggedUserName = /*[[${loggedUserName}]]*/ '';
+</script>
 </html>

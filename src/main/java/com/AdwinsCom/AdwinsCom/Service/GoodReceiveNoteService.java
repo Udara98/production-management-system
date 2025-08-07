@@ -135,6 +135,9 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
         newGoodReceiveNote.setAddedDate(java.time.LocalDateTime.now());
         newGoodReceiveNote.setPurchaseOrder(purchaseOrder);
         newGoodReceiveNote.setSupplier(supplier);
+        newGoodReceiveNote.setGrnStatus(GoodReceiveNote.GRNStatus.Pending);
+        newGoodReceiveNote.setTotalAmount(goodReceiveNoteDTO.getTotalAmount()); 
+        newGoodReceiveNote.setReceivedDate(goodReceiveNoteDTO.getReceivedDate());
         newGoodReceiveNote.setAcceptedQuantity(goodReceiveNoteDTO.getAcceptedQuantity());
         newGoodReceiveNote.setRejectedQuantity(goodReceiveNoteDTO.getRejectedQuantity());
         newGoodReceiveNote.setBalance(goodReceiveNoteDTO.getTotalAmount());
@@ -145,10 +148,17 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
 
         // --- Auto-complete PO if fully received ---
         Integer remainingQty = getRemainingQuantityForPurchaseOrder(purchaseOrder.getPurchaseOrderNo());
-        if (remainingQty != null && remainingQty <= 0) {
-            purchaseOrder.setPurchaseOrderStatus(PurchaseOrder.PurchaseOrderStatus.Completed);
-            purchaseOrderRepository.save(purchaseOrder);
-        }
+if (remainingQty != null && remainingQty <= 0) {
+    // Check if all GRNs for this PO are Approved
+    java.util.List<GoodReceiveNote> allGrns = goodReceiveNoteRepository.findAllByPurchaseOrder(purchaseOrder);
+    boolean allApproved = allGrns.stream()
+        .filter(g -> g.getGrnStatus() != null)
+        .allMatch(g -> g.getGrnStatus() == GoodReceiveNote.GRNStatus.Approved);
+    if (allApproved) {
+        purchaseOrder.setPurchaseOrderStatus(PurchaseOrder.PurchaseOrderStatus.Completed);
+        purchaseOrderRepository.save(purchaseOrder);
+    }
+}
         // --- End auto-complete logic ---
 
         return ResponseEntity.ok("GRN Added Successfully");
@@ -228,7 +238,7 @@ public class GoodReceiveNoteService implements IGoodReceiveNoteService{
 
        GoodReceiveNote goodReceiveNote = goodReceiveNoteRepository.findById(id).get();
 
-       if(goodReceiveNote.getGrnStatus() == GoodReceiveNote.GRNStatus.Pending){
+       if(goodReceiveNote.getGrnStatus() == GoodReceiveNote.GRNStatus.Pending || goodReceiveNote.getGrnStatus() == GoodReceiveNote.GRNStatus.Approved){
            return ResponseEntity.badRequest().body("Can't Delete Pending GRN");
        }
        goodReceiveNote.setGrnStatus(GoodReceiveNote.GRNStatus.Removed);

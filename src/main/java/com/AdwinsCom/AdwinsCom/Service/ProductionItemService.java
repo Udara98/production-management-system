@@ -8,6 +8,7 @@ import com.AdwinsCom.AdwinsCom.Repository.ProductionItemRepository;
 import com.AdwinsCom.AdwinsCom.Repository.RecipeRepository;
 import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
 import com.AdwinsCom.AdwinsCom.entity.Ingredient;
+import com.AdwinsCom.AdwinsCom.entity.Notification;
 import com.AdwinsCom.AdwinsCom.entity.User;
 import com.AdwinsCom.AdwinsCom.entity.Production.ProductUnitType;
 import com.AdwinsCom.AdwinsCom.entity.Production.ProductionItem;
@@ -22,6 +23,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -71,63 +74,6 @@ private INotificationService notificationService;
     }
 
     @Override
-    public ResponseEntity<?> AddNewProductionItem(ProductionItemDTO productionItemDTO) throws NoSuchAlgorithmException {
-        // Authentication and authorization
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        // Get privileges for the logged-in user
-        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "PRODUCTION_ITEM");
-
-        // If user doesn't have "insert" permission, return 403 Forbidden
-        if (!loguserPrivi.get("insert")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Production Item Adds not Completed: You don't have permission!");
-        }
-
-        ProductionItem newProductionItem = new ProductionItem().mapDTO(null, productionItemDTO, auth.getName());
-        productionItemRepository.save(newProductionItem);
-
-        return ResponseEntity.ok("Production Item Added Successfully");
-    }
-
-    @Override
-    public ResponseEntity<?> UpdateProductionItem(ProductionItemDTO productionItemDTO) throws NoSuchAlgorithmException {
-
-        // Authentication and authorization
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        // Get privileges for the logged-in user
-        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "PRODUCTION_ITEM");
-
-        // If user doesn't have "delete" permission, return 403 Forbidden
-        if (!loguserPrivi.get("update")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Production Item update not Completed: You don't have permission!");
-        }
-
-        ProductionItem productionItem = productionItemRepository.findById(productionItemDTO.getId()).get();
-        ProductionItem updateItem = new ProductionItem().mapDTO(productionItem,productionItemDTO, auth.getName());
-        productionItemRepository.save(updateItem);
-
-        return ResponseEntity.ok("Production Item Updated Successfully");
-    }
-
-    @Override
-    public ResponseEntity<?> GetAllProductionItems() {
-        List<ProductionItem> productionItems = productionItemRepository.findByStatusNotRemoved();
-        return ResponseEntity.ok(productionItems);
-    }
-
-    @Override
-    public ResponseEntity<?> DeleteProductionItem(Integer id) {
-       ProductionItem productionItem=productionItemRepository.findById(id).get();
-       productionItem.setStatus(ProductionItem.ProductionItemStatus.Removed);
-       productionItemRepository.save(productionItem);
-
-        return ResponseEntity.ok("Production Item Deleted Successfully");
-    }
-
-    @Override
     public ResponseEntity<?> CheckIngredientAvailability(String recipeCode, Integer batchSize) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -136,6 +82,8 @@ private INotificationService notificationService;
         Recipe recipe = recipeRepository.findByRecipeCode(recipeCode);
         List<IngredientAvailabilityDTO> ingredientAvailabilityDTOS = new ArrayList<>();
         AvailabilityResultDTO resultDTO = new AvailabilityResultDTO();
+
+        System.out.println("Checking availability for recipe: " + recipe.getRecipeName() + " with code: " + recipe.getRecipeCode());
         resultDTO.setIsIngAvailable(true);
         double cost = 0.0;
         for (RecipeItem ri : recipe.getRecipeItems()
@@ -160,11 +108,12 @@ private INotificationService notificationService;
             availabilityDTO.setUnitType(ingredient.getUnitType().toString());
             if(ingredientStockLevel > (ingRecipeQuantity * batchSize)){
                 availabilityDTO.setIsAvailable(true);
-                cost += (ingRecipeQuantity * batchSize)*ingredient.getAvgCost();
+                Double avgCost = (ingredient.getAvgCost() != null ? ingredient.getAvgCost() : 0.0);
+cost += (ingRecipeQuantity * batchSize) * avgCost;
 
                 // Low stock warning logic: only if stock is below ROP (reorder point)
                 if (ingredientStockLevel < ingredient.getRop()) {
-                    com.AdwinsCom.AdwinsCom.entity.Notification notification = new com.AdwinsCom.AdwinsCom.entity.Notification();
+                    Notification notification = new Notification();
                     notification.setType("LowStockWarning");
                     String msg = "Low stock warning: " +
                         ingredient.getIngredientName() + " (" + ingredient.getIngredientCode() + ")\n" +
@@ -180,14 +129,14 @@ private INotificationService notificationService;
                 resultDTO.setIsIngAvailable(false);
 
                 // Ingredient shortage notification
-                com.AdwinsCom.AdwinsCom.entity.Notification notification = new com.AdwinsCom.AdwinsCom.entity.Notification();
+                Notification notification = new Notification();
                 notification.setType("IngredientShortage");
                 String msg = "Ingredient shortage: " +
                     ingredient.getIngredientName() + " (" + ingredient.getIngredientCode() + ")\n" +
-                    "Required: " + (ingRecipeQuantity * batchSize) + " " + ingredient.getUnitType() + "\n" +
+                    "Required: " + BigDecimal.valueOf(ingRecipeQuantity * batchSize).setScale(2, RoundingMode.HALF_UP)+ " " + ingredient.getUnitType() + "\n" +
                     "Available: " + ingredientStockLevel + " " + ingredient.getUnitType() + "\n" +
                     "For Recipe: " + recipe.getRecipeName() + " (" + recipe.getRecipeCode() + ")\n" +
-                    "Time: 2025-07-11 00:13:11";
+                    "Time: " + LocalDateTime.now().toString();
                 notification.setMessage(msg);
                 notificationService.saveNotification(notification);
             }

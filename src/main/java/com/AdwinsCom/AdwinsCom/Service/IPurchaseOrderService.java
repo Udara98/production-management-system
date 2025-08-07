@@ -12,4 +12,6 @@ public interface IPurchaseOrderService {
     ResponseEntity<?> UpdatePurchaseOrder(PurchaseOrderDTO purchaseOrderDTO, String userName) throws NoSuchAlgorithmException;
     ResponseEntity<?> DeletePurchaseOrder(Integer Id);
 
+    ResponseEntity<?> findPendingPurchaseOrdersForGrn();
+
 }

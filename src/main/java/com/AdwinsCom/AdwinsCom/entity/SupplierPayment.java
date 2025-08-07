@@ -35,18 +35,19 @@ public class SupplierPayment {
     private Supplier supplier;
 
     @Column(name = "total_amount")
+    @NotNull
     private Double totalAmount;
 
     @Column(name = "total_payment_amount")
+    @NotNull
     private Double totalPaymentAmount;
 
-    @Column(name = "total_balance_amount")
-    private Double totalBalanceAmount;
-
     @Column(name = "payment_date")
+    @NotNull
     private LocalDate paymentDate;
 
     @Column(name = "payment_method")
+    @NotNull
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
@@ -60,6 +61,7 @@ public class SupplierPayment {
     private String addedUser;
 
     @Column(name = "added_date")
+    @NotNull
     private LocalDateTime addedDate;
 
     @JoinColumn(name = "updated_user")

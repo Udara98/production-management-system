@@ -10,8 +10,8 @@
       <h2 class="settingsHeader">GRN</h2>
       <button
               class="btn ms-auto me-4 addPrimaryBtn"
-              data-bs-target="#modalGRNAdd"
-              data-bs-toggle="modal"
+              onclick="prepareGrnModal()"
+              id="addGrnBtn"
               type="button"
       >
         Add New GRN
@@ -24,7 +24,7 @@
       <thead class="cusTableHead">
       <th>#</th>
       <th>GRN</th>
-      <th>Purchase Order No</th>
+      <th>Po No</th>
       <th>Accepted Quantity</th>
       <th>Rejected Quantity</th>
       <th>Total Amount</th>

@@ -1,8 +1,14 @@
 package com.AdwinsCom.AdwinsCom.controller;
 
 import com.AdwinsCom.AdwinsCom.DTO.QuotationDTO;
+import com.AdwinsCom.AdwinsCom.Repository.PrivilegeRepository;
+import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
 import com.AdwinsCom.AdwinsCom.Service.IQuotationService;
+import com.AdwinsCom.AdwinsCom.entity.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -16,10 +22,19 @@ public class QuotationController {
         this.quotationService = quotationService;
     }
 
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping
     public ModelAndView quotationModelAndView() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User loggedUser = userRepository.getUserByUserName(auth.getName());
+
         ModelAndView quotationMV = new ModelAndView();
         quotationMV.setViewName("quotation.html");
+        quotationMV.addObject("loggedUserName", auth.getName());
+        quotationMV.addObject("loggedUserRole", loggedUser.getRoles().iterator().next().getName());
+
         return quotationMV;
     }
 

@@ -2,8 +2,10 @@ package com.AdwinsCom.AdwinsCom.controller;
 import java.util.List;
 
 import com.AdwinsCom.AdwinsCom.DTO.SupplierDTO;
+import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
 import com.AdwinsCom.AdwinsCom.Service.ISupplierService;
 import com.AdwinsCom.AdwinsCom.entity.Supplier;
+import com.AdwinsCom.AdwinsCom.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -28,14 +30,25 @@ public class SupplierController {
     @Autowired
     private ISupplierService supplierService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping
     public ModelAndView supplierModelAndView() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        User loggedUser = userRepository.getUserByUserName(auth.getName());
+
         ModelAndView supplierMV = new ModelAndView();
         supplierMV.setViewName("supplier.html");
+        supplierMV.addObject("loggedUserName", auth.getName());
+        supplierMV.addObject("loggedUserRole", loggedUser.getRoles().iterator().next().getName());
+
         return supplierMV;
     }
 
-    @PostMapping()
+    @PostMapping("/addNewSupplier")
     public ResponseEntity<?> AddNewSupplier(@RequestBody SupplierDTO supplierDTO){
         try{
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -54,12 +67,13 @@ public class SupplierController {
         }
     }
 
-    @PutMapping("/updateSupplier")
-    public ResponseEntity<?> UpdateSupplier(@RequestBody SupplierDTO supplierDTO){
+    @PutMapping(value = "/updateSupplier", consumes = {"application/json", "application/json;charset=UTF-8"})    public ResponseEntity<?> UpdateSupplier(@RequestBody SupplierDTO supplierDTO){
         try{
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            System.out.println(supplierDTO);
             return supplierService.UpdateSupplier(supplierDTO, auth.getName());
         }catch (Exception e){
+            System.out.println(supplierDTO);
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }

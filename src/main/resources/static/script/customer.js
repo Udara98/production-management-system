@@ -36,6 +36,10 @@ function reloadCustomerForm() {
     if (address) address.value = '';
     if (creditLimit) creditLimit.value = '';
     if (email) email.value = '';
+    if (bankName) bankName.value = '';
+    if (bankBranch) bankBranch.value = '';
+    if (accountNo) accountNo.value = '';
+    if (accountName) accountName.value = '';
     status.value = 'Active';
     status.selected = true;
     
@@ -93,69 +97,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 })
 
-
-//Define function to generate dropdown
-const printCustomer = (customer) => {
-    // Populate modal with supplier details and show print button
-    const customerModal = new bootstrap.Modal(document.getElementById("customerModal"));
-
-    const customerDetailsDiv = document.getElementById("customerDetails");
-    let bankAccountsHtml = '';
-    if (supplier.bankAccount) {
-        bankAccountsHtml = `<div>
-            <hr>
-            <h6><strong>Bank Account</strong></h6>
-            <div><strong>Bank Name:</strong> ${supplier.bankAccount.bankName || ''}</div>
-            <div><strong>Bank Branch:</strong> ${supplier.bankAccount.bankBranch || ''}</div>
-            <div><strong>Account No:</strong> ${supplier.bankAccount.accountNo || ''}</div>
-            <div><strong>Account Name:</strong> ${supplier.bankAccount.accountName || ''}</div>
-        </div>`;
-    }
-    let ingredientsHtml = '';
-    if (supplier.ingredients && supplier.ingredients.length > 0) {
-        ingredientsHtml = `<div class="mb-3"><ul>${supplier.ingredients.map(ing => `<li>${ing.ingredientName} (${ing.ingredientCode})</li>`).join('')}</ul></div>`;
-    }
-    supplierDetailsDiv.innerHTML = `
-        <div class="mb-3">
-            <div><strong>Reg No:</strong> ${supplier.regNo || ''}</div>
-            <div><strong>Name:</strong> ${supplier.supplierName || ''}</div>
-            <div><strong>Contact Person:</strong> ${supplier.contactPersonName || ''}</div>
-            <div><strong>Contact Number:</strong> ${supplier.contactNo || ''}</div>
-            <div><strong>Email:</strong> ${supplier.email || ''}</div>
-            <div><strong>Address:</strong> ${supplier.address || ''}</div>
-            <div><strong>Status:</strong> ${supplier.supplierStatus || ''}</div>
-            <div><strong>Join Date:</strong> ${supplier.joinDate || ''}</div>
-            <div><strong>Note:</strong> ${supplier.note || 'N/A'}</div>
-        </div>
-        <div class="mb-3">
-            <hr>
-            <h6><strong>Supplier Ingredients</strong></h6>
-            ${ingredientsHtml}
-        </div>
-        ${bankAccountsHtml}
-        <div class="text-end">
-            <button id="btnPrintSupplier" class="btn btn-primary"><i class="fa fa-print"></i> Print</button>
-        </div>
-    `;
-    supplierModal.show();
-    setTimeout(() => {
-        document.getElementById('btnPrintSupplier').onclick = function() {
-            // Print only the modal content
-            let printContents = supplierDetailsDiv.innerHTML;
-            let printWindow = window.open('', '', 'height=700,width=900');
-            printWindow.document.write(`
-                <html>
-                <head>
-                <title>Supplier Details</title>
-                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-                </head>
-                <body>` + printContents + `</body></html>`);
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
-        };
-    }, 300);
-};
 
 // Dropdown menu for each customer row (refactored to match product.js pattern)
 const generateCustomerDropDown = (element, index, privilegeOb = null) => {
@@ -236,7 +177,8 @@ function customerTableRefresh() {
         { dataType: 'text', propertyName: 'nic' },
         { dataType: 'text', propertyName: 'mobile' },
         { dataType: 'text', propertyName: 'address' },
-        { dataType: 'function', propertyName: getCustomerStatus }
+        { dataType: 'function', propertyName: getCustomerStatus },
+        { dataType: 'price', propertyName: 'remainingCredit' },
 
 
     ];
@@ -275,6 +217,11 @@ function customerFormRefill(customer, rowIndex) {
     const creditLimit = document.getElementById('add-cus-creditLimit');
     const email = document.getElementById('add-cus-email');
     const status = document.getElementById('add-cus-status');
+    const bankName = document.getElementById('bankName');
+    const bankBranch = document.getElementById('bankBranch');
+    const accountNo = document.getElementById('accountNo');
+    const accountName = document.getElementById('accountName');
+
 
     businessTypeSelect.disabled = true;
     // Set business type and show/hide fields using robust class targeting
@@ -305,6 +252,10 @@ function customerFormRefill(customer, rowIndex) {
     }
     if (email) email.value = customer.email || '';
     if (status) status.value = customer.customerStatus || 'Active';
+    if (bankName) bankName.value = customer.bankAccount.bankName || '';
+    if (bankBranch) bankBranch.value = customer.bankAccount.bankBranch || '';
+    if (accountNo) accountNo.value = customer.bankAccount.accountNo || '';
+    if (accountName) accountName.value = customer.bankAccount.accountName || '';
 
     // Remove validation classes
     [companyName, brn, contactPerson, firstName, secondName, nic, mobile, landNo, address, creditLimit, email, status].forEach(f => {
@@ -325,6 +276,7 @@ function prepareCustomerAddModal() {
     document.getElementById('customer-modal-title').textContent = 'Add New Customer';
     document.getElementById('customer-submit-btn').disabled = false;
     document.getElementById('customer-update-btn').disabled = true;
+    document.getElementById('add-cus-businessType').disabled = false;
     // Enable business type select for new
     const businessTypeSelect = document.getElementById('add-cus-businessType');
     if (businessTypeSelect) businessTypeSelect.disabled = false;
@@ -357,7 +309,8 @@ function customerFormValidation() {
 
    
     // Company fields
-    if (companyName) companyName.addEventListener('input', () => validation(companyName, "^(?=.{4,})(?=.*[A-Za-z])[A-Za-z0-9.,&'’-]+( [A-Za-z0-9.,&'’-]+)*$", 'customer', 'companyName'));    if (brn) brn.addEventListener('input', () => validation(brn, '^[A-Za-z0-9]{5,}$', 'customer', 'brn'));
+    if (companyName) companyName.addEventListener('input', () => validation(companyName, "^(?=.{4,})(?=.*[A-Za-z])[A-Za-z0-9.,&'’-]+( [A-Za-z0-9.,&'’-]+)*$", 'customer', 'companyName'));  
+    if (brn) brn.addEventListener('input', () => validation(brn, '^[A-Za-z0-9-.]{5,12}$', 'customer', 'brn'));
     if (contactPerson) contactPerson.addEventListener('input', () => validation(contactPerson, '^([A-Z][a-z]+)( [A-Z][a-z]+)+$', 'customer', 'contactPerson'));
     // Individual fields
     if (firstName) firstName.addEventListener('input', () => validation(firstName, '^.{4,}$', 'customer', 'firstName'));
@@ -366,20 +319,28 @@ function customerFormValidation() {
     // Common fields
     if (mobile) mobile.addEventListener('input', () => validation(mobile, '^[0][7][01245678][0-9]{7}$', 'customer', 'mobile'));
     if (landNo) landNo.addEventListener('input', () => validation(landNo, '^[0][1][01245678][0-9]{7}$', 'customer', 'landNo'));
-    if (address) address.addEventListener('input', () => validation(address, '^(?=.{5,255})[0-9]+(\\/[0-9A-Za-z]+)?\\s+[A-Za-z0-9]+(\\s+[A-Za-z0-9]+)*$', 'customer', 'address'));
+    if (address) address.addEventListener('input', () => validation(address, '^(?=.{5,255})[0-9A-Z]+(\\/[0-9A-Za-z,\\.]+)?\\s+[A-Za-z0-9]+(\\s+[A-Za-z0-9]+)*$', 'customer', 'address'));
     if (creditLimit) creditLimit.addEventListener('input', () => validation(creditLimit, '^[0-9]{3,20}$', 'customer', 'creditLimit'));
     if (email) email.addEventListener('input', () => validation(email, '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$', 'customer', 'email'));
     if (status) status.addEventListener('change', () => selectFieldValidator(status, '', 'customer', 'customerStatus'));
     if (bankName) {
         bankName.addEventListener('input', () => {
-            validation(bankName, '^[A-Za-z]{3,50}$', 'customer.bankAccount', 'bankName');
+            validation(bankName, '^([A-Za-z]{3,50}+)( [A-Za-z]{3,50}+){2,5}$', 'customer.bankAccount', 'bankName');
         });
     }
     if (bankBranch) {
         bankBranch.addEventListener('input', () => {
-            validation(bankBranch, '^[A-Za-z]{3,50}$', 'customer.bankAccount', 'bankBranch');
+            validation(bankBranch, '^([A-Z][a-z]+)( [A-Z][a-z]){0,2}$', 'customer.bankAccount', 'bankBranch');
         });
     }
+
+     if (bankName) {
+            bankName.addEventListener('input', () => {
+                validation(bankName, '^([A-Z][a-z]+)( [A-Z][a-z]){0,5}$', 'customer.bankAccount', 'bankName');
+            });
+        }
+
+
     if (accountNo) {
         accountNo.addEventListener('input', () => {
             validation(accountNo, '^[0-9]{6,30}$', 'customer.bankAccount', 'accountNo'); 
@@ -400,15 +361,7 @@ function customerFormValidation() {
         });
     }
 
-    // Helper to validate email
-    function isValidEmail(val) {
-        return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val);
-    }
 
-    // Helper to validate mobile number (basic)
-    function isValidMobile(val) {
-        return /^\d{10,15}$/.test(val);
-    }
 
     // Validate and bind form to customer object
     // (kept as helper for submit/update, main validation is now event-driven)
@@ -438,7 +391,7 @@ function customerFormValidation() {
             if (!brn.value.trim()) {
                 errors += 'Business Registration Number is required.\n';
                 brn.classList.add('is-invalid');
-            } else if (!/^[A-Za-z0-9]{10,}$/.test(brn.value.trim())) {
+            } else if (!/^[A-Za-z0-9-,]{5,12}$/.test(brn.value.trim())) {
                 errors += 'Please Enter Valid BRN.\n';
                 brn.classList.add('is-invalid');
             } else {
@@ -517,7 +470,7 @@ function customerFormValidation() {
             customer.email = email.value.trim();
 
         }    // Bank Name Validation
-        if (!bankName.value.trim() || !/^[A-Za-z]{3,50}$/.test(bankName.value.trim())) {
+        if (!bankName.value) {
             errors += 'Valid Bank Name is required.\n';
             bankName.classList.add('is-invalid');
         } else {
@@ -526,7 +479,7 @@ function customerFormValidation() {
         }
     
         // Bank Branch Validation
-        if (!bankBranch.value.trim() || !/^[A-Za-z]{3,50}$/.test(bankBranch.value.trim())) {
+        if (!bankBranch.value.trim()) {
             errors += 'Valid Bank Branch is required.\n';
             bankBranch.classList.add('is-invalid');
         } else {
@@ -603,6 +556,7 @@ const customerSubmit  = () => {
                     });
                     reloadCustomerForm();
                     customerTableRefresh();
+                    $('#modalAddCustomer').modal('hide');
                     // Reset validation classes
                     Array.from(customerAddForm.elements).forEach((field) => {
                         field.classList.remove('is-valid', 'is-invalid');
@@ -649,6 +603,11 @@ const checkCustomerUpdates = () => {
     const address = document.getElementById('add-cus-address');
     const email = document.getElementById('add-cus-email');
     const status = document.getElementById('add-cus-status');
+    const bankName = document.getElementById('bankName');
+    const bankBranch = document.getElementById('bankBranch');
+    const accountNo = document.getElementById('accountNo');
+    const accountName = document.getElementById('accountName');
+    
     // Credit limit is not updatable
     if (businessTypeSelect.value !== selectedCustomer.businessType) updates += `Business Type changed from <b>${selectedCustomer.businessType}</b> to <b>${businessTypeSelect.value}</b>.<br>`;
     if (companyName && companyName.value !== (selectedCustomer.companyName || "")) updates += `Business Name changed from <b>${selectedCustomer.companyName || ""}</b> to <b>${companyName.value}</b>.<br>`;
@@ -662,6 +621,10 @@ const checkCustomerUpdates = () => {
     if (address && address.value !== (selectedCustomer.address || "")) updates += `Address changed from <b>${selectedCustomer.address || ""}</b> to <b>${address.value}</b>.<br>`;
     if (email && email.value !== (selectedCustomer.email || "")) updates += `Email changed from <b>${selectedCustomer.email || ""}</b> to <b>${email.value}</b>.<br>`;
     if (status && status.value !== (selectedCustomer.customerStatus || "")) updates += `Status changed from <b>${selectedCustomer.customerStatus || ""}</b> to <b>${status.value}</b>.<br>`;
+    if (bankName && bankName.value !== (selectedCustomer.bankAccount.bankName || "")) updates += `Bank Name changed from <b>${selectedCustomer.bankAccount.bankName || ""}</b> to <b>${bankName.value}</b>.<br>`;
+    if (bankBranch && bankBranch.value !== (selectedCustomer.bankAccount.bankBranch || "")) updates += `Bank Branch changed from <b>${selectedCustomer.bankAccount.bankBranch || ""}</b> to <b>${bankBranch.value}</b>.<br>`;
+    if (accountNo && accountNo.value !== (selectedCustomer.bankAccount.accountNo || "")) updates += `Account No changed from <b>${selectedCustomer.bankAccount.accountNo || ""}</b> to <b>${accountNo.value}</b>.<br>`;
+    if (accountName && accountName.value !== (selectedCustomer.bankAccount.accountName || "")) updates += `Account Name changed from <b>${selectedCustomer.bankAccount.accountName || ""}</b> to <b>${accountName.value}</b>.<br>`;
     return updates;
 }
 
@@ -770,9 +733,64 @@ function deleteCustomer(customer, rowIndex) {
 }
 
 
+// Show customer details in a modal with print option (like printSupplier)
+const printCustomer = (customer) => {
+    const customerModal = new bootstrap.Modal(document.getElementById("customerModal"));
+    const customerDetailsDiv = document.getElementById("customerDetails");
+    let bankAccountsHtml = '';
+    if (customer.bankAccount) {
+        bankAccountsHtml = `<div>
+            <hr>
+            <h6><strong>Bank Account</strong></h6>
+            <div><strong>Bank Name:</strong> ${customer.bankAccount.bankName || ''}</div>
+            <div><strong>Bank Branch:</strong> ${customer.bankAccount.bankBranch || ''}</div>
+            <div><strong>Account No:</strong> ${customer.bankAccount.accountNo || ''}</div>
+            <div><strong>Account Name:</strong> ${customer.bankAccount.accountName || ''}</div>
+        </div>`;
+    }
+    customerDetailsDiv.innerHTML = `
+        <div class="mb-3">
+            <div><strong>Reg No:</strong> ${customer.regNo || ''}</div>
+            <div><strong>Business Type:</strong> ${customer.businessType || ''}</div>
+            <div><strong>Company Name:</strong> ${customer.companyName || ''}</div>
+            <div><strong>BRN:</strong> ${customer.brn || ''}</div>
+            <div><strong>Contact Person:</strong> ${customer.contactPerson || ''}</div>
+            <div><strong>First Name:</strong> ${customer.firstName || ''}</div>
+            <div><strong>Second Name:</strong> ${customer.secondName || ''}</div>
+            <div><strong>NIC:</strong> ${customer.nic || ''}</div>
+            <div><strong>Mobile:</strong> ${customer.mobile || ''}</div>
+            <div><strong>Land No:</strong> ${customer.landNo || ''}</div>
+            <div><strong>Email:</strong> ${customer.email || ''}</div>
+            <div><strong>Address:</strong> ${customer.address || ''}</div>
+            <div><strong>Status:</strong> ${customer.customerStatus || ''}</div>
+            <div><strong>Credit Limit:</strong> ${customer.creditLimit || ''}</div>
+        </div>
+        ${bankAccountsHtml}
+        <div class="text-end">
+            <button id="btnPrintCustomer" class="btn btn-primary"><i class="fa fa-print"></i> Print</button>
+        </div>
+    `;
+    customerModal.show();
+    setTimeout(() => {
+        document.getElementById('btnPrintCustomer').onclick = function() {
+            let printContents = customerDetailsDiv.innerHTML;
+            let printWindow = window.open('', '', 'height=700,width=900');
+            printWindow.document.write(`
+                <html>
+                <head>
+                <title>Customer Details</title>
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+                </head>
+                <body>` + printContents + `</body></html>`);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
+        };
+    }, 300);
+};
+
+// (Legacy) Show customer details in a modal or side panel
 function viewCustomerDetails(customer, rowIndex) {
-    // Show customer details in a modal or side panel
-    // Example:
     document.getElementById('detailCustomerName').innerText = customer.name;
     document.getElementById('detailCustomerEmail').innerText = customer.email;
     document.getElementById('detailCustomerPhone').innerText = customer.phone;

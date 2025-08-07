@@ -86,14 +86,16 @@ public class QuotationRequestService implements IQuotationRequestService {
         quotationRequest.setIngredientId(ingId);
         quotationRequest.setRequestNo(generateNextRequestNo());
         quotationRequest.setRequestDate(LocalDateTime.now());
-        List<String> suppliers = supplierIngredientService.GetSuppliersByIngredientId(ingId);
+
+
+        List<String> activeSup = supplierRepository.findActiveSuppliersByIngredientId(ingId);
 
         //Check if there are any suppliers for the ingredient
-        if (suppliers ==null|| suppliers.isEmpty()){
+        if (activeSup ==null|| activeSup.isEmpty()){
             return ResponseEntity.badRequest().body("Cannot create quotation request: No suppliers are available for this ingredient.");
         }
 
-    quotationRequest.setSuppliers(suppliers);
+        quotationRequest.setSuppliers(activeSup);
         quotationRequest.setAddedUser(auth.getName());
         quotationRequest.setAddedDate(LocalDateTime.now());
         quotationRequest.setUnitType(request.getUnitType());
@@ -105,7 +107,7 @@ public class QuotationRequestService implements IQuotationRequestService {
         // Save the quotation request
         quotationRequestRepository.save(quotationRequest);
 
-            // Build the email DTO
+         // Build the email DTO
         Ingredient ingredient = ingredientRepository.findById(ingId).orElse(null);
         QuotationRequestEmailDTO emailDTO = new QuotationRequestEmailDTO();
         emailDTO.setIngredientId(ingId);
@@ -117,7 +119,7 @@ public class QuotationRequestService implements IQuotationRequestService {
         emailDTO.setNote(request.getNote());
 
         // Send emails
-        sendQuotationRequestToAllSuppliers(emailDTO);   
+//        sendQuotationRequestToAllSuppliers(emailDTO);
 
         return ResponseEntity.ok("Quotation Request Created Successfully");
 
@@ -161,6 +163,35 @@ public class QuotationRequestService implements IQuotationRequestService {
             requestGetDTOS.add(requestGetDTO);
         }
 
+        return ResponseEntity.ok(requestGetDTOS);
+    }
+
+    @Override
+    public ResponseEntity<?> findQuotationRequestByStatusNotRemoved() {
+        // Authentication and authorization
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "QUOTATION_REQUEST");
+        if (!loguserPrivi.get("select")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Quotation Request GetAll not Completed: You don't have permission!");
+        }
+        List<QuotationRequest> quotationRequests = quotationRequestRepository.findAllByRequestStatusNotRemoved();
+        List<QRequestGetDTO> requestGetDTOS = new ArrayList<>();
+        for (QuotationRequest qr : quotationRequests) {
+            QRequestGetDTO requestGetDTO = new QRequestGetDTO();
+            requestGetDTO.setId(qr.getId());
+            requestGetDTO.setRequestNo(qr.getRequestNo());
+            requestGetDTO.setRequestStatus(qr.getRequestStatus()); // expects enum
+            requestGetDTO.setDeadline(qr.getDeadline());
+            requestGetDTO.setRequiredDeliveryDate(qr.getRequiredDeliveryDate());
+            requestGetDTO.setQuantity(qr.getQuantity());
+            requestGetDTO.setNote(qr.getNote());
+            // Set ingredient name and unit for frontend
+            Ingredient ingredient = ingredientRepository.findById(qr.getIngredientId()).orElse(null);
+            requestGetDTO.setIngredientName(ingredient != null ? ingredient.getIngredientName() : null);
+            requestGetDTO.setUnit(ingredient != null ? ingredient.getUnitType().toString() : null);
+            requestGetDTOS.add(requestGetDTO);
+        }
         return ResponseEntity.ok(requestGetDTOS);
     }
 
@@ -271,7 +302,8 @@ public class QuotationRequestService implements IQuotationRequestService {
                 "Quantity: %s %s\n" +
                 "Required Delivery Date: %s\n" +
                 "Please submit your quotation here: %s\n\nThank you.",
-                supplier.getSupplierName(),
+                ("COMPANY".equals(supplier.getBusinessType()) ? supplier.getCompanyName() : (supplier.getFirstName() + supplier.getSecondName())),
+
                 emailDTO.getIngredientName(),
                 emailDTO.getQuantity(),
                 emailDTO.getUnit(),

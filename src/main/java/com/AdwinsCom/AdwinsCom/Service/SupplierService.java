@@ -1,6 +1,7 @@
 package com.AdwinsCom.AdwinsCom.Service;
 
 import com.AdwinsCom.AdwinsCom.DTO.SupplierDTO;
+import com.AdwinsCom.AdwinsCom.DTO.SupplierDTOShort;
 import com.AdwinsCom.AdwinsCom.DTO.SupplierWithIngredientsDTO;
 import com.AdwinsCom.AdwinsCom.DTO.BankAccountDTO;
 import com.AdwinsCom.AdwinsCom.Repository.BankAccountRepository;
@@ -18,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -55,7 +57,7 @@ public class SupplierService implements ISupplierService {
 
          // Get privileges for the logged-in user
          HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "SUPPLIER");
- 
+
          // If user doesn't have "insert" permission, return 403 Forbidden
          if (!loguserPrivi.get("insert")) {
              return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -65,25 +67,47 @@ public class SupplierService implements ISupplierService {
 
         Supplier newSupplier = new Supplier();
         newSupplier.setRegNo(supplierDTO.getRegNo());
+
+        //Check Dupplicate values
+        if (supplierRepository.existsByRegNo(supplierDTO.getRegNo())) {
+            return ResponseEntity.badRequest().body("Supplier Adds not Completed: Reg No already exists!");
+        }
+        if (supplierRepository.existsByContactNo(supplierDTO.getContactNo())) {
+            return ResponseEntity.badRequest().body("Supplier Adds not Completed: Contact No already exists!");
+        }
+        if (supplierRepository.existsByEmail(supplierDTO.getEmail())) {
+            return ResponseEntity.badRequest().body("Supplier Adds not Completed: Email already exists!");
+        }
+
+        if (supplierDTO.getBrn() != null && !supplierDTO.getBrn().trim().isEmpty()) {
+            if (supplierRepository.existsByBrn(supplierDTO.getBrn())) {
+                return ResponseEntity.badRequest().body("Supplier Add not Completed: BRN already exists!");
+            }
+        }
+
+        if (supplierDTO.getCompanyName() != null && !supplierDTO.getCompanyName().trim().isEmpty()) {
+            if (supplierRepository.existsByBrn(supplierDTO.getCompanyName())) {
+                return ResponseEntity.badRequest().body("Supplier Adds not Completed: Company Name already exists!");
+            }
+        }
+
         // New business type logic
         newSupplier.setBusinessType(supplierDTO.getBusinessType());
         newSupplier.setCompanyName(supplierDTO.getCompanyName());
         newSupplier.setBrn(supplierDTO.getBrn());
         newSupplier.setFirstName(supplierDTO.getFirstName());
         newSupplier.setSecondName(supplierDTO.getSecondName());
+        newSupplier.setSupplierStatus(Supplier.SupplierStatus.Active);
         newSupplier.setContactPersonName(supplierDTO.getContactPersonName());
         newSupplier.setNic(supplierDTO.getNic());
-        newSupplier.setSupplierStatus(Supplier.SupplierStatus.Active);
+        newSupplier.setJoinDate(LocalDate.now());
         newSupplier.setAddedUser(userName);
         newSupplier.setAddedDate(LocalDateTime.now());
         // Fallback for deprecated fields (for backward compatibility)
-        if (supplierDTO.getSupplierName() != null) newSupplier.setCompanyName(supplierDTO.getSupplierName());
         // Common fields
         newSupplier.setContactNo(supplierDTO.getContactNo());
         newSupplier.setEmail(supplierDTO.getEmail());
         newSupplier.setAddress(supplierDTO.getAddress());
-        newSupplier.setJoinDate(supplierDTO.getJoinDate());
-        newSupplier.setSupplierStatus(supplierDTO.getSupplierStatus());
         newSupplier.setNote(supplierDTO.getNote());
         newSupplier.setAddedUser(userName);
         newSupplier.setAddedDate(LocalDateTime.now());
@@ -133,7 +157,7 @@ public class SupplierService implements ISupplierService {
 
          // Get privileges for the logged-in user
          HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "SUPPLIER");
- 
+
          // If user doesn't have "insert" permission, return 403 Forbidden
          if (!loguserPrivi.get("select")) {
              return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -154,36 +178,43 @@ public class SupplierService implements ISupplierService {
 
          // Get privileges for the logged-in user
          HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "SUPPLIER");
- 
+
          // If user doesn't have "insert" permission, return 403 Forbidden
          if (!loguserPrivi.get("update")) {
              return ResponseEntity.status(HttpStatus.FORBIDDEN)
                      .body("Supplier Update not Completed: You don't have permission!");
          }
 
-        Supplier supplier = supplierRepository.getSupplierByRegNo(supplierDTO.getRegNo());
-        Supplier updatedSupplier = supplier;
-        updatedSupplier.setSupplierName(supplierDTO.getSupplierName());
-        updatedSupplier.setContactNo(supplierDTO.getContactNo());
-        updatedSupplier.setEmail(supplierDTO.getEmail());
-        updatedSupplier.setContactPersonName(supplierDTO.getContactPersonName());
-        updatedSupplier.setAddress(supplierDTO.getAddress());
-        updatedSupplier.setJoinDate(supplierDTO.getJoinDate());
-        updatedSupplier.setSupplierStatus(supplierDTO.getSupplierStatus());
-        updatedSupplier.setNote(supplierDTO.getNote());
-        updatedSupplier.setUpdatedUser(userName);
-        updatedSupplier.setUpdatedDate(LocalDateTime.now());
+        Supplier uppdatedSupplier = supplierRepository.getSupplierByRegNo(supplierDTO.getRegNo());
+        uppdatedSupplier.setUpdatedUser(userName);
+        uppdatedSupplier.setContactNo(supplierDTO.getContactNo());
+        uppdatedSupplier.setBusinessType(supplierDTO.getBusinessType());
+        uppdatedSupplier.setEmail(supplierDTO.getEmail());
+        uppdatedSupplier.setContactPersonName(supplierDTO.getContactPersonName());
+        uppdatedSupplier.setAddress(supplierDTO.getAddress());
+        uppdatedSupplier.setJoinDate(LocalDate.now());
+        uppdatedSupplier.setUpdatedUser(userName);
+        uppdatedSupplier.setCompanyName(supplierDTO.getCompanyName());
+        uppdatedSupplier.setBrn(supplierDTO.getBrn());
+        uppdatedSupplier.setSupplierStatus(supplierDTO.getSupplierStatus());
+        uppdatedSupplier.setNote(supplierDTO.getNote());
+        uppdatedSupplier.setContactNo(supplierDTO.getContactNo());
+        uppdatedSupplier.setFirstName(supplierDTO.getFirstName());
+        uppdatedSupplier.setSecondName(supplierDTO.getSecondName());
+        uppdatedSupplier.setNic(supplierDTO.getNic());
+        uppdatedSupplier.setUpdatedUser(userName);
+        uppdatedSupplier.setUpdatedDate(LocalDateTime.now());
 
         // Update or add bank account
         if (supplierDTO.getBankAccount() != null) {
             BankAccountDTO bankAccountDTO = supplierDTO.getBankAccount();
             BankAccount bankAccount;
             // Try to update existing bank account if present
-            if (updatedSupplier.getBankAccounts() != null && !updatedSupplier.getBankAccounts().isEmpty()) {
-                bankAccount = updatedSupplier.getBankAccounts().get(0); // Assume one bank account per supplier for now
+            if (uppdatedSupplier.getBankAccounts() != null && !uppdatedSupplier.getBankAccounts().isEmpty()) {
+                bankAccount = uppdatedSupplier.getBankAccounts().get(0); // Assume one bank account per supplier for now
             } else {
                 bankAccount = new BankAccount();
-                bankAccount.setSupplier(updatedSupplier);
+                bankAccount.setSupplier(uppdatedSupplier);
             }
             bankAccount.setBankName(bankAccountDTO.getBankName());
             bankAccount.setBankBranch(bankAccountDTO.getBankBranch());
@@ -191,12 +222,14 @@ public class SupplierService implements ISupplierService {
             bankAccount.setAccountName(bankAccountDTO.getAccountName());
             bankAccountRepository.save(bankAccount);
             // Ensure it's in the supplier's list
-            if (updatedSupplier.getBankAccounts() == null || updatedSupplier.getBankAccounts().isEmpty()) {
-                updatedSupplier.getBankAccounts().add(bankAccount);
+            if (uppdatedSupplier.getBankAccounts() == null || uppdatedSupplier.getBankAccounts().isEmpty()) {
+                uppdatedSupplier.getBankAccounts().add(bankAccount);
             }
         }
 
-        mapIngredients(supplierDTO, updatedSupplier);
+        if(!supplierDTO.getIngredientList().equals(uppdatedSupplier.getIngredients())) {
+            mapIngredients(supplierDTO, uppdatedSupplier);
+        }
         return ResponseEntity.ok("Supplier Updated Successfully");
     }
 
@@ -207,7 +240,7 @@ public class SupplierService implements ISupplierService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         // Get privileges for the logged-in user
-        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "USER");
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "SUPPLIER");
 
         // If user doesn't have "delete" permission, return 403 Forbidden
         if (!loguserPrivi.get("delete")) {
@@ -241,9 +274,8 @@ public class SupplierService implements ISupplierService {
 
     private void mapIngredients(SupplierDTO supplierDTO, Supplier updatedSupplier) {
         Set<Ingredient> managedIngredients = new HashSet<>();
-        for (Ingredient ingredient : supplierDTO.getIngredients()) {
-            Ingredient managedIngredient = ingredientRepository.findById(ingredient.getId())
-                    .orElseThrow(() -> new RuntimeException("Ingredient not found: " + ingredient.getId()));
+        for ( SupplierDTOShort ingredient : supplierDTO.getIngredientList()) {
+            Ingredient managedIngredient = ingredientRepository.findByIngredientCode(ingredient.getIngredientCode());
             managedIngredients.add(managedIngredient);
         }
         updatedSupplier.setIngredients(managedIngredients);

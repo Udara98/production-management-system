@@ -27,6 +27,11 @@ public class CustomerController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCustomer(@PathVariable Integer id) {
+        return customerService.DeleteCustomer(id);
+    }
+
     @GetMapping("/getAllCustomers")
     public ResponseEntity<?> GetAllCustomers(){
         try {

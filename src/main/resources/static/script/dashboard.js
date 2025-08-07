@@ -1,246 +1,251 @@
-window.addEventListener('load', async () => {
-    try {
-        // Show loading spinner
-        document.getElementById('dashboardLoading').style.display = 'block';
-        document.getElementById('dashboardContent').style.display = 'none';
+// window.addEventListener('load', async () => {
+//     try {
+//         // Show loading spinner
+//         document.getElementById('dashboardLoading').style.display = 'block';
+//         document.getElementById('dashboardContent').style.display = 'none';
 
-        // Fetch data
-        await getData();
-        await reloadTable();
+//         // Fetch data
+//         await getData();
+//         // await reloadTable();
 
-        // Initialize charts
-        const ctx = document.getElementById('barchart');
-        const itx = document.getElementById('incomeChart');
-        const stx = document.getElementById('salesChart');
+//         // Initialize charts
+//         const ctx = document.getElementById('barchart');
+//         const itx = document.getElementById('incomeChart');
+//         const stx = document.getElementById('salesChart');
 
-        const cusPayments = await ajaxGetRequest('/cusPayment/getAllCusPayments');
-        const batches = await ajaxGetRequest("/batch/getAllBatches");
+//         const cusPayments = await ajaxGetRequest('/cusPayment/getAllCusPayments');
+//         const batches = await ajaxGetRequest("/batch/getAllBatches");
 
-        // Chart configuration
-        const chartConfig = {
-            type: 'line',
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        font: {
-                            size: 16
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return 'Rs. ' + value.toLocaleString();
-                            }
-                        }
-                    }
-                }
-            }
-        };
+//         // Chart configuration
+//         const chartConfig = {
+//             type: 'line',
+//             options: {
+//                 responsive: true,
+//                 maintainAspectRatio: false,
+//                 plugins: {
+//                     legend: {
+//                         position: 'top',
+//                     },
+//                     title: {
+//                         display: true,
+//                         font: {
+//                             size: 16
+//                         }
+//                     }
+//                 },
+//                 scales: {
+//                     y: {
+//                         beginAtZero: true,
+//                         ticks: {
+//                             callback: function(value) {
+//                                 return 'Rs. ' + value.toLocaleString();
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         };
 
-        // Monthly Sales Comparison Chart
-        const daysArray = Array.from({length: 31}, (v, k) => k + 1);
-        let thisMonth = [];
-        let prevMonth = [];
+//         // Monthly Sales Comparison Chart
+//         const daysArray = Array.from({length: 31}, (v, k) => k + 1);
+//         let thisMonth = [];
+//         let prevMonth = [];
 
-        cusPayments.forEach((cp) => {
-            const month = new Date(cp.paymentDate).getMonth();
-            if (month === new Date().getMonth()) {
-                const day = new Date(cp.paymentDate).getDate();
-                let amount = 0.0;
-                let newThisMonth = [];
-                if (thisMonth.length !== 0) {
-                    let selected = thisMonth.filter((s) => s.x === day);
-                    if (selected.length !== 0) {
-                        amount = parseFloat(selected[0].y);
-                        newThisMonth = thisMonth.filter((s) => s.x !== day);
-                    } else {
-                        newThisMonth = thisMonth;
-                    }
-                }
-                newThisMonth.push({x: day, y: (parseFloat(cp.totalAmount) + amount)});
-                thisMonth = newThisMonth;
-            }
-            if (month === new Date().getMonth() - 1) {
-                const day = new Date(cp.paymentDate).getDate();
-                let amount = 0.0;
-                let newPrevMonth = [];
-                if (prevMonth.length !== 0) {
-                    let selected = prevMonth.filter((s) => s.x === day);
-                    if (selected.length !== 0) {
-                        amount = parseFloat(selected[0].y);
-                        newPrevMonth = prevMonth.filter((s) => s.x !== day);
-                    } else {
-                        newPrevMonth = prevMonth;
-                    }
-                }
-                newPrevMonth.push({x: day, y: (parseFloat(cp.totalAmount) + amount)});
-                prevMonth = newPrevMonth;
-            }
-        });
+//         cusPayments.forEach((cp) => {
+//             const month = new Date(cp.paymentDate).getMonth();
+//             if (month === new Date().getMonth()) {
+//                 const day = new Date(cp.paymentDate).getDate();
+//                 let amount = 0.0;
+//                 let newThisMonth = [];
+//                 if (thisMonth.length !== 0) {
+//                     let selected = thisMonth.filter((s) => s.x === day);
+//                     if (selected.length !== 0) {
+//                         amount = parseFloat(selected[0].y);
+//                         newThisMonth = thisMonth.filter((s) => s.x !== day);
+//                     } else {
+//                         newThisMonth = thisMonth;
+//                     }
+//                 }
+//                 newThisMonth.push({x: day, y: (parseFloat(cp.totalAmount) + amount)});
+//                 thisMonth = newThisMonth;
+//             }
+//             if (month === new Date().getMonth() - 1) {
+//                 const day = new Date(cp.paymentDate).getDate();
+//                 let amount = 0.0;
+//                 let newPrevMonth = [];
+//                 if (prevMonth.length !== 0) {
+//                     let selected = prevMonth.filter((s) => s.x === day);
+//                     if (selected.length !== 0) {
+//                         amount = parseFloat(selected[0].y);
+//                         newPrevMonth = prevMonth.filter((s) => s.x !== day);
+//                     } else {
+//                         newPrevMonth = prevMonth;
+//                     }
+//                 }
+//                 newPrevMonth.push({x: day, y: (parseFloat(cp.totalAmount) + amount)});
+//                 prevMonth = newPrevMonth;
+//             }
+//         });
 
-        new Chart(stx, {
-            ...chartConfig,
-            data: {
-                labels: daysArray,
-                datasets: [{
-                    label: 'This Month Sales',
-                    data: thisMonth,
-                    fill: false,
-                    borderColor: 'rgb(75, 192, 192)',
-                    tension: 0.1
-                },
-                {
-                    label: 'Previous Month Sales',
-                    data: prevMonth,
-                    fill: false,
-                    borderColor: 'rgb(255, 99, 132)',
-                    tension: 0.1
-                }]
-            }
-        });
+//         new Chart(stx, {
+//             ...chartConfig,
+//             data: {
+//                 labels: daysArray,
+//                 datasets: [{
+//                     label: 'This Month Sales',
+//                     data: thisMonth,
+//                     fill: false,
+//                     borderColor: 'rgb(75, 192, 192)',
+//                     tension: 0.1
+//                 },
+//                 {
+//                     label: 'Previous Month Sales',
+//                     data: prevMonth,
+//                     fill: false,
+//                     borderColor: 'rgb(255, 99, 132)',
+//                     tension: 0.1
+//                 }]
+//             }
+//         });
 
-        // Sales Income vs Cost Chart
-        const labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        let sales = [];
-        let cost = [];
+//         // Sales Income vs Cost Chart
+//         const labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+//         let sales = [];
+//         let cost = [];
 
-        cusPayments.forEach((cp) => {
-            const month = new Date(cp.paymentDate).getMonth();
-            let amount = 0.0;
-            let newSales = [];
-            if (sales.length !== 0) {
-                let selected = sales.filter((s) => s.x === labels[month]);
-                if (selected.length !== 0) {
-                    amount = parseFloat(selected[0].y);
-                    newSales = sales.filter((s) => s.x !== labels[month]);
-                } else {
-                    newSales = sales;
-                }
-            }
-            newSales.push({x: labels[month], y: (parseFloat(cp.totalAmount) + amount)});
-            sales = newSales;
-        });
+//         cusPayments.forEach((cp) => {
+//             const month = new Date(cp.paymentDate).getMonth();
+//             let amount = 0.0;
+//             let newSales = [];
+//             if (sales.length !== 0) {
+//                 let selected = sales.filter((s) => s.x === labels[month]);
+//                 if (selected.length !== 0) {
+//                     amount = parseFloat(selected[0].y);
+//                     newSales = sales.filter((s) => s.x !== labels[month]);
+//                 } else {
+//                     newSales = sales;
+//                 }
+//             }
+//             newSales.push({x: labels[month], y: (parseFloat(cp.totalAmount) + amount)});
+//             sales = newSales;
+//         });
 
-        batches.forEach((batch) => {
-            const month = new Date(batch.manufactureDate).getMonth();
-            let amount = 0.0;
-            let newCost = [];
-            if (cost.length !== 0) {
-                let selected = cost.filter((s) => s.x === labels[month]);
-                if (selected.length !== 0) {
-                    amount = parseFloat(selected[0].y);
-                    newCost = cost.filter((s) => s.x !== labels[month]);
-                } else {
-                    newCost = cost;
-                }
-            }
-            newCost.push({x: labels[month], y: (parseFloat(batch.totalCost) + amount)});
-            cost = newCost;
-        });
+//         batches.forEach((batch) => {
+//             const month = new Date(batch.manufactureDate).getMonth();
+//             let amount = 0.0;
+//             let newCost = [];
+//             if (cost.length !== 0) {
+//                 let selected = cost.filter((s) => s.x === labels[month]);
+//                 if (selected.length !== 0) {
+//                     amount = parseFloat(selected[0].y);
+//                     newCost = cost.filter((s) => s.x !== labels[month]);
+//                 } else {
+//                     newCost = cost;
+//                 }
+//             }
+//             newCost.push({x: labels[month], y: (parseFloat(batch.totalCost) + amount)});
+//             cost = newCost;
+//         });
 
-        new Chart(itx, {
-            ...chartConfig,
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Sales',
-                    data: sales,
-                    fill: false,
-                    borderColor: 'rgb(75, 192, 192)',
-                    tension: 0.1
-                },
-                {
-                    label: 'Cost',
-                    data: cost,
-                    fill: false,
-                    borderColor: 'rgb(255, 99, 132)',
-                    tension: 0.1
-                }]
-            }
-        });
+//         new Chart(itx, {
+//             ...chartConfig,
+//             data: {
+//                 labels: labels,
+//                 datasets: [{
+//                     label: 'Sales',
+//                     data: sales,
+//                     fill: false,
+//                     borderColor: 'rgb(75, 192, 192)',
+//                     tension: 0.1
+//                 },
+//                 {
+//                     label: 'Cost',
+//                     data: cost,
+//                     fill: false,
+//                     borderColor: 'rgb(255, 99, 132)',
+//                     tension: 0.1
+//                 }]
+//             }
+//         });
 
-        // Ingredient Stock Level Chart
-        const ingredientList = await ajaxGetRequest("/ingredient/getAllIngredients", "GET");
-        let stockLevels = [];
-        let insCount = 0;
-        let lsCount = 0;
-        let osCount = 0;
+//         // Ingredient Stock Level Chart
+//         const ingredientList = await ajaxGetRequest("/ingredient/getAllIngredients", "GET");
+//         let stockLevels = [];
+//         let insCount = 0;
+//         let lsCount = 0;
+//         let osCount = 0;
 
-        ingredientList.forEach((ing) => {
-            if (ing.ingredientStatus === "InStock") insCount++;
-            if (ing.ingredientStatus === "LowStock") lsCount++;
-            if (ing.ingredientStatus === "OutOfStock") osCount++;
-        });
+//         ingredientList.forEach((ing) => {
+//             if (ing.ingredientStatus === "InStock") insCount++;
+//             if (ing.ingredientStatus === "LowStock") lsCount++;
+//             if (ing.ingredientStatus === "OutOfStock") osCount++;
+//         });
 
-        stockLevels = [
-            {x: "In Stock", y: insCount},
-            {x: "Low Stock", y: lsCount},
-            {x: "Out of Stock", y: osCount}
-        ];
+//         stockLevels = [
+//             {x: "In Stock", y: insCount},
+//             {x: "Low Stock", y: lsCount},
+//             {x: "Out of Stock", y: osCount}
+//         ];
 
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['In Stock', 'Low Stock', 'Out of Stock'],
-                datasets: [{
-                    label: 'Ingredient Stock Level',
-                    data: stockLevels,
-                    borderWidth: 1,
-                    backgroundColor: [
-                        'rgba(75, 192, 192, 0.4)',
-                        'rgba(255, 159, 64, 0.4)',
-                        'rgba(255, 99, 132, 0.4)',
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Ingredient Stock Level',
-                        font: {
-                            size: 16
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    }
-                }
-            }
-        });
+//         new Chart(ctx, {
+//             type: 'bar',
+//             data: {
+//                 labels: ['In Stock', 'Low Stock', 'Out of Stock'],
+//                 datasets: [{
+//                     label: 'Ingredient Stock Level',
+//                     data: stockLevels,
+//                     borderWidth: 1,
+//                     backgroundColor: [
+//                         'rgba(75, 192, 192, 0.4)',
+//                         'rgba(255, 159, 64, 0.4)',
+//                         'rgba(255, 99, 132, 0.4)',
+//                     ]
+//                 }]
+//             },
+//             options: {
+//                 responsive: true,
+//                 maintainAspectRatio: false,
+//                 plugins: {
+//                     legend: {
+//                         position: 'top',
+//                     },
+//                     title: {
+//                         display: true,
+//                         text: 'Ingredient Stock Level',
+//                         font: {
+//                             size: 16
+//                         }
+//                     }
+//                 },
+//                 scales: {
+//                     y: {
+//                         beginAtZero: true,
+//                         ticks: {
+//                             stepSize: 1
+//                         }
+//                     }
+//                 }
+//             }
+//         });
 
-        // Hide loading spinner and show content
-        document.getElementById('dashboardLoading').style.display = 'none';
-        document.getElementById('dashboardContent').style.display = 'block';
+//         // Hide loading spinner and show content
+//         document.getElementById('dashboardLoading').style.display = 'none';
+//         document.getElementById('dashboardContent').style.display = 'block';
 
-    } catch (error) {
-        console.error('Error loading dashboard:', error);
-        // Show error message
-        document.getElementById('dashboardLoading').innerHTML = `
-            <div class="alert alert-danger" role="alert">
-                Error loading dashboard data. Please try refreshing the page.
-            </div>
-        `;
-    }
+//     } catch (error) {
+//         console.error('Error loading dashboard:', error);
+//         // Show error message
+//         document.getElementById('dashboardLoading').innerHTML = `
+//             <div class="alert alert-danger" role="alert">
+//                 Error loading dashboard data. Please try refreshing the page.
+//             </div>
+//         `;
+//     }
+// });
+
+window.addEventListener('DOMContentLoaded', async () => {
+    getData();
+    // reloadTable();
 });
 
 const getData = async () => {

@@ -14,6 +14,7 @@ public interface ProductHasBatchRepository extends JpaRepository<ProductHasBatch
 
     @Query(value = "SELECT * FROM product_has_batch WHERE product_id = :productId ORDER BY id ASC LIMIT 1", nativeQuery = true)
     Optional<ProductHasBatch> findFirstByProductId(@Param("productId") Integer productId);
+    
 
     @NotNull Optional<ProductHasBatch> findById(ProductBatchId id);
 

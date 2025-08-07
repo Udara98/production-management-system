@@ -6,6 +6,8 @@ import com.AdwinsCom.AdwinsCom.Repository.QuotationRequestRepository;
 import com.AdwinsCom.AdwinsCom.Repository.RecipeItemRepository;
 import com.AdwinsCom.AdwinsCom.entity.Ingredient;
 import com.AdwinsCom.AdwinsCom.entity.QuotationRequest;
+import com.AdwinsCom.AdwinsCom.entity.Ingredient.IngredientStatus;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +53,23 @@ public class IngredientService implements IIngredientService {
                     .body("Ingredient Adds not Completed: You don't have permission!");
         }
 
-        Ingredient newIngredient = new Ingredient().mapDTO(null, ingredientDTO, auth.getName());
+        Ingredient newIngredient = new Ingredient();
+
+        if(ingredientRepository.existsByIngredientName(ingredientDTO.getIngredientName().trim())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Ingredient Name Already Exists");
+        }
+        newIngredient.setIngredientCode(ingredientDTO.getIngredientCode());
+        newIngredient.setIngredientName(ingredientDTO.getIngredientName());
+        newIngredient.setNote(ingredientDTO.getNote());
+        newIngredient.setQuantity(ingredientDTO.getQuantity());
+        newIngredient.setIngredientStatus(IngredientStatus.InStock);
+        newIngredient.setUnitType(ingredientDTO.getUnitType());
+        newIngredient.setRop(ingredientDTO.getRop());
+        newIngredient.setRoq(ingredientDTO.getRoq());
+        newIngredient.setAvgCost(ingredientDTO.getAvgCost());
+        newIngredient.setAddedUser(auth.getName());
+        newIngredient.setAddedDate(java.time.LocalDateTime.now());
         if (newIngredient.getIngredientCode() == null || newIngredient.getIngredientCode().isEmpty()) {
             newIngredient.setIngredientCode(getNextIngredientCode());
         }
@@ -93,11 +111,21 @@ public class IngredientService implements IIngredientService {
                      .body("Ingredient Update not Completed: You don't have permission!");
          }
 
-        Ingredient ingredient = ingredientRepository.getIngredientByIngredientCode(ingredientDTO.getIngredientCode());
-
-        Ingredient updatedIngredient = new Ingredient().mapDTO(ingredient, ingredientDTO, userName);
-
-        ingredientRepository.save(updatedIngredient);
+        Ingredient dbIngredient = ingredientRepository.getIngredientByIngredientCode(ingredientDTO.getIngredientCode());
+        if (dbIngredient == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Ingredient not found with code: " + ingredientDTO.getIngredientCode());
+        }
+        dbIngredient.setIngredientName(ingredientDTO.getIngredientName());
+        dbIngredient.setNote(ingredientDTO.getNote());
+        dbIngredient.setQuantity(ingredientDTO.getQuantity());
+        dbIngredient.setUnitType(ingredientDTO.getUnitType());
+        dbIngredient.setRop(ingredientDTO.getRop());
+        dbIngredient.setRoq(ingredientDTO.getRoq());
+        dbIngredient.setAvgCost(ingredientDTO.getAvgCost());
+        dbIngredient.setUpdatedUser(userName);
+        dbIngredient.setUpdatedDate(java.time.LocalDateTime.now());
+        ingredientRepository.save(dbIngredient);
         return ResponseEntity.ok("Ingredient Updated Successfully");
     }
 

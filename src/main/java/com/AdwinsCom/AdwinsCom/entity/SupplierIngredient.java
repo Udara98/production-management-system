@@ -15,6 +15,7 @@ public class SupplierIngredient {
 
     @Id
     @Column(name = "supplier_id")
+    
     private Integer supplierId;
 
     @Id

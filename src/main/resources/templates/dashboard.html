@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head th:replace="~{fragments/head.html:: headDashboard}">
+
 </head>
 <body>
 <div th:replace="~{fragments/topnav.html}"></div>
@@ -9,118 +10,59 @@
     <div class="container-fluid settingsTabContent">
         <div class="container-fluid">
             <!-- Loading Spinner -->
-            <div id="dashboardLoading" class="text-center py-5">
+            <!-- <div id="dashboardLoading" class="text-center py-5">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Dashboard Content -->
-            <div id="dashboardContent" style="display: none;">
+            <div id="dashboardContent" style="display: block;">
                 <!-- Stats Cards -->
                 <div class="row mt-3 mb-3 g-3">
                     <div class="col-12 col-md-6 col-lg-3">
-                        <div class="dashboard-card p-3 h-100">
+                        <div class="dashboard-card p-3 h-120">
                             <a href="/quotation" class="text-decoration-none text-dark">
                                 <div class="d-flex flex-column justify-content-center align-items-center">
-                                    <h4 class="mb-2">Pending Quotations</h4>
+                                    <h4 class="mb-2"><i class="fa-solid fa-newspaper me-2"></i>Pending Quotations</h4>
                                     <h4 id="pq-num" class="text-primary">0</h4>
                                 </div>
                             </a>
                         </div>
                     </div>
                     <div class="col-12 col-md-6 col-lg-3">
-                        <div class="dashboard-card p-3 h-100">
+                        <div class="dashboard-card p-3 h-120">
                             <a href="/purchaseOrder" class="text-decoration-none text-dark">
                                 <div class="d-flex flex-column justify-content-center align-items-center">
-                                    <h4 class="mb-2">Pending GRN</h4>
+                                    <h4 class="mb-2"><i class="fa-solid fa-truck me-2"></i>Pending GRN</h4>
                                     <h4 id="pg-num" class="text-primary">0</h4>
                                 </div>
                             </a>
                         </div>
                     </div>
                     <div class="col-12 col-md-6 col-lg-3">
-                        <div class="dashboard-card p-3 h-100">
+                        <div class="dashboard-card p-3 h-120">
                             <a href="/productionItem" class="text-decoration-none text-dark">
                                 <div class="d-flex flex-column justify-content-center align-items-center">
-                                    <h4 class="mb-2">In-Production Batches</h4>
+                                    <h4 class="mb-2"><i class="fa-solid fa-bowl-rice me-2"></i>Production Batches</h4>
                                     <h4 id="pb-num" class="text-primary">0</h4>
                                 </div>
                             </a>
                         </div>
                     </div>
                     <div class="col-12 col-md-6 col-lg-3">
-                        <div class="dashboard-card p-3 h-100">
+                        <div class="dashboard-card p-3 h-120">
                             <a href="/customerOrder" class="text-decoration-none text-dark">
                                 <div class="d-flex flex-column justify-content-center align-items-center">
-                                    <h4 class="mb-2">Pending Customer Orders</h4>
+                                    <h4 class="mb-2"><i class="fa-solid fa-ice-cream me-2"></i>Pending Orders</h4>
                                     <h4 id="po-num" class="text-primary">0</h4>
                                 </div>
                             </a>
                         </div>
                     </div>
-                </div>              
+                </div>
                 <div id="dashboardNotifications"></div>
-                <!-- Charts Row -->
-                <div class="row g-3 mb-3">
-                    <div class="col-12 col-lg-6">
-                        <div class="card h-100">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="card-title mb-0">Sales Income vs Cost</h5>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="incomeChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-lg-6">
-                        <div class="card h-100">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="card-title mb-0">Monthly Sales Comparison</h5>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="salesChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Bottom Row -->
-                <div class="row g-3">
-                    <div class="col-12 col-lg-6">
-                        <div class="card h-100">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="card-title mb-0">Ingredient Stock Level</h5>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="barchart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-lg-6">
-                        <div class="card h-100">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="card-title mb-0">Daily Transactions</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col">#</th>
-                                                <th scope="col">Type</th>
-                                                <th scope="col">Transaction ID</th>
-                                                <th scope="col">Amount</th>
-                                                <th scope="col">Payment Method</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="trans-table"></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div id="dashboardNotifications"></div>
             </div>
         </div>
     </div>
@@ -129,5 +71,6 @@
     var loggedUserName = /*[[${loggedUserName}]]*/ '';
 </script>
 <script src="/script/dashboard.js"></script>
+<script src="/script/dashboardNotification.js"></script>
 </body>
 </html>

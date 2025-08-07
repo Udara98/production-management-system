@@ -10,7 +10,7 @@
                     <div class="col">
                         <label class="form-label fw-medium" for="addGrnPoNo">Purchase Order No<span class="text-danger"> * </span></label>
                         <select id="addGrnPoNo" class="form-select">
-                            <option selected>Select PO No</option>
+                            <option selected disabled> Select PO No </option>
                         </select>
                         <div class="invalid-feedback">Please Select the Purchase Order</div>
                     </div>
@@ -71,12 +71,14 @@
                                 class="btn cusbutton btn-update"
                                 id="grnUpdateBtn"
                                 onclick="grnUpdate() "
+                                type="button"
                         >
                             <i class="fa-solid fa-edit me-2"></i>Update
                         </button>
                         <button
                                 class="btn cusbutton ms-4 btn-submit"
                                 id="grnSubmitBtn"
+                                type="button"
                                 onclick="grnSubmit();"
                         >
                             <i class="fa-solid fa-plus me-2"></i>Add

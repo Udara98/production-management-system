@@ -1,6 +1,12 @@
 let UserTableInstance;
+let submitUserBtn;
+let updUserBtn;
+
 //Browser Load Option
 window.addEventListener('DOMContentLoaded', ()=>{
+
+    updUserBtn  = document.getElementById("btn-user-update");
+    submitUserBtn = document.getElementById("btn-user-submit");
 
     //Call table Refresh function
     refreshUserTable();
@@ -121,10 +127,17 @@ const getUserStatus = (ob) => {
 //User form refill function
 const refillUserForm = (ob, rowIndex)=>{
 
-    $("#modalUser").modal('show');
+     selectEmployee.disabled = true;
+     submitUserBtn.disabled = true;
+     updUserBtn.disabled = false;
+
 
     user = JSON.parse(JSON.stringify(ob));
     oldUser = JSON.parse(JSON.stringify(ob));
+
+    const modalTitle = document.getElementById('userModalTitle');
+    modalTitle.textContent = "Update User";
+
 
     UserName.value = user.username;
 
@@ -190,6 +203,8 @@ const refillUserForm = (ob, rowIndex)=>{
         div.appendChild(label);
 
         divRoles.appendChild(div);
+
+         $("#modalUser").modal('show');
 
     });
 
@@ -357,6 +372,33 @@ const checkUserFormEroor = () => {
     return errors;
 }
 
+const prepareUserModal = () =>{
+
+     document.getElementById('userForm').reset();
+        Array.from(document.getElementById('userForm').elements).forEach((field) => {
+            field.classList.remove('is-valid', 'is-invalid');
+        });
+
+        const modalTitle = document.getElementById('userModalTitle');
+        if (modalTitle) {
+            modalTitle.textContent = 'Add New User';
+        }
+        document.getElementById('selectEmployee').disabled = false;
+
+
+        submitUserBtn.disabled = false;
+        updUserBtn.disabled = true;
+
+
+        $('#modalUser').modal('show');
+
+
+
+
+
+
+}
+
 const refreshUserForm = ()=>{
 
     //Create new object call user
@@ -427,6 +469,7 @@ const refreshUserForm = ()=>{
         } else {
             profilePhoto.src = atob(user.photo);
         }
+
 
 }
 
@@ -516,12 +559,12 @@ const UserSubmit = () => {
 const checkUserUpdate = () =>{
     let updates = "";
 
-    if(user.employee_id !== oldUser.employee_id){
-        updates = updates + "Employee " + oldUser.employee_id.fullname + " into " + user.employee_id.fullname + "<br>";
-    }
+//    if(user.employee_id !== oldUser.employee_id){
+//        updates = updates + "Employee " + oldUser.employee_id.fullname + " into " + user.employee_id.fullname + "<br>";
+//    }
 
     if(user.username !== oldUser.username){
-        updates = updates + "User Name" + oldUser.callingname + " into " + user.callingname +"<br>";
+        updates = updates + "User Name" + oldUser.username + " into " + user.username +"<br>";
     }
 
      if(user.photo !== oldUser.photo){

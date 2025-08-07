@@ -2,6 +2,7 @@ package com.AdwinsCom.AdwinsCom.entity;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,10 +33,12 @@ public class CustomerOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "order_no")
+    @Column(name = "order_no", unique = true)
+    @NotNull
     private String orderNo;
 
     @Column(name = "invoice_no", unique = true)
+    @NotNull
     private String invoiceNo;
 
     @ManyToOne
@@ -43,9 +46,11 @@ public class CustomerOrder {
     private Customer customer;
 
     @Column(name = "required_date")
+    @NotNull
     private LocalDateTime requiredDate;
 
     @Column(name = "total_amount")
+    @NotNull
     private Double totalAmount;
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -53,8 +58,10 @@ public class CustomerOrder {
     @JsonManagedReference
     private List<CustomerOrderProduct> customerOrderProducts;
 
+    @NotNull
     private Integer addeduser;
 
+    @NotNull
     private LocalDateTime addeddate;
 
     private Integer lastmodifieduser;

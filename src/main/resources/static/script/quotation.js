@@ -1,14 +1,24 @@
 let quotationTableInstance;
 let selectedQuotation;
+let getPrivilege;
 
 
 window.addEventListener("load", function () {
+
+    //Get Privilege of Quot
+    getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/QUOTATION");
+
+    if (!getPrivilege.insert) {
+        $("#addQuotationBtn").prop("disabled", true);
+    }
+
 
     //Call function to reload the quotation table
     reloadQuotationTable();
 
     // Fetch all quotation requests via an AJAX GET request
     const qRequests = ajaxGetRequest("/quotation-request/send");
+
 
     const qrnSelectElement = document.getElementById("qRequest_no");
     const supIdSelectElement = document.getElementById("quo-supId");
@@ -25,12 +35,15 @@ window.addEventListener("load", function () {
 
 //Define refresh function for quotation form
 const refreshQuotationForm = () =>{
+    
 
     quotation = new Object();
     oldQuotation = null;
 
+
     // Fetch all quotation requests via an AJAX GET request
     const qRequests = ajaxGetRequest("/quotation-request/send");
+
 
     const qrnSelectElement = document.getElementById("qRequest_no");
     const supIdSelectElement = document.getElementById("quo-supId");
@@ -38,28 +51,45 @@ const refreshQuotationForm = () =>{
     const todayStr = new Date().toISOString().split('T')[0];
     document.getElementById('add-receivedDate').setAttribute('max', todayStr);
     document.getElementById('add-proposedDeliveryDate').setAttribute('min', todayStr);
+     document.getElementById('add-proposedDeliveryDate').setAttribute('max', todayStr);
 
     document.getElementById('btnQuotationUpdate').disabled = true;
     document.getElementById('btnQuotationSubmit').disabled = false;
+    const receivedDateInput = document.getElementById('add-receivedDate');
+    const proposedDeliveryDateInput = document.getElementById('add-proposedDeliveryDate');
 
-    // Function to fill data into a quotation request select element
-    fillDataIntoSelect(
-           qrnSelectElement,
-           "Select QRequest No",
-           qRequests,
-           "requestNo",
-     );
 
+
+     //Auto refill all batches on dropdown
+         // Fill Batch dropdown as 'batchNo (flavor)'
+         qrnSelectElement.innerHTML = '';
+         const defaultOption = document.createElement('option');
+         defaultOption.value = '';
+         defaultOption.textContent = 'Select Quotation Request';
+         qrnSelectElement.appendChild(defaultOption);
+         qRequests.forEach(qReq => {
+             const option = document.createElement('option');
+             option.value = JSON.stringify(qReq);
+             option.textContent = qReq.requestNo;
+             qrnSelectElement.appendChild(option);
+         });
+
+    //Buttons should be disabled
+    receivedDateInput.disabled = true;
+    proposedDeliveryDateInput.disabled = true;
 
     // Add an event listener to handle changes in the quotation request number dropdown
     qrnSelectElement.addEventListener('change', (event) => {
         const selectedValue = JSON.parse(event.target.value);
         const request = qRequests.find((r) => r.requestNo === selectedValue.requestNo);
 
+        //Buttons should be disabled
+         receivedDateInput.disabled = false;
+         proposedDeliveryDateInput.disabled = false;
+
         console.log(request);
 
         // Set min/max for Received Date input
-        const receivedDateInput = document.getElementById('add-receivedDate');
         const deadline = request.deadline ? new Date(request.deadline) : null;
         const addedDate = request.requestDate ? new Date(request.requestDate) : null;
         // Convert to yyyy-mm-dd
@@ -71,7 +101,6 @@ const refreshQuotationForm = () =>{
             receivedDateInput.setAttribute('max', deadline.toISOString().split('T')[0]);
         }
 
-        const proposedDeliveryDateInput = document.getElementById('add-proposedDeliveryDate');
         const requiredDeliveryDate = request.requiredDeliveryDate ? new Date(request.requiredDeliveryDate) : null;
         // Convert to yyyy-mm-dd
         if (requiredDeliveryDate) {
@@ -91,6 +120,9 @@ const refreshQuotationForm = () =>{
     option.selected = true;
     ingInput.appendChild(option);
 
+
+
+
     // Bind values into quotation object and validate
     quotation.ingredientCode = request.ingCode;
 
@@ -100,15 +132,15 @@ const refreshQuotationForm = () =>{
 
         // Fill data to supplier id select element
         supIdSelectElement.innerHTML = '';
-        supIdSelectElement.innerHTML = '<option value="" selected>Select Supplier ID</option>';
+        innerHTML = '<option value="" selected>Select Supplier ID</option>';
+        const defaultOption = document.createElement('option');
+         defaultOption.value = '';
+         defaultOption.textContent = 'Select Supplier ID';
+         supIdSelectElement.appendChild(defaultOption);
         request.suppliers.forEach((sup) => {
-            console.log(sup);
             const option = document.createElement('option');
             option.value = sup;
-
-            const supplier = ajaxGetRequest("/supplier/byRegNo/" + sup);
-            const supplierName = supplier.businessType?supplier.companyName:supplier.firstName + " " + supplier.lastName;
-            option.textContent = supplierName;
+            option.textContent = sup;
             supIdSelectElement.appendChild(option);
         });
     });
@@ -142,7 +174,7 @@ const quotationValidation = () =>{
 
     const addPriceUnit = document.getElementById('add-pricePerUnit');
     addPriceUnit.addEventListener('input', () =>{
-            validation(addPriceUnit,'^(?:[1-9]|[1-9]{6})$','quotation','pricePerUnit')
+            validation(addPriceUnit,'^(?:[1-9]|[0-9]{2,6})$','quotation','pricePerUnit')
     })
 
     const addQuotationStatus = document.getElementById('add-quotationStatus');
@@ -205,7 +237,7 @@ const checkQuotationFormError = () => {
  const quotationSubmit = () => {
     event.preventDefault();
     console.log("button Quotation Submit");
-    console.log(quotation);
+    quotation.quotationStatus = "Pending";
 
     // 1. Check form errors
     const errors = checkQuotationFormError();
@@ -271,11 +303,16 @@ const quotationFormRefill = (ob, rowIndex) => {
         modalTitle.textContent = 'Edit Quotation';
     }
 
+    console.log(quotation);
     document.getElementById('btnQuotationUpdate').disabled = false;
     document.getElementById('btnQuotationSubmit').disabled = true;
 
 
-  document.getElementById("quo-ingId").value = quotation.ingredientCode ;
+  // Fill Ingredient select/input with both code and name
+  const ingInput = document.getElementById("quo-ingId");
+  
+    // If it's an input, just fill value with code + name
+  
   document.getElementById("add-receivedDate").value = convertDateTimeToDate(quotation.receivedDate);
   document.getElementById("add-pricePerUnit").value = quotation.pricePerUnit;
   document.getElementById("add-quotationStatus").value = quotation.quotationStatus;
@@ -299,25 +336,23 @@ const quotationFormRefill = (ob, rowIndex) => {
   qReqNo.value = quotation.quotationRequestNo;
   qReqNo.disabled = true;
 
-  //Get the select element by its ID
+  // Fill Supplier select with regNo and name
   const quoSupID = document.getElementById("quo-supId");
   quoSupID.innerHTML = '';
-
-   // Create a new option element
-   const optionSup = document.createElement("option");
-
-   // Set the value and text content of the new option
-   optionSup.value = quotation.supplierRegNo;
-   optionSup.textContent = quotation.supplierRegNo;
-
-   // Append the new option to the select element
-   quoSupID.appendChild(optionSup);
-
+  const supData = ajaxGetRequest("/supplier/byRegNo/" + quotation.supplierRegNo);
+  const supOption = document.createElement("option");
+  supOption.value = quotation.supplierRegNo;
+  if (supData.businessType && supData.companyName) {
+    supOption.textContent = `${quotation.supplierRegNo} - ${supData.companyName}`;
+  } else {
+    supOption.textContent = `${quotation.supplierRegNo} - ${supData.firstName || ''} ${supData.secondName || ''}`;
+  }
+  supOption.selected = true;
+  quoSupID.appendChild(supOption);
+  quoSupID.value = quotation.supplierRegNo;
   quoSupID.disabled = true;
+  document.getElementById("add-quotationStatus").disabled = false;
 
-
-
-  // Disable the select element
 
     //refill Quotation No
      const qRequests = ajaxGetRequest("/quotation-request/getAllRequests");
@@ -325,6 +360,8 @@ const quotationFormRefill = (ob, rowIndex) => {
     //    const quoSupID = document.getElementById("quo-supId");
 
     // Function to fill data into a quotation request select element
+//    fillDataIntoSelect.classList.remove('valid-input', 'invalid-input');
+
     fillDataIntoSelect(
          quoSupID,
          "Select Supplier ID",
@@ -509,7 +546,6 @@ function getStatus(ob) {
 
 const reloadQuotationTable = function () {
     const quotations = ajaxGetRequest("/quotation/getAllQuotations");
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/QUOTATION");
 
         
 
@@ -538,19 +574,20 @@ const reloadQuotationTable = function () {
     quotationTableInstance = $("#tableQuotations").DataTable();
 };
 
-const generateQuotationDropDown = (element, index) => {
+const generateQuotationDropDown = (element, index, privilegeOb) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
-        {name: "Details", action: showQuotationDetails, icon: "fa-solid fa-circle-info me-2"},
-        {name: "Delete", action: deleteQuotation, icon: "fa-solid fa-trash me-2"},
+        {name: "Details", action: showQuotationDetails, icon: "fa-solid fa-circle-info me-2", enabled: privilegeOb.select},
+        {name: "Delete", action: deleteQuotation, icon: "fa-solid fa-trash me-2", enabled: privilegeOb.delete},
     ];
     if (element.quotationStatus !== "Closed") {
         buttonList.push({
             name: "Edit",
             action: quotationFormRefill,
             icon: "fa-solid fa-edit me-2",
+            enabled: privilegeOb.update,
         })
     }
 
@@ -558,7 +595,8 @@ const generateQuotationDropDown = (element, index) => {
         buttonList.push({
             name: "Send purchase order",
             action: sendPerchesOrder,
-            icon: "fa-solid fa-basket-shopping me-2"
+            icon: "fa-solid fa-basket-shopping me-2",
+            enabled: privilegeOb.select,
         })
     }
 
@@ -566,8 +604,15 @@ const generateQuotationDropDown = (element, index) => {
         const buttonElement = document.createElement("button");
         buttonElement.className = "dropdown-item btn";
         buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
+        buttonElement.disabled = !button.enabled;
+        if (!button.enabled) {
+            buttonElement.style.cursor = "not-allowed";
+            buttonElement.classList.add("text-muted");
+        }
         buttonElement.onclick = function () {
-            button.action(element, index);
+            if (button.enabled) {
+                button.action(element, index);
+            }
         };
         const liElement = document.createElement("li");
         liElement.appendChild(buttonElement);
@@ -632,7 +677,7 @@ const sendPerchesOrder = (quotation) => {
         showCancelButton: true,
         confirmButtonText: 'Yes, Send',
         cancelButtonText: 'Cancel',
-        confirmButtonColor: '#3085d6',
+        confirmButtonColor: '#2e326d ',
         cancelButtonColor: '#d33'
     }).then((result) => {
         if (result.isConfirmed) {
@@ -692,8 +737,12 @@ const openAddQuotationForm = () => {
         modalTitle.textContent = 'Add New Quotation';
     }
     document.getElementById('btnQuotationUpdate').disabled = true;
+    document.getElementById("add-quotationStatus").value = "Pending";
+    document.getElementById("add-quotationStatus").disabled = true;
     document.getElementById('btnQuotationSubmit').disabled = false;
+    qrnSelectElement.disabled = false;
     quotation = {};
     oldQuotation = null;
+
     $('#modelQuotationAdd').modal('show');
 }

@@ -58,7 +58,7 @@ public class SupplierPaymentService implements ISupplierPaymentService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         // Get privileges for the logged-in user
-        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "SUPPLIERPAYMENT");
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "SUPPLIER_PAYMENT");
 
         // If user doesn't have "insert" permission, return 403 Forbidden
         if (!loguserPrivi.get("insert")) {
@@ -75,7 +75,6 @@ public class SupplierPaymentService implements ISupplierPaymentService {
         newSupplierPayment.setAddedDate(java.time.LocalDateTime.now());
         newSupplierPayment.setPaymentDate(supplierPaymentDTO.getPaymentDate());
         newSupplierPayment.setTotalPaymentAmount(supplierPaymentDTO.getTotalPaymentAmount());
-        newSupplierPayment.setTotalBalanceAmount(supplierPaymentDTO.getTotalBalanceAmount());
         newSupplierPayment.setPaymentMethod(supplierPaymentDTO.getPaymentMethod());
         // Set supplier
         Supplier supplier = new Supplier();
@@ -83,9 +82,16 @@ public class SupplierPaymentService implements ISupplierPaymentService {
         newSupplierPayment.setSupplier(supplier);
         // Set Payment MethodSup
         PaymentMethodSup paymentMethodSup = new PaymentMethodSup();
+        if (supplierPaymentDTO.getPaymentMethod() == PaymentMethod.CASH) {
+            paymentMethodSup.setPaymentMethod(PaymentMethod.CASH);
+            paymentMethodSup.setTransactionId("Ch-" + java.util.UUID.randomUUID().toString());
+            newSupplierPayment.setPaymentMethodSup(paymentMethodSup);
+            
+        }else{
         paymentMethodSup.setTransactionId(supplierPaymentDTO.getTransactionId());
         paymentMethodSup.setPaymentMethod(supplierPaymentDTO.getPaymentMethod());
         newSupplierPayment.setPaymentMethodSup(paymentMethodSup);
+        }
         // Save to generate ID
         newSupplierPayment = supplierPaymentRepository.save(newSupplierPayment);
         // Handle SupplierPaymentHasGoodReceiveNote mapping
@@ -208,7 +214,7 @@ public class SupplierPaymentService implements ISupplierPaymentService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         // Get privileges for the logged-in user
-        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "SUPPLIERPAYMENT");
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "SUPPLIER_PAYMENT");
 
         if (!loguserPrivi.get("select")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)

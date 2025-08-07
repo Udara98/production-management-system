@@ -1,8 +1,14 @@
 let batchTableInstance;
 let selectedBatch;
 let oldBatch;
+let getPrivilegeBatch;
 
 window.addEventListener('load',()=>{
+
+    getPrivilegeBatch = ajaxGetRequest("/privilege/byloggedusermodule/BATCH");
+    if (!getPrivilegeBatch.insert) {
+        $("#addBatchBtn").prop("disabled", true);
+    }
     reloadBatchTable()
     document.getElementById('updateBatchForm').onsubmit = productionBatchUpdate;
 })
@@ -10,7 +16,6 @@ window.addEventListener('load',()=>{
 const reloadBatchTable=()=>{
 
     const batchList = ajaxGetRequest("/batch/getAllBatches")
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
 
     const getStatus = (ob) => {
         if (ob.batchStatus === "InProduction") {
@@ -41,7 +46,7 @@ const reloadBatchTable=()=>{
         displayProperty,
         true,
         generateBatchDropDown,
-        getPrivilege
+        getPrivilegeBatch
     )
     batchTableInstance = $("#tablePB").DataTable({
         responsive: true,
@@ -198,6 +203,7 @@ function productionBatchUpdate(event) {
             text: "Damaged quantity cannot be negative",
             icon: "error"
         });
+        document.getElementById('edit-bt-dmg').classList.add('is-invalid');
         return;
     }
     if (dmgQty > totalQty) {
@@ -206,6 +212,7 @@ function productionBatchUpdate(event) {
             text: "Damaged quantity cannot exceed total quantity of " + totalQty,
             icon: "error"
         });
+        document.getElementById('edit-bt-dmg').classList.add('is-invalid');
         return;
     }
     // Update selectedBatch with new values

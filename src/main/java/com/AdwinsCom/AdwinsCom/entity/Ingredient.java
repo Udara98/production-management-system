@@ -1,6 +1,6 @@
 package com.AdwinsCom.AdwinsCom.entity;
 
-import com.AdwinsCom.AdwinsCom.DTO.IngredientDTO;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "ingredient")
@@ -35,7 +37,7 @@ public class Ingredient {
     @NotNull
     private String ingredientCode;
 
-    @Column(name = "name")
+    @Column(name = "name",unique = true)
     @NotNull
     private String ingredientName;
 
@@ -43,6 +45,7 @@ public class Ingredient {
     private String note;
 
     @Column(name = "quantity")
+    @NotNull
     private Double quantity;
 
     @Column(name = "unit_size")
@@ -51,15 +54,18 @@ public class Ingredient {
     private UnitType unitType;
 
     @Column(name = "rop")
+    @NotNull
     private Integer rop;
 
     @Column(name = "roq")
+    @NotNull
     private Integer roq;
 
     @Column(name = "avg_cost")
     private Double avgCost;
 
     @Column(name = "ingredient_status")
+    @NotNull
     @Enumerated(EnumType.STRING)
     private IngredientStatus ingredientStatus;
 
@@ -68,6 +74,7 @@ public class Ingredient {
     private String addedUser;
 
     @Column(name = "added_date")
+    @NotNull
     private LocalDateTime addedDate;
 
     @JoinColumn(name = "updated_user")
@@ -81,25 +88,5 @@ public class Ingredient {
 
 
 
-    public Ingredient mapDTO(Ingredient ingredient,IngredientDTO addDTO, String userName) {
-        Ingredient newIngredient = new Ingredient();
-        if(ingredient != null){
-            newIngredient = ingredient;
-            newIngredient.setUpdatedUser(userName);
-            newIngredient.setUpdatedDate(LocalDateTime.now());
-        }else {
-            newIngredient.setAddedUser(userName);
-            newIngredient.setAddedDate(LocalDateTime.now());
-        }
-        newIngredient.setIngredientCode(addDTO.getIngredientCode());
-        newIngredient.setIngredientName(addDTO.getIngredientName());
-        newIngredient.setNote(addDTO.getNote());
-        newIngredient.setQuantity(addDTO.getQuantity());
-        newIngredient.setUnitType(addDTO.getUnitType());
-        newIngredient.setRop(addDTO.getRop());
-        newIngredient.setRoq(addDTO.getRoq());
-        newIngredient.setAvgCost(addDTO.getAvgCost());
 
-        return newIngredient;
-    }
 }

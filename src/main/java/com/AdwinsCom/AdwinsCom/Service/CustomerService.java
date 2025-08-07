@@ -9,6 +9,7 @@ import com.AdwinsCom.AdwinsCom.entity.Customer;
 import com.AdwinsCom.AdwinsCom.entity.QuotationRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import com.AdwinsCom.AdwinsCom.Repository.CustomerOrderRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,6 +21,7 @@ import com.AdwinsCom.AdwinsCom.DTO.BankAccountDTO;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 
@@ -29,13 +31,17 @@ public class CustomerService implements ICustomerService{
     final CustomerRepository customerRepository;
 
     @Autowired
+    private CustomerOrderRepository customerOrderRepository;
+
+    @Autowired
     private BankAccountRepository bankAccountRepository;
 
     @Autowired
     private IPrivilegeService privilegeService;
 
-    public CustomerService(CustomerRepository customerRepository ) {
+    public CustomerService(CustomerRepository customerRepository, CustomerOrderRepository customerOrderRepository) {
         this.customerRepository = customerRepository;
+        this.customerOrderRepository = customerOrderRepository;
     }
 
     @Override
@@ -56,6 +62,27 @@ public class CustomerService implements ICustomerService{
 
       
         Customer newCustomer = new Customer();
+
+        if (customerDTO.getNic() != null && !customerDTO.getNic().trim().isEmpty()) {
+            if (customerRepository.existsByNic(customerDTO.getNic())) {
+                return ResponseEntity.badRequest().body("A customer with this NIC already exists.");
+            }
+        }
+        if (customerDTO.getBrn() != null && !customerDTO.getBrn().trim().isEmpty()) {
+            if (customerRepository.existsByBrn(customerDTO.getBrn())) {
+                return ResponseEntity.badRequest().body("A customer with this BRN already exists.");
+            }
+        }
+        if (customerDTO.getEmail() != null && !customerDTO.getEmail().trim().isEmpty()) {
+            if (customerRepository.existsByEmail(customerDTO.getEmail())) {
+                return ResponseEntity.badRequest().body("A customer with this Email already exists.");
+            }
+        }
+        if (customerDTO.getMobile() != null && !customerDTO.getMobile().trim().isEmpty()) {
+            if (customerRepository.existsByMobile(customerDTO.getMobile())) {
+                return ResponseEntity.badRequest().body("A customer with this Mobile number already exists.");
+            }
+        }
         // Generate RegNo automatically
         newCustomer.setRegNo(getNextCustomerRegNo());
         newCustomer.setBusinessType(customerDTO.getBusinessType());
@@ -65,6 +92,9 @@ public class CustomerService implements ICustomerService{
         newCustomer.setFirstName(customerDTO.getFirstName());
         newCustomer.setSecondName(customerDTO.getSecondName());
         newCustomer.setNic(customerDTO.getNic());
+        newCustomer.setRemainingCredit(customerDTO.getCreditLimit());
+        newCustomer.setAddedUser(userName);
+        newCustomer.setAddedDate(LocalDateTime.now());
         newCustomer.setMobile(customerDTO.getMobile());
         newCustomer.setLandNo(customerDTO.getLandNo());
         newCustomer.setEmail(customerDTO.getEmail());
@@ -134,6 +164,7 @@ public class CustomerService implements ICustomerService{
         List<CustomerDTO> customerDTOs = customers.stream().map(customer -> {
             CustomerDTO dto = new CustomerDTO();
             dto.setId(customer.getId());
+            dto.setRemainingCredit(customer.getRemainingCredit());
             dto.setBusinessType(customer.getBusinessType());
             dto.setCompanyName(customer.getCompanyName());
             dto.setBrn(customer.getBrn());
@@ -173,6 +204,10 @@ public class CustomerService implements ICustomerService{
                      .body("Customer Delete not Completed: You don't have permission!");
          }
 
+        // Prevent deletion if customer has orders
+        if (customerOrderRepository.existsByCustomerId(id)) {
+            return ResponseEntity.badRequest().body("Cannot delete customer: Customer has existing orders.");
+        }
         customerRepository.deleteById(id);
         return ResponseEntity.ok("Customer Deleted Successfully");
     }

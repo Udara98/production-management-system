@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+<title>Ingredient</title>
+</head>   
 <head th:replace="~{fragments/head.html:: headIngredient}">
 </head>
 <body>
@@ -13,6 +16,7 @@
                         class="btn ms-auto me-4 addPrimaryBtn"
                         data-bs-target="#modelIngredientAdd"
                         data-bs-toggle="modal"
+                        id="addIngredientBtn"
                         type="button"
                         onclick="openAddIngredientForm();"
                 >
@@ -74,4 +78,7 @@
 </div>
 </body>
 <script src="/script/ingredient.js" ></script>
+<script th:inline="javascript">
+    var loggedUserName = /*[[${loggedUserName}]]*/ '';
+</script>
 </html>

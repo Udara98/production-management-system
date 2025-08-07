@@ -17,8 +17,6 @@ import java.util.List;
 @AllArgsConstructor
 public class Product {
 
-    // public static final String ProductUnitType = null;
-
     public enum ProductStatus{
         InStock,
         LowStock,
@@ -35,7 +33,7 @@ public class Product {
     @NotNull
     private String productCode;
 
-    @Column(name = "product_name")
+    @Column(name = "product_name",unique = true)
     @NotNull
     private String productName;
 
@@ -47,46 +45,32 @@ public class Product {
     @JsonManagedReference
     private List<CustomerOrderProduct> customerOrderProducts = new ArrayList<>();
 
-//    @ManyToOne
-//    @JoinColumn(name = "batch_id" ,referencedColumnName = "id")
-//    private Batch batch;
-
     @Column(name = "reorder_point")
+    @NotNull
     private Integer reorderPoint;
 
     @Column(name = "reorder_quantity")
+    @NotNull
     private Integer reorderQuantity;
 
-    // public Integer getRop() {
-    //     return reorderPoint;
-    // }
-
-    // public void setRop(Integer rop) {
-    //     this.reorderPoint = rop;
-    // }
-
-    // public Integer getRoq() {
-    //     return reorderQuantity;
-    // }
-
-    // public void setRoq(Integer roq) {
-    //     this.reorderQuantity = roq;
-    // }
-
     @Column(name = "quantity")
+    @NotNull
     private Integer quantity;
 
     @Column(name = "note")
     private String note;
 
     @Column(name = "sale_price")
+    @NotNull
     private Double salePrice;
 
     @Column(name = "unit_type")
+    @NotNull
     @Enumerated(EnumType.STRING)
     private ProductUnitType unitType;
 
     @Column(name = "unit_size")
+    @NotNull
     private Double unitSize;
 
     @Column(name = "product_photo")
@@ -96,13 +80,16 @@ public class Product {
     private String productPhotoName;
 
     @Column(name = "product_status")
+    @NotNull
     @Enumerated(EnumType.STRING)
     private ProductStatus productStatus;
 
     @Column(name = "addeduser")
+    @NotNull
     private Integer addedUser;
 
     @Column(name = "addeddate")
+    @NotNull
     private LocalDateTime addedDate;
 
     @Column(name = "lastmodifieduser")

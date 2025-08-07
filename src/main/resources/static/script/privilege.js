@@ -23,6 +23,25 @@ window.addEventListener("load", () => {
 
 });
 
+const preparePrivModal = () => {
+
+  btnPrivUpdate.disabled = true;
+  btnPrivAdd.disabled = false;
+
+  //Reset form
+  formPrivilege.reset();
+  formPrivilege.classList.remove('was-validated');
+  formPrivilege.classList.add('needs-validation');
+
+  //Need to hide validation error
+  document.querySelectorAll('.needs-validation input,.needs-validation select, .needs-validation textarea ').forEach((input) => {
+    input.classList.remove('is-valid', 'is-invalid');
+  });
+
+  $('#modalPrivilegeAdd').modal('show');
+
+}
+
 const refresPrivilegeTable = () => {
 
 
@@ -292,6 +311,10 @@ const getDelete = (ob) => {
 const PrivilegeFormRefill = (ob, rowIndex) => {
     $("#modalPrivilegeAdd").modal('show');
 
+    btnPrivUpdate.disabled = false;
+    btnPrivAdd.disabled = true;
+
+
     privilege = JSON.parse(JSON.stringify(ob));
     oldPrivilege = JSON.parse(JSON.stringify(ob));
 
@@ -331,8 +354,7 @@ const PrivilegeFormRefill = (ob, rowIndex) => {
     labelDelete.innerHTML = privilege.del ? '<b>Delete</b> Privilege is GRANTED.' : '<b>Delete</b> Privilege is NOT-GRANTED.';
 
     // Disable Add button, enable Update button
-    document.getElementById('btnPrivAdd').disabled = true;
-    document.getElementById('btnPrivUpdate').disabled = false;
+
 };
 
 const viewPrivilegeData = () => {

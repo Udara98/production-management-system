@@ -10251,7 +10251,7 @@ copyright:
   label: Copyright
   search:
     terms:
-      - brand
+      - Brand.Java
       - c
       - copyright
       - mark

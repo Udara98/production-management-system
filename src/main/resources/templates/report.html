@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+<title>Reports</title>
+</head>    
 <head th:replace="~{fragments/head.html:: headIngredient}">
 </head>
 <body>
@@ -9,16 +12,10 @@
     <div class="flex-grow-1 container-fluid settingsTabContent px-4">
                 <div class="hstack mt-3 mb-3">
                     <h2 class="settingsHeader ">Reports</h2>
-                            <button
-                                    class="btn ms-auto me-4 btn-outline-success"
-                                    type="button"
-                                    id="downloadReportBtn"
-                            >
-                                <i class="fa-solid fa-file-excel me-2" style="color: #139a3c;"></i>
-                                Download Report
-                            </button>
                 </div>
                 <div class="d-flex p-2 mx-1" style="border: 1px solid #c9c6c6">
+                    <div class="d-flex justify-content-end mb-3">
+                    </div>
                     <div style="flex: 0.7; margin-right: 10rem">
                         <label class="form-label fw-medium" for="add-report-type"></label>
                         <select id="add-report-type" class="form-select" required>
@@ -53,6 +50,10 @@
                         </button>
                     </div>
                 </div>
+                <div class="d-flex justify-content-end mt-2">
+                    <button id="printReportBtn" class="btn btn-submit" style="width: 150px;"><i class="fa fa-print"></i> Print Report</button>
+                </div>
+                <div id="reportContainer">
                 <div class="row mt-4"  id="saleReport"  style="display: none">
                     <!-- Customer Sales Report Section -->
                     <div class="mt-2 col-7">
@@ -84,13 +85,13 @@
                 <div class="row mt-4" id="productSalesReport" style="display: none;">
                     <div class="mt-2 col-md-7">
                         <div class="mt-2 mb-2 d-flex align-items-center justify-content-between">
-    <div>
-            <label for="productSalesTotalAmount" class="fw-normal fs-5">Total Sales:</label>
-            <span id="productSalesTotalAmount" class="fw-medium fs-5"></span>
-        </div>
-        <button id="updateProductRopBtn" class="btn btn-warning btn-sm ms-2">Update ROPs</button>
-    </div>
-    <table class="table table-bordered table-hover" id="tableProductSales">
+                        <div>
+                                <label for="productSalesTotalAmount" class="fw-normal fs-5">Total Sales:</label>
+                                <span id="productSalesTotalAmount" class="fw-medium fs-5"></span>
+                            </div>
+                            <button id="updateProductRopBtn" class="btn btn-warning btn-sm ms-2">Update ROPs</button>
+                        </div>
+                        <table class="table table-bordered table-hover" id="tableProductSales">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -146,11 +147,10 @@
                 <table class="table table-bordered table-hover" id="tableSupPayReport">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Reg No</th>
-                            <th>Supplier Name</th>
-                            <th>Amount Paid</th>
-                            <th>Outstanding Amount</th>
+                             <th>#</th>
+                             <th>Reg No</th>
+                             <th>Amount Paid</th>
+                             <th>Outstanding Amount</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -186,38 +186,12 @@
     </div>
 </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
-<script src="/script/report.js"></script>
-<script>
-// Dropdown and Search logic
-// function showReportSection(type) {
-//     var sale = document.getElementById('saleReport');
-//     var product = document.getElementById('productSalesReport');
-//     var grn = document.getElementById('grnIngredientReport');
-//     var sup = document.getElementById('supPayReport');
-//     var cost = document.getElementById('costReport');
-//     if (sale) sale.style.display = (type === 'CSR') ? '' : 'none';
-//     if (product) product.style.display = (type === 'PSR') ? '' : 'none';
-//     if (grn) grn.style.display = (type === 'GRN') ? '' : 'none';
-//     if (sup) sup.style.display = (type === 'SPR') ? '' : 'none';
-//     if (cost) cost.style.display = (type === 'PCR') ? '' : 'none';
-// }
-
-
-// const reportTypeDropdown = document.getElementById('add-report-type');
-// const searchBtn = document.getElementById('searchBtn');
-// const saleReportDiv = document.getElementById('saleReport');
-
-// reportTypeDropdown.addEventListener('change', function() {
-//     showReportSection(this.value);
-// });
-
-
-
-// Show default on load
-// showReportSection(reportTypeDropdown.value);
-
-</script>
+</div>
+</div>
 </body>
+<script src="/script/report.js"></script>
+<script src="/chart.min.js/chart.min.js"></script>
+<script th:inline="javascript">
+    var loggedUserName = /*[[${loggedUserName}]]*/ '';
+</script>
 </html>

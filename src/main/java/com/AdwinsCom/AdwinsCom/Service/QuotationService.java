@@ -39,10 +39,10 @@ public class QuotationService implements IQuotationService {
         int maxNumber = 1;
 
         if(maxQuotationNo != null && maxQuotationNo.startsWith("QNO-")) {
-            maxNumber = Integer.parseInt(maxQuotationNo.substring(4) +1);
+            maxNumber = Integer.parseInt(maxQuotationNo.substring(4)) +1 ;
         }
 
-        return "QNO-" + String.format("%04d", maxNumber);
+        return String.format("QNO-%04d", maxNumber);
     }
 
     @Override
@@ -94,13 +94,10 @@ public class QuotationService implements IQuotationService {
         newQuotation.setAddedDate(java.time.LocalDateTime.now());
         newQuotation.setPricePerUnit(pricePerUnit);
         newQuotation.setReceivedDate(LocalDate.now());
-        newQuotation.setDeadline(quotationDTO.getDeadline());
         newQuotation.setQuotationStatus(Quotation.QuotationStatus.Pending);
         newQuotation.setQuantity(quantity);
         newQuotation.setUnitType(unitType);
         newQuotation.setTotalPrice(totalPrice);
-        newQuotation.setAdvancePercentage(quotationDTO.getAdvancePercentage());
-        newQuotation.setCreditDays(quotationDTO.getCreditDays());
         newQuotation.setProposedDeliveryDate(quotationDTO.getProposedDeliveryDate());
         quotationRepository.save(newQuotation);
 
@@ -146,13 +143,10 @@ public class QuotationService implements IQuotationService {
                 q.getSupplierRegNo(),
                 q.getPricePerUnit(),
                 q.getReceivedDate(),
-                q.getDeadline(),
                 q.getQuotationStatus(),
                 q.getQuantity(),
                 q.getUnitType(),
                 q.getTotalPrice(),
-                q.getAdvancePercentage(),
-                q.getCreditDays(),
                 q.getProposedDeliveryDate()
             );
             return dto;

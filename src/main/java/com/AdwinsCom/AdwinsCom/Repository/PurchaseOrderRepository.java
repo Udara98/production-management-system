@@ -19,4 +19,7 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, In
     @Query("SELECT MAX(po.purchaseOrderNo) FROM PurchaseOrder po")
     String findMaxPurchaseOrderNo();
 
+    @Query(value = "SELECT po.* FROM purchaseorder po LEFT JOIN (SELECT grn.purchase_order_id, SUM(grn.accepted_quantity) AS total_grn_qty FROM good_receive_note grn  GROUP BY grn.purchase_order_id) grn_sum ON po.id = grn_sum.purchase_order_id WHERE po.qty > IFNULL(grn_sum.total_grn_qty, 0) AND po.qty > 0 AND po.purchase_order_status = 'Pending'", nativeQuery = true)
+    List<PurchaseOrder> findPendingPurchaseOrdersForGrn();
+
 }

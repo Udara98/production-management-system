@@ -55,20 +55,11 @@ public class Quotation {
     @Column(name = "total_price")
     private Double totalPrice;
 
-    @Column(name = "advance_percentage")
-    private Double advancePercentage;
-
-    @Column(name = "credit_days")
-    private Integer creditDays;
-
     @Column(name = "proposed_delivery_date")
     private LocalDate proposedDeliveryDate;
 
     @Column(name = "received_date")
     private LocalDate receivedDate;
-
-    @Column(name = "deadline")
-    private LocalDate deadline;
 
     @Column(name = "quotation_status")
     @Enumerated(EnumType.STRING)
@@ -104,7 +95,6 @@ public class Quotation {
 
         newQuotation.setPricePerUnit(quotationDTO.getPricePerUnit());
         newQuotation.setReceivedDate(quotationDTO.getReceivedDate());
-        newQuotation.setDeadline(quotationDTO.getDeadline());
         newQuotation.setQuotationStatus(quotationDTO.getQuotationStatus());
         newQuotation.setQuantity(quotationDTO.getQuantity());
         newQuotation.setUnitType(quotationDTO.getUnitType());

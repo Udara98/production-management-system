@@ -11,6 +11,7 @@
             <button
                     class="btn ms-auto me-4 addPrimaryBtn"
                     data-bs-target="#modalSPAdd"
+                    id="addSpBtn"
                     data-bs-toggle="modal"
                     type="button"
             >
@@ -39,5 +40,22 @@
         >
             <div th:replace="~{fragments/IngOrders/SupplierPayment/SupplierPaymentAddForm.html}"  ></div>
         </div>
+        <div
+                    class="modal fade"
+                    data-bs-backdrop="static"
+                    data-bs-keyboard="false"
+                    id="supplierPaymentModal"
+            >
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Supplier Payment Details</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="supplierPaymentDetails">
+                        </div>
+                    </div>
+                </div>
+            </div>
     </div>
 </div>

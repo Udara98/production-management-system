@@ -2,6 +2,8 @@ package com.AdwinsCom.AdwinsCom.Service;
 
 import com.AdwinsCom.AdwinsCom.DTO.BatchDTO;
 import com.AdwinsCom.AdwinsCom.DTO.BatchProductionReportDTO;
+import com.AdwinsCom.AdwinsCom.DTO.SupplierPaymentReportDTO;
+
 import java.util.ArrayList;
 import com.AdwinsCom.AdwinsCom.Repository.*;
 import com.AdwinsCom.AdwinsCom.entity.Ingredient;
@@ -61,7 +63,6 @@ public class BatchService implements IBatchService{
         newBatch.setRecipeName(batchDTO.getRecipeName());
         newBatch.setTotalQuantity(batchDTO.getTotalQuantity());
         newBatch.setDamagedQuantity(batchDTO.getDamagedQuantity());
-        newBatch.setTotalSale(batchDTO.getTotalSale());
         newBatch.setAvailableQuantity(batchDTO.getTotalQuantity());
         newBatch.setManufactureDate(batchDTO.getManufactureDate());
         newBatch.setExpireDate(batchDTO.getExpireDate());
@@ -127,6 +128,12 @@ public class BatchService implements IBatchService{
     }
 
     @Override
+    public ResponseEntity<?> GetAllDoneBatches() {
+        List<Batch> batchList = batchRepository.findByBatchStatusProductionDone();
+        return ResponseEntity.ok(batchList);
+    }
+
+    @Override
     public ResponseEntity<?> DeleteBatch(Integer id) {
         Batch batch = batchRepository.findById(id).get();
         batch.setBatchStatus(Batch.BatchStatus.Removed);
@@ -149,25 +156,31 @@ public class BatchService implements IBatchService{
     }
 
     @Override
-    public ResponseEntity<?> getBatchesForProduct(Integer productId, boolean fifo) {
+    public ResponseEntity<?> getBatchesForProduct(Integer productId) {
 
-        // First, get the recipe code from the product
-        ResponseEntity<?> recipeCodeResponse = getRecipeCodeFromProduct(productId);
+        try{
 
-        if (recipeCodeResponse.getStatusCode().is2xxSuccessful() && recipeCodeResponse.getBody() != null) {
+            ResponseEntity<?> recipeCodeResponse = getRecipeCodeFromProduct(productId);
+
             String recipeCode = recipeCodeResponse.getBody().toString();
 
-            List<Batch> batches;
-            if (fifo) {
-                batches = batchRepository.findByRecipeCodeOrderByManufactureDateAsc(recipeCode);
-            } else {
-                batches = batchRepository.findByRecipeCodeOrderByManufactureDateDesc(recipeCode);
+            if (recipeCode.trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Empty recipe code returned for product ID: " + productId);
             }
 
+            List<Batch> batches = batchRepository.findProductionDoneBatchesByRecipeCodeOrderByManufactureDateAsc(recipeCode);
+
+            if (batches == null || batches.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            }
+    
+
             return ResponseEntity.ok(batches);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Recipe code not found for the product.");
+
+        }catch (Exception e){
+            return ResponseEntity.internalServerError().body(e.getMessage());
         }
+
     }
 
 
@@ -209,7 +222,7 @@ public class BatchService implements IBatchService{
 
 
 
-    public java.util.List<com.AdwinsCom.AdwinsCom.DTO.SupplierPaymentReportDTO> getSupplierPaymentReportByDateRange(LocalDate startDate, LocalDate endDate) {
+    public java.util.List<SupplierPaymentReportDTO> getSupplierPaymentReportByDateRange(LocalDate startDate, LocalDate endDate) {
         return supplierPaymentHasGoodReceiveNoteService.getSupplierPaymentReportByDateRange(startDate, endDate);
     }
 

@@ -117,8 +117,6 @@ const deleteQRequest= (ob) => {
                     icon: "success"
                 });
                 reloadQRequestTable();
-                reloadQRequestTable();
-                refreshQuotationReqForm();
             } else {
                 swal.fire({
                     title: "Something Went Wrong",

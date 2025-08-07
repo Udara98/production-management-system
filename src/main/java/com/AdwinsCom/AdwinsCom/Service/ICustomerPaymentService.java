@@ -9,7 +9,7 @@ public interface ICustomerPaymentService {
     ResponseEntity<?> AddNewCustomerPayment(CustomerPaymentDTO customerPaymentDTO, String userName) throws NoSuchAlgorithmException;
     ResponseEntity<?> UpdateCustomerPayment(CustomerPaymentDTO customerPaymentDTO, String userName);
     ResponseEntity<?> GetAllCustomerPayments();
-    ResponseEntity<?> GetAllUnpaidCustomerPayments();
+    // ResponseEntity<?> GetAllUnpaidCustomerPayments();
     ResponseEntity<?>getLatestCompletedPaymentByOrderId(Integer id);
 
 

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.AdwinsCom.AdwinsCom.DTO.SupplierDTO;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -35,12 +37,13 @@ public class Supplier {
     private String regNo;
 
     @Column(name = "business_type")
+    @NotNull
     private String businessType; 
 
-    @Column(name = "company_name")
+    @Column(name = "company_name" , unique = true)
     private String companyName; 
 
-    @Column(name = "brn")
+    @Column(name = "brn", unique = true)
     private String brn; 
 
     @Column(name = "first_name")
@@ -49,10 +52,10 @@ public class Supplier {
     @Column(name = "second_name")
     private String secondName;
 
-    @Column(name = "nic")
+    @Column(name = "nic", unique = true)
     private String nic;
 
-    @Column(name = "contact_no")
+    @Column(name = "contact_no", unique = true)
     @NotNull
     private String contactNo;
 
@@ -71,9 +74,11 @@ public class Supplier {
     private String note;
 
     @Column(name = "join_date")
+    @NotNull
     private LocalDate joinDate;
 
     @Column(name = "supplier_status")
+    @NotNull
     @Enumerated(EnumType.STRING)
     private SupplierStatus supplierStatus;
 
@@ -88,6 +93,7 @@ public class Supplier {
     private String addedUser;
 
     @Column(name = "added_date")
+    @NotNull
     private LocalDateTime addedDate;
 
     @JoinColumn(name = "updated_user")
@@ -97,11 +103,10 @@ public class Supplier {
     private LocalDateTime updatedDate;
 
     @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<BankAccount> bankAccounts = new ArrayList<>();
 
-    // Deprecated fields for backward compatibility (to be removed later)
-    @Column(name = "supplier_name")
-    private String supplierName;
+
 
 }
 

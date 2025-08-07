@@ -5,6 +5,7 @@ import com.AdwinsCom.AdwinsCom.entity.Role;
 import com.AdwinsCom.AdwinsCom.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,8 +30,11 @@ public class LoginController {
 
     @GetMapping(value = "/login")
     public ModelAndView loginUI() {
+
+
         //Get authenticated logged user authentication  object using security contest
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        SecurityContextHolder.clearContext();
         ModelAndView loginView = new ModelAndView();
         loginView.setViewName("login.html");
         loginView.addObject("username",auth.getName());

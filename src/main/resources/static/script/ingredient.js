@@ -1,7 +1,12 @@
 let currentIngredient = {};
 let tableIngredientInstance;
+let privilegeOb
+
 
 window.addEventListener("load", () => {
+
+    //Get Privilege
+    privilegeOb = ajaxGetRequest("/privilege/byloggedusermodule/INGREDIENT");
 
     //Call form refresh function
      reloadIngredientsForm();
@@ -15,6 +20,11 @@ window.addEventListener("load", () => {
     // Call this function on modal open or page load for quotation request form
     quotationRequestFormValidation();
 
+   
+    if (!privilegeOb.insert) {
+        $("#addIngredientBtn").prop("disabled", true).attr("title", "You do not have permission to add new ingredients.");
+    }
+
 
 
 });
@@ -24,6 +34,11 @@ const reloadIngredientsForm = () =>{
 
  ingredient = new Object();
  oldIngredient = null;
+
+ unitType.disabled = false;
+ quantity.disabled = false;
+
+ 
 
  //Get all products
   let ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
@@ -66,7 +81,6 @@ const ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
         {dataType: "price", propertyName: "avgCost"},
     ];
 
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/INGREDIENT");
 
     // Destroy the existing DataTable instance if it exists
     if (tableIngredientInstance) {
@@ -77,8 +91,9 @@ const ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
     $('#tableIngredient tbody').empty();
 
     //Define function for generate drop down
-    const generateIngredientDropDown = (element, index, privilegeOb = null) => {
+    const generateIngredientDropDown = (element, index, privilegeOb) => {
         const dropdownMenu = document.createElement("ul");
+        console.log(privilegeOb);
         dropdownMenu.className = "dropdown-menu";
 
         const buttonList = [
@@ -98,7 +113,7 @@ const ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
                 name: "Send Quotation Request",
                 action: quoRequestFormRefill,
                 icon: "fa-solid fa-file-lines me-2",
-                enabled: privilegeOb ? !!privilegeOb.insert : true,
+                enabled: privilegeOb ? !!privilegeOb.select : true,
             }
         ];
 
@@ -132,7 +147,7 @@ const ingredientList = ajaxGetRequest("/ingredient/getAllIngredients", "GET");
         displayProperty,
         true,
         generateIngredientDropDown,
-        getPrivilege
+        privilegeOb
     );
 
     // Initialize DataTable and store the instance
@@ -162,6 +177,7 @@ const quotationRequestFormValidation = () => {
     const requiredDeliveryDate = document.getElementById('requiredDeliveryDate');
     const quoDeadline = document.getElementById('QuoDeadline');
 
+
    
     // Ingredient Name validation (letters, min 2)
     quoIngredientName.addEventListener('input', () => {
@@ -176,8 +192,15 @@ const quotationRequestFormValidation = () => {
         selectFieldValidator(quoUnitType, '', 'quoRequest', 'unitType');
     });
 
+    QuoDeadline.addEventListener('change', () => {
+            dateFeildValidator(QuoDeadline, '', 'quoRequest', 'deadline');
+     });
+
+
     requiredDeliveryDate.addEventListener('change', () => {
         dateFeildValidator(requiredDeliveryDate, '', 'quoRequest', 'requiredDeliveryDate');
+
+
         let requiredDeliveryDateValue = requiredDeliveryDate.value;
 
         console.log(requiredDeliveryDateValue)
@@ -194,11 +217,10 @@ const quotationRequestFormValidation = () => {
     
     quoDeadline.addEventListener('change', () => {
         dateFeildValidator(quoDeadline, '', 'quoRequest', 'deadline');
-    });
+    })
 
    
-};
-
+    }
 
 
 // Existing ingredient form validation
@@ -214,7 +236,7 @@ quantity.addEventListener('input', () => {
 });
 
 ingredientName.addEventListener('input', () => {
-validation(ingredientName, '^[A-Z][a-z]{3,25}( [A-Z][a-z]{3,25})?$', 'ingredient', 'ingredientName');
+validation(ingredientName, '^[A-Z][a-z]{1,25}( [A-Z][a-z]{1,25}){0,8}?$', 'ingredient', 'ingredientName');
  });
 
 unitType.addEventListener('change', () => {
@@ -480,9 +502,13 @@ const ingredientFormRefill = (ob, rowIndex) => {
     quantity.value = ingredient.quantity;
     rop.value = ingredient.rop;
     roq.value = ingredient.roq;
-    unitType.value = ingredient.unitType;
+    unitType.disabled = true;
+    quantity.disabled =true;
 
-    if(product.note !=null){
+    
+
+
+    if(ingredient.note !=null){
         note.value = ingredient.note;
     } else {
         note.value = '';
@@ -492,45 +518,7 @@ const ingredientFormRefill = (ob, rowIndex) => {
     document.getElementById('btnIngredientSubmit').disabled = true;
 };
 
-const editIngredient = (ingredient) => {
-    $("#modelIngredientEdit").modal('show');
-    currentIngredient = ingredient;
-    document.getElementById('edit-ingredientCode').value = ingredient.ingredientCode;
-    document.getElementById('edit-ingredientName').value = ingredient.ingredientName;
-    document.getElementById('edit-note').value = ingredient.note;
-    document.getElementById('edit-quantity').value = ingredient.quantity;
-    document.getElementById('edit-unitType').value = ingredient.unitType;
-    document.getElementById('edit-rop').value = ingredient.rop;
-    document.getElementById('edit-roq').value = ingredient.roq;
-};
 
-document.getElementById('ingredientEditForm').onsubmit = function (event) {
-    event.preventDefault();
-
-    currentIngredient.ingredientCode = document.getElementById('edit-ingredientCode').value;
-    currentIngredient.ingredientName = document.getElementById('edit-ingredientName').value;
-    currentIngredient.note = document.getElementById('edit-note').value;
-    currentIngredient.quantity = parseInt(document.getElementById('edit-quantity').value, 10);
-    currentIngredient.unitType = document.getElementById('edit-unitType').value;
-    currentIngredient.rop = parseInt(document.getElementById('edit-rop').value, 10);
-    currentIngredient.roq = parseInt(document.getElementById('edit-roq').value, 10);
-
-    let response = ajaxRequestBody("/ingredient/updateIngredient", "PUT", currentIngredient);
-    if (response.status === 200) {
-        swal.fire({
-            title: response.responseText,
-            icon: "success"
-        });
-        $("#modelIngredientEdit").modal('hide');
-        getAllIngredients();
-    } else {
-        swal.fire({
-            title: "Something Went Wrong",
-            text: response.responseText,
-            icon: "error"
-        });
-    }
-};
 
 const deleteIngredient = (ingredient) => {
     swal.fire({
@@ -594,6 +582,7 @@ const checkQRFormError = () =>{
 
 const sendQuotationRequest=()=>{
     event.preventDefault();
+    console.log(quoRequest);
 
 //    Check form errors
     const errors = checkQRFormError();
@@ -654,12 +643,25 @@ const sendQuotationRequest=()=>{
 
 //Refill Ingredient form fields
 const quoRequestFormRefill = (ob, rowIndex) => {
+    const quoDeadline = document.getElementById('QuoDeadline');
+
   $("#modelQuotationRequest").modal('show');
   quoRequestIng = JSON.parse(JSON.stringify(ob));
   oldQuoRequestIng = JSON.parse(JSON.stringify(ob));
+  quoQuantity.value = "";
+  quoQuantity.classList.remove('is-invalid');
+  quoQuantity.classList.remove('is-valid');
+  quoDeadline.value = "";
+  quoDeadline.classList.remove('is-invalid');
+  quoDeadline.classList.remove('is-valid');
+  requiredDeliveryDate.value = "";
+  requiredDeliveryDate.classList.remove('is-invalid');
+  requiredDeliveryDate.classList.remove('is-valid');
+
 
   quoRequest = new Object();
   oldQuoRequest = null;
+
 
 
   quoRequest.ingredientCode = quoIngredientCode.value = quoRequestIng.ingredientCode;
@@ -704,6 +706,10 @@ function openAddIngredientForm() {
     // Set button states: enable Add, disable Update
     document.getElementById('btnIngredientUpdate').disabled = true;
     document.getElementById('btnIngredientSubmit').disabled = false;
+
+    unitType.disabled = false;
+    quantity.disabled = false;
+
 
     // Optionally, reset your JS ingredient object
     ingredient = {};

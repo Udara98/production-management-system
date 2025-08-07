@@ -2,6 +2,7 @@ package com.AdwinsCom.AdwinsCom.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,7 +32,8 @@ public class GoodReceiveNote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "grn_no")
+    @Column(name = "grn_no" , unique = true)
+    @NotNull
     private String grnNo;
 
     @OneToOne
@@ -39,9 +41,11 @@ public class GoodReceiveNote {
     private PurchaseOrder purchaseOrder;
 
     @Column(name = "total_amount")
+    @NotNull
     private Double totalAmount;
 
     @Column(name = "accepted_quantity")
+    @NotNull
     private Integer acceptedQuantity;
 
     @Column(name = "rejected_quantity")
@@ -51,20 +55,25 @@ public class GoodReceiveNote {
     private String rejectReason;
 
     @Column(name = "grn_status")
+    @NotNull
     @Enumerated(EnumType.STRING)
     private GRNStatus grnStatus;
 
     @Column(name = "payment_status")
+    @NotNull
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
 
     @Column(name = "received_date")
+    @NotNull
     private LocalDate receivedDate;
 
     @Column(name = "added_user")
+    @NotNull
     private String addedUser;
 
     @Column(name = "added_date")
+    @NotNull
     private LocalDateTime addedDate;
 
     @Column(name = "updated_user")
@@ -74,6 +83,7 @@ public class GoodReceiveNote {
     private LocalDateTime updatedDate;
 
     @Column(name = "balance")
+    @NotNull
     private Double balance;
 
     @ManyToOne

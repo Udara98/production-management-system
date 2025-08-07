@@ -1,21 +1,17 @@
 package com.AdwinsCom.AdwinsCom.Service;
 
-import com.AdwinsCom.AdwinsCom.DTO.CustomerOrderDTO;
-import com.AdwinsCom.AdwinsCom.DTO.CustomerSalesSummaryDTO;
-import com.AdwinsCom.AdwinsCom.DTO.ProductSalesSummaryDTO;
-import com.AdwinsCom.AdwinsCom.Repository.CustomerOrderProductRepository;
-import com.AdwinsCom.AdwinsCom.Repository.CustomerOrderRepository;
-import com.AdwinsCom.AdwinsCom.Repository.CustomerPaymentHasOrderRepository;
-import com.AdwinsCom.AdwinsCom.Repository.ProductHasBatchRepository;
-import com.AdwinsCom.AdwinsCom.Repository.CustomerRepository;
-import com.AdwinsCom.AdwinsCom.Repository.ProductRepository;
-import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
-import com.AdwinsCom.AdwinsCom.entity.CustomerOrder;
-import com.AdwinsCom.AdwinsCom.entity.CustomerOrderProduct;
-import com.AdwinsCom.AdwinsCom.entity.ProductHasBatch;
-import com.AdwinsCom.AdwinsCom.entity.Customer;
-import com.AdwinsCom.AdwinsCom.entity.Product;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,21 +19,22 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.AdwinsCom.AdwinsCom.DTO.CustomerOrderDTO;
+import com.AdwinsCom.AdwinsCom.DTO.CustomerSalesSummaryDTO;
+import com.AdwinsCom.AdwinsCom.DTO.ProductSalesSummaryDTO;
+import com.AdwinsCom.AdwinsCom.Repository.CustomerOrderProductRepository;
+import com.AdwinsCom.AdwinsCom.Repository.CustomerOrderRepository;
+import com.AdwinsCom.AdwinsCom.Repository.CustomerPaymentHasOrderRepository;
+import com.AdwinsCom.AdwinsCom.Repository.CustomerRepository;
+import com.AdwinsCom.AdwinsCom.Repository.ProductHasBatchRepository;
+import com.AdwinsCom.AdwinsCom.Repository.ProductRepository;
+import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
+import com.AdwinsCom.AdwinsCom.entity.Customer;
+import com.AdwinsCom.AdwinsCom.entity.CustomerOrder;
+import com.AdwinsCom.AdwinsCom.entity.CustomerOrderProduct;
 import com.AdwinsCom.AdwinsCom.entity.Notification;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import com.AdwinsCom.AdwinsCom.entity.Product;
+import com.AdwinsCom.AdwinsCom.entity.ProductHasBatch;
 
 @Service
 public class CustomerOrderService implements ICustomerOrderService{
@@ -59,6 +56,9 @@ public class CustomerOrderService implements ICustomerOrderService{
 
     @Autowired
     private IPrivilegeService privilegeService;
+
+    @Autowired
+    private CustomerCreditService customerCreditService;
 
     public CustomerOrderService(CustomerOrderRepository customerOrderRepository, ProductHasBatchRepository productHasBatchRepository, CustomerRepository customerRepository, ProductRepository productRepository, com.AdwinsCom.AdwinsCom.Repository.CustomerPaymentHasOrderRepository customerPaymentHasOrderRepository) {
         this.customerOrderRepository = customerOrderRepository;
@@ -108,7 +108,7 @@ public class CustomerOrderService implements ICustomerOrderService{
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found with ID: " + customerOrderDTO.getCustomerId()));
 
         Integer userId = userRepository.getUserByUserName(auth.getName()).getId();
-        
+
 
         CustomerOrder newCustomerOrder = new CustomerOrder();
         newCustomerOrder.setOrderNo(getNextSupplierRegNo());
@@ -129,6 +129,7 @@ public class CustomerOrderService implements ICustomerOrderService{
 
 
         boolean allProductsHaveStock = true;
+        int remaining = 0;
         for (CustomerOrderDTO.CustomerOrderProductDTO orderProductDTO : customerOrderDTO.getCustomerOrderProducts()) {
             Integer productId = orderProductDTO.getProductId();
             Integer requiredQty = orderProductDTO.getQuantity();
@@ -143,7 +144,7 @@ public class CustomerOrderService implements ICustomerOrderService{
                     .sorted(Comparator.comparing(ProductHasBatch::getManufacturingDate))
                     .collect(Collectors.toList());
 
-            int remaining = requiredQty;
+            remaining = requiredQty;
             boolean hasSufficientStock = false;
             Double latestBatchPrice = null;
             if (!batches.isEmpty()) {
@@ -191,6 +192,7 @@ public class CustomerOrderService implements ICustomerOrderService{
         newCustomerOrder.setCustomerOrderProducts(orderProducts);
         newCustomerOrder.setTotalAmount(totalAmount);
 
+
         // Dynamic credit limit check
         Double outstanding = customerOrderRepository.getTotalOutstandingByCustomerId(customer.getId());
         if (outstanding == null) outstanding = 0.0;
@@ -199,6 +201,9 @@ public class CustomerOrderService implements ICustomerOrderService{
         // Set order status based on stock/credit
         if (allProductsHaveStock && hasSufficientCredit) {
             newCustomerOrder.setOrderStatus(CustomerOrder.OrderStatus.Assigned);
+
+            customerCreditService.deductCredit(customer.getId(), totalAmount);
+
             // Deduct from batch quantities
             for (CustomerOrderProduct orderLine : orderProducts) {
                 ProductHasBatch batch = orderLine.getProductHasBatch();
@@ -217,7 +222,7 @@ public class CustomerOrderService implements ICustomerOrderService{
             notAssignedNotif.setResolved(false);
             notAssignedNotif.setReportedBy(userName);
             String dateStr = java.time.LocalDate.now().toString();
-            notAssignedNotif.setMessage("Order " + newCustomerOrder.getOrderNo() + " for customer " + customer.getCompanyName() + " is not assigned due to insufficient stock or credit.\nReported By: " + userName + "\nDate: " + dateStr);
+            notAssignedNotif.setMessage("Order " + newCustomerOrder.getOrderNo() + " for customer " + customer.getRegNo() + " is not assigned due to insufficient stock or credit.\nReported By: " + userName + "\nDate: " + dateStr);
             notificationService.saveNotification(notAssignedNotif);
         }
 
@@ -226,7 +231,7 @@ public class CustomerOrderService implements ICustomerOrderService{
         resp.put("orderId", newCustomerOrder.getId());
         resp.put("orderStatus", newCustomerOrder.getOrderStatus().name());
         if (newCustomerOrder.getOrderStatus() == CustomerOrder.OrderStatus.NotAssigned) {
-            resp.put("responseText", "Order placed but not assigned due to insufficient stock or credit.");
+            resp.put("responseText", "Order was not assigned due to insufficient stock or exceeded credit limit.");
         } else {
             resp.put("responseText", "Customer Order Placed Successfully");
         }

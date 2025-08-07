@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 @Data
 @AllArgsConstructor
@@ -20,19 +21,20 @@ public class SupplierDTO {
     private String businessType; 
     private String companyName; 
     private String brn; 
-    private String contactPerson; 
     private String firstName;   
     private String secondName;
     private String nic; 
     private String contactNo;
+    private String addedUser;
+    private LocalDateTime addedDate;
+    private String updatedUser;
+    private LocalDateTime updatedDate;
     private String email;
     private String address;
     private String note;
-    private LocalDate joinDate;
     private Supplier.SupplierStatus supplierStatus;
-    private Set<Ingredient> ingredients;
+//    private Set<Ingredient> ingredients;
     private BankAccountDTO bankAccount;
-    private Double creditLimit;
-    private String supplierName;
     private String contactPersonName;
+    private List <SupplierDTOShort> ingredientList;
 }

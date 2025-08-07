@@ -1,14 +1,17 @@
 let purchaseOrderTableInstance;
 let selectedPO;
+let getPrivilege;
 window.addEventListener("load", function () {
+    getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/PURCHASE_ORDER");
     reloadPOTable();
+    console.log(getPrivilege);
+
 
 })
 
 //Declare function to refresh the table
 const reloadPOTable =  () => {
     const purchaseOrders = ajaxGetRequest("/purchaseOrder/getAllPurchaseOrders");
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
 
     const getStatus = (ob) => {
         if (ob.purchaseOrderStatus === "Pending") {
@@ -28,7 +31,7 @@ const reloadPOTable =  () => {
     const displayProperty = [
         {dataType: "text", propertyName: "purchaseOrderNo"},
         {dataType: "text", propertyName: "quotationNo"},
-        {dataType: "text", propertyName: "orderedDate"}, // Order Date column
+        {dataType: "date", propertyName: "orderedDate"}, // Order Date column
         {dataType: "price", propertyName: "totalPrice"},
         {dataType: "date", propertyName: "proposedDeliveryDate"}, // Changed from requiredDate
         {dataType: "function", propertyName: getStatus},
@@ -50,18 +53,19 @@ const reloadPOTable =  () => {
 }
 
 //Define the function to generate the dropdown
-const generatePODropDown = (element) => {
+const generatePODropDown = (element,index,getPrivilege) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
-        {name: "View", action: viewPO, icon: "fa-solid fa-eye me-2"},
-        {
-            name: "Edit",
-            action: editPO,
-            icon: "fa-solid fa-edit me-2",
-        },
-        {name: "Delete", action: deletePO, icon: "fa-solid fa-trash me-2"},
+        {name: "View", action: viewPO, icon: "fa-solid fa-eye me-2", enabled: getPrivilege.select},
+        // {
+        //     name: "Edit",
+        //     action: editPO,
+        //     icon: "fa-solid fa-edit me-2",
+        //     enabled: getPrivilege.insert
+        // },
+        {name: "Delete", action: deletePO, icon: "fa-solid fa-trash me-2",enabled:getPrivilege.delete},
 
     ];
 
@@ -69,9 +73,17 @@ const generatePODropDown = (element) => {
         const buttonElement = document.createElement("button");
         buttonElement.className = "dropdown-item btn";
         buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
-        buttonElement.onclick = function () {
-            button.action(element);
-        };
+        buttonElement.type = "button";
+        buttonElement.disabled =  !button.enabled;
+        if(!button.enabled) {
+                    buttonElement.style.cursor = "not-allowed";
+                    buttonElement.classList.add("text-muted");
+                }
+                buttonElement.onclick = function () {
+                    if (button.enabled) {
+                        button.action(element,index);
+                    }
+                };
         const liElement = document.createElement("li");
         liElement.appendChild(buttonElement);
         dropdownMenu.appendChild(liElement);

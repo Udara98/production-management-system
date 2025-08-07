@@ -6,6 +6,8 @@ import com.AdwinsCom.AdwinsCom.Repository.ProductRepository;
 import com.AdwinsCom.AdwinsCom.Repository.UserRepository;
 import com.AdwinsCom.AdwinsCom.Service.IPrivilegeService;
 import com.AdwinsCom.AdwinsCom.Service.IProductService;
+import com.AdwinsCom.AdwinsCom.entity.User;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,6 +27,7 @@ public class ProductController {
     @Autowired
     private UserRepository userRepository;
 
+
     final IProductService productService;
     final ProductRepository productRepository;
 
@@ -34,17 +37,20 @@ public class ProductController {
     }
 
 
-
-
     @GetMapping()
     public ModelAndView ProductUI() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        User loggedUser = userRepository.getUserByUserName(auth.getName());
+
         HashMap<String, Boolean> logUserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "product");
         if (!logUserPrivi.get("select")) {
             return null;
         }
         {
             ModelAndView itemTableView = new ModelAndView();
+            itemTableView.addObject("loggedUserName", auth.getName());
+            itemTableView.addObject("loggedUserRole", loggedUser.getRoles().iterator().next().getName());   
             itemTableView.setViewName("product.html");
             return itemTableView;
         }

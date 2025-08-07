@@ -1,5 +1,38 @@
 // report.js
+function printReport() {
+    // Print only the main report section (tables, charts)
+    let reportContent = document.querySelector('#reportContainer');
+    if (!reportContent) {
+        window.print();
+        return;
+    }
+    const printWindow = window.open('', '', 'height=700,width=900');
+    printWindow.document.write('<html><head><title>Print Report</title>');
+    // Add styles
+    printWindow.document.write('<link href="/bootstrap-5.3.2/css/bootstrap.min.css"  rel="stylesheet"/>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(reportContent.outerHTML);
+    printWindow.document.write('<script src="/chart.min.js/chart.min.js"></script>');
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+    }, 500);
+}
+
 window.document.addEventListener('DOMContentLoaded', () => {
+    // Print Report Button
+    const printBtn = document.getElementById('printReportBtn');
+    if (printBtn) {
+        printBtn.addEventListener('click', printReport);
+    }
+
+
+});
+
+// Existing code follows
     // Update Product ROP
     const updateProductRopBtn = document.getElementById('updateProductRopBtn');
     if (updateProductRopBtn) {
@@ -26,19 +59,14 @@ window.document.addEventListener('DOMContentLoaded', () => {
         updateIngredientRopBtn.addEventListener('click', function() {
             const rows = Array.from(document.querySelectorAll('#tableGrnIngredient tbody tr'));
             const data = rows.map(row => {
-                console.log(row);
                 const cells = row.querySelectorAll('td');
-                // Find the ingredient code from the data-* attribute or hidden column if available
-                // If not available, you need to add ingredientCode to your table rows (recommended)
-                // For now, assume ingredient code is stored as a data-attribute on the row
+                // Find the ingredient code 
                 const ingredientCode = row.getAttribute('data-ingredient-code');
-                console.log(ingredientCode);
                 return {
                     ingredientCode: ingredientCode,
                     generatedRop: Number(cells[5]?.textContent)
                 };
             }).filter(row => row.ingredientCode);
-            console.log(data);
             fetch('/report/updateIngredientRop', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -99,7 +127,8 @@ window.document.addEventListener('DOMContentLoaded', () => {
         }
     });
    
-});
+
+
 
 function reloadBatchProductionTable() {
     const batchProductionReport = document.getElementById("batchProductionReport");
@@ -163,7 +192,6 @@ function bindSupplierPaymentTable(data) {
         tr.innerHTML = `
             <td>${idx + 1}</td>
             <td>${row.supNo || ''}</td>
-            <td>${row.supplierName || ''}</td>
             <td>${row.amountPaid != null ? row.amountPaid.toFixed(2) : ''}</td>
             <td>${row.outstandingAmount != null ? row.outstandingAmount.toFixed(2) : ''}</td>
         `;
@@ -201,6 +229,8 @@ function renderSupplierPaymentBarChart(data) {
     });
 }
 
+
+//Render supplier Table and Pie Chart
 let batchProductionTableInstance;
 function reloadSupPayTable() {
     const supPayReport = document.getElementById("supPayReport");
@@ -223,7 +253,6 @@ function reloadSupPayTable() {
 
     supPayReport.style.display="";
 }
-
 
 // Function to render the batch production pie chart
 function renderBatchProductionPieChart(data) {
@@ -264,243 +293,6 @@ function renderBatchProductionPieChart(data) {
     });
 }
 
-
-
-    //         reloadPCRTable();
-    //     } else if (reportType === "PSR") {
-    //         fillProductSalesSummaryTable();
-    //     }
-    // });
-
-    // document.getElementById('searchBtn').addEventListener('click', () => {
-    //     const fromDate = document.getElementById('add-from').value;
-    //     const toDate = document.getElementById('add-to').value;
-    //     const reportType = document.getElementById('add-report-type').value;
-//         } else if (reportType === "PCR") {
-//             reloadPCRTable()
-//             document.getElementById('saleReport').style.display = 'none';
-//             document.getElementById('supPayReport').style.display = 'none';
-//             document.getElementById('costReport').style.display = 'block';
-//         }
-//     });
-
-//     document.getElementById('searchBtn').addEventListener('click', () => {
-//         const fromDate = document.getElementById('add-from').value;
-//         const toDate = document.getElementById('add-to').value;
-//         const reportType = document.getElementById('add-report-type').value;
-
-//         if (reportType === "CSR") {
-//             reloadCusPayments({ fromDate, toDate });
-//         }
-//         if (reportType === "SPR") {
-//             reloadSPTable({ fromDate, toDate });
-//         }
-//         if (reportType === "PCR") {
-//             reloadPCRTable({ fromDate, toDate });
-//         }
-//     });
-
-//     document.getElementById('downloadReportBtn').addEventListener('click', () => {
-//         const reportType = document.getElementById('add-report-type').value;
-//         if (reportType === "CSR") {
-//             downloadTableAsExcel('tableSR', 'CustomerSalesReport.xlsx');
-//         }
-//         if (reportType === "SPR") {
-//             downloadTableAsExcel('tableSPR', 'SupplierPaymentReport.xlsx');
-//         }
-//         if (reportType === "PCR") {
-//             downloadTableAsExcel('tableCR', 'ProductionCostReport.xlsx');
-//         }
-//     });
-// });
-
-// const reloadCusPayments = (filter) => {
-//     let cusPayments = ajaxGetRequest('/cusPayment/getAllCusPayments');
-
-//     if (filter && filter.fromDate && filter.toDate) {
-//         cusPayments = cusPayments.filter(payment => {
-//             const paymentDate = new Date(payment.paymentDate);
-//             return paymentDate >= new Date(filter.fromDate) && paymentDate <= new Date(filter.toDate);
-//         });
-//     }
-
-//     const getOrderNO = (ob) => ob.order.orderNo;
-//     const getPaymentMethod = (ob) => {
-//         if (ob.paymentMethod === "VISA_CARD") {
-//             return '<div style="display: flex;justify-content: start;"> <div><i class="fa-brands fa-cc-visa fa-lg me-2" style="color: #194ca4;"></i><span>Visa Card</span></div> </div>';
-//         }
-//         if (ob.paymentMethod === "MASTER_CARD") {
-//             return '<div style="display: flex;justify-content: start;"> <div><i class="fa-brands fa-cc-mastercard fa-lg me-2" style="color: #ff4733;"></i><span>MASTER CARD</span></div> </div>';
-//         }
-//         if (ob.paymentMethod === "BANK_TRANSFER") {
-//             return '<div style="display: flex;justify-content: start;"> <div><i class="fa-solid fa-money-bill-transfer fa-lg me-2" style="color: #6a9f5b;"></i><span>BANK TRANSFER</span></div> </div>';
-//         }
-//         if (ob.paymentMethod === "CASH") {
-//             return '<div style="display: flex;justify-content: start;"> <div><i class="fa-solid fa-money-bill fa-lg me-2" style="color: #6a9f5b;"></i><span>CASH</span></div> </div>';
-//         }
-//         if (ob.paymentMethod === "CHEQUE") {
-//             return '<div style="display: flex;justify-content: start;"> <div><i class="fa-solid fa-money-check fa-lg me-2" style="color: #ace1fb;"></i><span>CHEQUE</span></div> </div>';
-//         }
-//     };
-
-//     const displayProperty = [
-//         { dataType: "text", propertyName: "invoiceNo" },
-//         { dataType: "function", propertyName: getOrderNO },
-//         { dataType: "date", propertyName: "paymentDate" },
-//         { dataType: "price", propertyName: "totalAmount" },
-//         { dataType: "function", propertyName:  getPaymentMethod },
-//     ];
-
-//     if (cusSalesReportTableInstance) {
-//         cusSalesReportTableInstance.destroy();
-//     }
-//     $("#tableSR tbody").empty();
-//     tableDataBinder(
-//         tableSR,
-//         cusPayments,
-//         displayProperty,
-//         false,
-//         null,
-//         null
-//     );
-//     cusSalesReportTableInstance = $("#tableSR").DataTable({
-//         responsive: true,
-//         autoWidth: false,
-//         searching: false,
-//         ordering: false,
-//         paging: false,
-//         info: false,
-//     });
-// };
-
-// const reloadSPTable = (filter) => {
-//     let supplierPayments = ajaxGetRequest("/supplier_payment/getAllSP");
-
-//     if (filter && filter.fromDate && filter.toDate) {
-//         supplierPayments = supplierPayments.filter(payment => {
-//             const paymentDate = new Date(payment.paymentDate);
-//             return paymentDate >= new Date(filter.fromDate) && paymentDate <= new Date(filter.toDate);
-//         });
-//     }
-
-//     const getGRNNo = (ob) => ob.goodReceiveNote.grnNo;
-
-//     const getPaymentMethod = (ob) => {
-//         if (ob.paymentMethod === "VISA_CARD") {
-//             return '<div style="display: flex;justify-content: center;"> <div><i class="fa-brands fa-cc-visa fa-lg me-2" style="color: #194ca4;"></i><span>Visa Card</span></div> </div>';
-//         }
-//         if (ob.paymentMethod === "MASTER_CARD") {
-//             return '<div style="display: flex;justify-content: center;"> <div><i class="fa-brands fa-cc-mastercard fa-lg me-2" style="color: #ff4733;"></i><span>MASTER CARD</span></div> </div>';
-//         }
-//         if (ob.paymentMethod === "BANK_TRANSFER") {
-//             return '<div style="display: flex;justify-content: center;"> <div><i class="fa-solid fa-money-bill-transfer fa-lg me-2" style="color: #6a9f5b;"></i><span>BANK TRANSFER</span></div> </div>';
-//         }
-//         if (ob.paymentMethod === "CASH") {
-//             return '<div style="display: flex;justify-content: center;"> <div><i class="fa-solid fa-money-bill fa-lg me-2" style="color: #6a9f5b;"></i><span>CASH</span></div> </div>';
-//         }
-//         if (ob.paymentMethod === "CHEQUE") {
-//             return '<div style="display: flex;justify-content: center;"> <div><i class="fa-solid fa-money-check fa-lg me-2" style="color: #ace1fb;"></i><span>CHEQUE</span></div> </div>';
-//         }
-//     };
-
-//     const displayProperty = [
-//         { dataType: "text", propertyName: "billNo" },
-//         { dataType: "function", propertyName: getGRNNo },
-//         { dataType: "price", propertyName: "totalAmount" },
-//         { dataType: "date", propertyName: "paymentDate" },
-//         { dataType: "function", propertyName: getPaymentMethod },
-//     ];
-
-//     if (spReportTableInstance) {
-//         spReportTableInstance.destroy();
-//     }
-//     $("#tableSPR tbody").empty();
-//     tableDataBinder(
-//         tableSPR,
-//         supplierPayments,
-//         displayProperty,
-//         false,
-//         null,
-//         null
-//     );
-//     spReportTableInstance = $("#tableSPR").DataTable({
-//         responsive: true,
-//         autoWidth: false,
-//         searching: false,
-//         ordering: false,
-//         paging: false,
-//         info: false,
-//     });
-// };
-
-// const reloadPCRTable = (filter)=>{
-//     let batchList = ajaxGetRequest("/batch/getAllBatches")
-//     if (filter && filter.fromDate && filter.toDate) {
-//         batchList = batchList.filter(batch => {
-//             const paymentDate = new Date(batch.manufactureDate);
-//             return paymentDate >= new Date(filter.fromDate) && paymentDate <= new Date(filter.toDate);
-//         });
-//     }
-//     const getStatus = (ob) => {
-//         if (ob.batchStatus === "InProduction") {
-//             return '<div style="display: flex;justify-content: center;"><button class="btn btn-warning btn-sm" style="width: 100%;" disabled >In-Production</button></div>';
-//         }
-//         if (ob.batchStatus === "ProductionDone") {
-//             return '<div style="display: flex;justify-content: center;"><button  class="btn btn-success btn-sm" style="width: 100%;" disabled >Production Done</button></div>';
-//         }
-
-//     };
-//     const displayProperty = [
-//         {dataType: "text", propertyName: "batchNo"},
-//         {dataType: "text", propertyName: "productionItemNo"},
-//         {dataType: "date", propertyName: "manufactureDate"},
-//         {dataType: "date", propertyName: "expireDate"},
-//         {dataType: "text", propertyName: "availableQuantity"},
-//         {dataType: "text", propertyName: "damagedQuantity"},
-//         {dataType: "price", propertyName: "totalCost"},
-//         {dataType: "function", propertyName: getStatus},
-//     ];
-//     if (pcReportTableInstance) {
-//         pcReportTableInstance.destroy();
-//     }
-//     $("#tableCR tbody").empty();
-//     tableDataBinder(
-//         tableCR,
-//         batchList,
-//         displayProperty,
-//         false,
-//         null,
-//         null
-//     )
-//     pcReportTableInstance = $("#tableCR").DataTable({
-//         responsive: true,
-//         autoWidth: false,
-//         searching: false,
-//         ordering: false,
-//         paging: false,
-//         info: false,
-//     })
-// }
-
-// const downloadTableAsExcel = (tableId, filename) => {
-//     const table = document.getElementById(tableId);
-//     const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
-//     XLSX.writeFile(wb, filename);
-// };
-
-// Dropdown and Search logic
-// function showReportSection(type) {
-//     var sale = document.getElementById('saleReport');
-//     var product = document.getElementById('productSalesReport');
-//     var grn = document.getElementById('grnIngredientReport');
-//     var sup = document.getElementById('supPayReport');
-//     var cost = document.getElementById('costReport');
-//     if (sale) sale.style.display = (type === 'CSR') ? '' : 'none';
-//     if (product) product.style.display = (type === 'PSR') ? '' : 'none';
-//     if (grn) grn.style.display = (type === 'GRN') ? '' : 'none';
-//     if (sup) sup.style.display = (type === 'SPR') ? '' : 'none';
-//     if (cost) cost.style.display = (type === 'PCR') ? '' : 'none';
-// }
 
 //Fill Customer Sales Summary Table
 let tableCusSalesInstance;
@@ -581,9 +373,7 @@ function fillProductSalesSummaryTable() {
      data.forEach((row, idx) => {
          totalAmount += Number(row.totalAmount) || 0;
          totalQuantity += Number(row.totalQuantity) || 0;
-//         const tr = document.createElement('tr');
-//         tr.innerHTML = `<td>${idx + 1}</td><td>${row.productName}</td><td>${row.totalQuantity != null ? row.totalQuantity : ''}</td><td>${row.totalAmount != null ? Number(row.totalAmount).toFixed(2) : ''}</td><td>${row.generatedRop != null ? Number(row.generatedRop).toFixed(2) : ''}</td>`;
-//         tableProductSales.querySelector('tbody').appendChild(tr);
+
      });
     const amountSpan = document.getElementById('productSalesTotalAmount');
     if (amountSpan) amountSpan.textContent = totalAmount.toFixed(2);
@@ -652,32 +442,14 @@ function renderCustomerSalesSummaryChart(data) {
 
 
 
-searchBtn.addEventListener('click', function() {
-    const reportTypeDropdown = document.getElementById('add-report-type');
-
-    const type = reportTypeDropdown.value;
-    const from = document.getElementById('add-from').value;
-    const to = document.getElementById('add-to').value;
-    if (!from || !to) {
-        alert('Please select both start and end dates.');
-        return;
-    }
-    if (type === 'CSR') {
-        fillCustomerSalesSummaryTable();
-    } else if (type === 'PSR') {
-        fillProductSalesSummaryTable();
-    } else if (type === 'GRN') {
-        fillGrnIngredientSummaryTable(from, to);
-    } else if (type === 'PCR') {
-        reloadPCRTable();
-    } else if (type === 'SPR') {
-        reloadSupPayTable();
-    }
-});
-
 // Function to fill the GRN Ingredient Summary table
 let tableIngredientGrnInstance;
 function fillGrnIngredientSummaryTable(from, to) {
+    // Hide all other report sections when showing GRN Ingredient report
+    if (typeof saleReport !== 'undefined') saleReport.style.display = "none";
+    if (typeof supPayReport !== 'undefined') supPayReport.style.display = "none";
+    if (typeof batchProductionReport !== 'undefined') batchProductionReport.style.display = "none";
+    if (typeof productSalesReport !== 'undefined') productSalesReport.style.display = "none";
     const grnIngredientReport = document.getElementById("grnIngredientReport");
     const tableGrnIngredient = document.getElementById("tableGrnIngredient");
 
@@ -706,16 +478,7 @@ function fillGrnIngredientSummaryTable(from, to) {
             responsive: true,
             autoWidth: false,
         });
-        // Totals
-        let totalAmount = 0;
-        let totalQuantity = 0;
-//         grnIngredientData.forEach((row, idx) => {
-//             totalAmount += Number(row.totalAmount) || 0;
-//             totalQuantity += Number(row.totalQuantity) || 0;
-//    //         const tr = document.createElement('tr');
-//    //         tr.innerHTML = `<td>${idx + 1}</td><td>${row.productName}</td><td>${row.totalQuantity != null ? row.totalQuantity : ''}</td><td>${row.totalAmount != null ? Number(row.totalAmount).toFixed(2) : ''}</td><td>${row.generatedRop != null ? Number(row.generatedRop).toFixed(2) : ''}</td>`;
-//    //         tableProductSales.querySelector('tbody').appendChild(tr);
-//         });
+     
 
        let totalValue = 0;
        grnIngredientData.forEach((row, idx) => {
@@ -726,11 +489,10 @@ function fillGrnIngredientSummaryTable(from, to) {
 
 
         grnIngredientReport.style.display="";
-        renderProductSalesSummaryChart(data);
         renderGrnIngredientPieChart(grnIngredientData);
 }
 
-//
+//GRN Ingredient Pie Chart
 function renderGrnIngredientPieChart(data) {
     // Aggregate total cost by ingredient name
     const ingredientTotals = {};
@@ -767,6 +529,7 @@ function renderGrnIngredientPieChart(data) {
     });
 }
 
+//Customer Sales Summary Chart
 function renderCustomerSalesSummaryChart(data) {
     const ctx = document.getElementById('salesChart').getContext('2d');
     const labels = data.map(row => row.customerName);

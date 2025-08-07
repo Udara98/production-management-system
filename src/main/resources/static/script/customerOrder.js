@@ -1,8 +1,8 @@
 let OrderProductsTableInstance;
 let cusOrderTableInstance;
-let orderProducts = []
-let products = []
-let totalAmount = 0
+let orderProducts = [];
+let products = [];
+let totalAmount = 0;
 
 
 
@@ -87,8 +87,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            
-
             // Proceed with add logic
             const orderProduct = {
                 product: selectedProduct,
@@ -103,16 +101,34 @@ window.addEventListener('DOMContentLoaded', () => {
                     prod.quantity = prod.quantity - quantity
                 }
             })
+
             displayOrderProducts(newOrderProducts);
             totalAmount = totalAmount + (selectedProduct.salesPrice * quantity)
             document.getElementById('tot-amount').innerHTML = ''
+
+
             document.getElementById('tot-amount').innerHTML = `<h5>Total Amount : ${(totalAmount).toLocaleString("en-US", {
                 style: "currency",
                 currency: "LKR",
             })}</h5>`
-            orderProducts.push(orderProduct);
-        }
 
+            orderProducts.push(orderProduct);
+        }else{
+
+         quantityElement.value = "";
+               quantityElement.classList.remove('is-invalid');
+               quantityElement.classList.remove('is-valid');
+
+               productSelectElement.value = "";
+               productSelectElement.classList.remove('is-invalid');
+               productSelectElement.classList.remove('is-valid');
+
+       swal.fire({
+            title: "Product Does not Added",
+            text: errors,
+            icon: "error"
+        });
+}
         quantityElement.value = "";
        quantityElement.classList.remove('is-invalid');
        quantityElement.classList.remove('is-valid');
@@ -126,7 +142,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('place-order-btn').onclick = function (event) {
         event.preventDefault();
-        let errors = checkCusOrderFormEroor();
+        let errors = checkMainCusOrderFormEroor();
         console.log(errors);
         if(errors === ""){
         const customerId = parseInt(document.getElementById('add-co-cus').value);
@@ -158,6 +174,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const formCO = document.getElementById('COAddForm');
             if(formCO) formCO.reset();
             reloadOrderTable();
+            orderProducts = [];
             customerOrderFormRefill();
             // Remove validation classes
             document.querySelectorAll('#COAddForm input, #COAddForm select, #COAddForm textarea').forEach((input) => {
@@ -195,6 +212,9 @@ window.addEventListener('DOMContentLoaded', () => {
     }}
 })
 
+const CalDiscountPrice = () => {
+
+}
 
 const customerOrderFormRefill = () => {
 
@@ -491,6 +511,7 @@ const customerOrderFormValidation = () =>{
     const requiredDateElement = document.getElementById("add-co-reqDate");
     const orderStatusElement = document.getElementById("add-co-status");
     const quantityElement = document.getElementById("add-co-qty");
+    const discountElement = document.getElementById("add-co-discount");
 
     customerSelectElement.addEventListener('change',  () => {
         DynamicSelectValidation(customerSelectElement, 'customerOrderValidation', 'customerName');
@@ -521,6 +542,7 @@ const checkCusOrderFormEroor = () => {
     const requiredDateElement = document.getElementById("add-co-reqDate");
     const orderStatusElement = document.getElementById("add-co-status");
     const quantityElement = document.getElementById("add-co-qty");
+    const discountElement = document.getElementById("add-co-discount");
 
     // Customer validation
     if (!customerSelectElement.value) {
@@ -531,7 +553,7 @@ const checkCusOrderFormEroor = () => {
         customerSelectElement.classList.add('is-valid');
     }
     // Product validation
-    if (!productSelectElement.value && orderProducts.length<0) {
+    if (!productSelectElement.value && orderProducts.length<=0) {
         errors += 'Product must be selected.\n';
         productSelectElement.classList.add('is-invalid');
     } else {
@@ -555,15 +577,71 @@ const checkCusOrderFormEroor = () => {
         orderStatusElement.classList.add('is-valid');
     }
     // Quantity validation
-    if ( (!quantityElement.value && orderProducts.length<0) ) {
-        errors += 'Quantity must be a positive number.\n';
+    if ( !quantityElement.value || !/^[1-9][0-9]{0,3}$/.test(quantityElement.value)) {
+        errors += 'Quantity must be a valid number.\n';
         quantityElement.classList.add('is-invalid');
     } else {
         quantityElement.classList.remove('is-invalid');
         quantityElement.classList.add('is-valid');
     }
+
+
     return errors;
 };
 
+
+const checkMainCusOrderFormEroor = () => {
+    let errors = '';
+    const customerSelectElement = document.getElementById("add-co-cus");
+    const productSelectElement = document.getElementById("add-co-product");
+    const requiredDateElement = document.getElementById("add-co-reqDate");
+    const orderStatusElement = document.getElementById("add-co-status");
+    const quantityElement = document.getElementById("add-co-qty");
+    const discountElement = document.getElementById("add-co-discount");
+
+    // Customer validation
+    if (!customerSelectElement.value) {
+        errors += 'Customer must be selected.\n';
+        customerSelectElement.classList.add('is-invalid');
+    } else {
+        customerSelectElement.classList.remove('is-invalid');
+        customerSelectElement.classList.add('is-valid');
+    }
+    // Product validation
+    if (!productSelectElement.value && orderProducts.length<=0) {
+        errors += 'Product must be selected.\n';
+        productSelectElement.classList.add('is-invalid');
+    } else {
+        productSelectElement.classList.remove('is-invalid');
+        productSelectElement.classList.add('is-valid');
+    }
+    // Required date validation
+    if (!requiredDateElement.value) {
+        errors += 'Required date is mandatory.\n';
+        requiredDateElement.classList.add('is-invalid');
+    } else {
+        requiredDateElement.classList.remove('is-invalid');
+        requiredDateElement.classList.add('is-valid');
+    }
+    // Order status validation
+    if (!orderStatusElement.value) {
+        errors += 'Order status must be selected.\n';
+        orderStatusElement.classList.add('is-invalid');
+    } else {
+        orderStatusElement.classList.remove('is-invalid');
+        orderStatusElement.classList.add('is-valid');
+    }
+    // Quantity validation
+    if ( !quantityElement.value && orderProducts.length<=0) {
+        errors += 'Quantity must be a valid number.\n';
+        quantityElement.classList.add('is-invalid');
+    } else {
+        quantityElement.classList.remove('is-invalid');
+        quantityElement.classList.add('is-valid');
+    }
+
+
+    return errors;
+};
 
 

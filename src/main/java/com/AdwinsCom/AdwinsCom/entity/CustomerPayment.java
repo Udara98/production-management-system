@@ -2,6 +2,7 @@ package com.AdwinsCom.AdwinsCom.entity;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,6 +30,7 @@ public class CustomerPayment {
     private Integer id;
 
     @Column(name = "receipt_no")
+    @NotNull
     private String receiptNo;
 
     @OneToMany(mappedBy = "customerPayment", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -36,32 +38,34 @@ public class CustomerPayment {
     private java.util.List<CustomerPaymentHasOrder> paymentDetails = new java.util.ArrayList<>();
 
     @Column(name = "payment_date")
+    @NotNull
     private LocalDate paymentDate;
 
-    @Column(name = "total_amount")
-    private Double totalAmount;
-
     @Column(name = "balance")
+    @NotNull
     private BigDecimal balance;
 
     @Column(name = "paidamount")
+    @NotNull
     private BigDecimal payAmount;
 
     @Column(name = "payment_status")
+    @NotNull
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
 
     @Column(name = "payment_method")
+    @NotNull
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
-    @Column(name = "transferid")
-    private String transferid;
 
     @Column(name = "added_user")
+    @NotNull
     private String addedUser;
 
     @Column(name = "added_date")
+    @NotNull
     private LocalDateTime addedDate;
 
     @Column(name = "updated_user")

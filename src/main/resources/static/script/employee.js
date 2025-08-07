@@ -1,6 +1,12 @@
 let employeeTableInstance;
+let empUpdBtn;
+let empSubBtn;
 //browser on load event
 window.addEventListener("load", () => {
+
+    empUpdBtn = document.getElementById("btn-emp-update");
+    empSubBtn  = document.getElementById("btn-emp-submit");
+
 
   //Create empty object
   employee = {};
@@ -13,6 +19,25 @@ window.addEventListener("load", () => {
 
 
 });
+
+const prepareEmpModal = () => {
+
+  empUpdBtn.disabled = true;
+  empSubBtn.disabled = false;
+
+  //Reset form
+  formEmployee.reset();
+  formEmployee.classList.remove('was-validated');
+  formEmployee.classList.add('needs-validation');
+
+  //Need to hide validation error
+  document.querySelectorAll('.needs-validation input,.needs-validation select, .needs-validation textarea ').forEach((input) => {
+    input.classList.remove('is-valid', 'is-invalid');
+  });
+
+  $('#modalEmployeeAdd').modal('show');
+
+}
 
 const refreshEmployeeTable = () => {
 
@@ -49,7 +74,7 @@ const refreshEmployeeTable = () => {
     displayProperty,
     employeeFormRefill,
     deleteEmployee,
-    printEmployee,
+    null,
     true,
       getPrivilege
   );
@@ -114,6 +139,11 @@ const getHasUserAccount = (ob) => {
 
 //Create refill Function
 const employeeFormRefill = (ob, rowIndex) => {
+
+  empUpdBtn.disabled = false;
+  empSubBtn.disabled = true;
+
+
   console.log("refil");
   $("#modalEmployeeAdd").modal('show');
   employee = JSON.parse(JSON.stringify(ob));
@@ -644,3 +674,5 @@ const refreshEmployeeForm = () =>{
 
 
 }
+
+

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 
@@ -83,13 +84,13 @@ public class PurchaseOrderService implements IPurchaseOrderService{
         newPurchaseOrder.setSupplierRegNo(purchaseOrderDTO.getSupplierRegNo());
         newPurchaseOrder.setPricePerUnit(purchaseOrderDTO.getPricePerUnit());
         newPurchaseOrder.setAddedUser(userName);
-        newPurchaseOrder.setAddedDate(java.time.LocalDateTime.now());
+        newPurchaseOrder.setAddedDate(LocalDateTime.now());
         newPurchaseOrder.setQty(purchaseOrderDTO.getQty());
         newPurchaseOrder.setTotalPrice(purchaseOrderDTO.getTotalPrice());
         newPurchaseOrder.setProposedDeliveryDate(purchaseOrderDTO.getProposedDeliveryDate());
         newPurchaseOrder.setNotes(purchaseOrderDTO.getNotes());
         newPurchaseOrder.setPurchaseOrderStatus(purchaseOrderDTO.getPurchaseOrderStatus());
-        newPurchaseOrder.setOrderedDate(LocalDate.now());
+        newPurchaseOrder.setOrderedDate(LocalDateTime.now());
         purchaseOrderRepository.save(newPurchaseOrder);
 
         // Close related quotation request
@@ -182,5 +183,17 @@ public class PurchaseOrderService implements IPurchaseOrderService{
         }
         purchaseOrderRepository.save(purchaseOrder);
         return ResponseEntity.ok("Purchase Order Deleted Successfully.");
+    }
+
+    @Override
+    public ResponseEntity<?> findPendingPurchaseOrdersForGrn() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "PURCHASE_ORDER");
+        if (!loguserPrivi.get("select")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Purchase Order fetch not completed: You don't have permission!");
+        }
+        List<PurchaseOrder> pendingPOs = purchaseOrderRepository.findPendingPurchaseOrdersForGrn();
+        return ResponseEntity.ok(pendingPOs);
     }
 }

@@ -11,8 +11,8 @@ public class IngredientAvailabilityDTO {
     private String ingredientCode;
     private String ingredientName;
     private Boolean isAvailable;
-    private Double requiredQty; // <-- Add this line
-    private String unitType; // <-- Add this line
+    private Double requiredQty; 
+    private String unitType; 
 
 
 }

@@ -33,12 +33,15 @@ public class QuotationRequest {
     private Integer id;
 
     @Column(name="request_no")
+    @NotNull
     private String requestNo;
 
     @Column(name="ingredient_id")
+    @NotNull
     private Integer ingredientId;
 
     @Column(name = "request_date")
+    @NotNull
     private LocalDateTime requestDate;
 
     @ElementCollection
@@ -46,8 +49,10 @@ public class QuotationRequest {
     @Column(name = "suppliers")
     private List<String> suppliers;
 
+
     @Column(name = "request_status")
     @Enumerated(EnumType.STRING)
+    @NotNull
     private QRequestStatus requestStatus = QRequestStatus.Send;
 
     @Column(name = "added_user")
@@ -55,24 +60,29 @@ public class QuotationRequest {
     private String addedUser;
 
     @Column(name = "added_date")
+    @NotNull
     private LocalDateTime addedDate;
 
-    @JoinColumn(name = "updated_user")
+    @Column(name = "updated_user")
     private String updatedUser;
 
     @Column(name = "updated_date")
     private LocalDateTime updatedDate;
 
     @Column(name = "quantity")
+    @NotNull
     private Double quantity;
 
     @Column(name = "unit_type")
+    @NotNull
     private String unitType;
 
     @Column(name = "required_delivery_date")
+    @NotNull
     private LocalDate requiredDeliveryDate;
 
     @Column(name = "deadline")
+    @NotNull
     private LocalDate deadline;
 
     @Column(name = "note")

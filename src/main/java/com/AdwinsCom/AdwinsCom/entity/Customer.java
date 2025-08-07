@@ -1,7 +1,10 @@
 package com.AdwinsCom.AdwinsCom.entity;
 
 import com.AdwinsCom.AdwinsCom.DTO.CustomerDTO;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,16 +19,27 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Customer {
+    
+    @NotNull
     @Column(name = "business_type")
-    private String businessType; // COMPANY or INDIVIDUAL
+    private String businessType; 
+
     @Column(name = "contact_person")
-    private String contactPerson; // Only for company
+    private String contactPerson; 
+
     @Column(name = "credit_limit")
-    private Double creditLimit; // Always present for both types
+    @NotNull
+    private Double creditLimit; 
+
+    @Column(name = "remaining_credit")
+    private Double remainingCredit = 0.0;
+
+
     @Column(name = "first_name")
-    private String firstName; // Only for individual
+    private String firstName; 
+    
     @Column(name = "second_name")
-    private String secondName; // Only for individual
+    private String secondName; 
 
 
     public enum CustomerStatus{
@@ -38,7 +52,8 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "reg_no")
+    @Column(name = "reg_no",unique = true)
+    @NotNull
     private String regNo;
 
     @Column(name = "f_name")
@@ -47,38 +62,44 @@ public class Customer {
     @Column(name = "s_name")
     private String sName;
 
-    @Column(name = "nic")
+    @Column(name = "nic",unique = true)
     private String nic;
 
-    @Column(name = "mobile")
+    @Column(name = "mobile" ,unique = true)
+    @NotNull
     private String mobile;
 
     @Column(name = "land_no")
     private String landNo;
 
-    @Column(name = "email")
+    @Column(name = "email",unique = true)
+    @NotNull
     private String email;
 
     @Column(name = "address")
     private String address;
 
-    @Column(name = "company_name")
+    @Column(name = "company_name",unique = true)
     private String companyName;
 
-    @Column(name = "brn")
+    @Column(name = "brn",unique = true)
     private String brn;
 
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private BankAccount bankAccount;
 
     @Column(name = "customer_status")
     @Enumerated(EnumType.STRING)
+    @NotNull
     private CustomerStatus customerStatus;
 
     @Column(name = "added_user")
+    @NotNull
     private String addedUser;
 
     @Column(name = "added_date")
+    @NotNull
     private LocalDateTime addedDate;
 
     @Column(name = "updated_user")

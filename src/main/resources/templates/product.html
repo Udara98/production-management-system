@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-<head th:replace="~{fragments/head.html:: headProduct}"></head>
+<title>Product</title>
+<head th:replace="~{fragments/head.html:: headProduct}">
+</head>
 <body>
 <div th:replace="~{fragments/topnav.html}"></div>
 <div class="d-flex">
@@ -22,9 +24,8 @@
       <h2 class="settingsHeader">Products</h2>
       <button
         class="btn ms-auto me-4 addPrimaryBtn"
-        data-bs-target="#modalAddProduct"
-        data-bs-toggle="modal"
         type="button"
+        onclick="prepareProductnModal()"
       >
         <i class="fa-solid fa-plus me-2"></i>
         Add Product
@@ -126,5 +127,8 @@
     </div>
 </div>
 </body>
+<script th:inline="javascript">
+    var loggedUserName = /*[[${loggedUserName}]]*/ '';
+</script>
 <script src="/script/sidebar.js"></script>
 </html>

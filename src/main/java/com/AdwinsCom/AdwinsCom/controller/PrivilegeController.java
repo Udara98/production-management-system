@@ -25,29 +25,12 @@ public class PrivilegeController {
     private IPrivilegeService privilegeService;
 
 
-    //Get mapping for generate privilegeUI
-//    @GetMapping
-//    public ModelAndView privilegeUi() {
-//        //Get authenticated logged user authentication  object using security contest
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        ModelAndView privilegeUi = new ModelAndView();
-//        privilegeUi.addObject("loginusername",auth.getName());
-//        privilegeUi.addObject("title","Employee Management : Privilege Management");
-//        privilegeUi.setViewName("privilege.html");
 
-        @GetMapping
-        public ResponseEntity<ModelAndView> privilegeUi() {
+    @GetMapping
+    public ResponseEntity<ModelAndView> privilegeUi() {
             return privilegeService.getPrivilegeUi();
         }
-//
-//        return privilegeUi;
-//    }
 
-    //URL -> privilege/findall
-//    @GetMapping(value = "/findall", produces = "application/json")
-//    public List<Privilege> findAll() {
-//
-//        return privilegeRepository.findAll(Sort.by(Sort.Direction.DESC,"id"));
 
     @GetMapping(value = "/findall", produces = "application/json")
     public ResponseEntity<?> findall() {
@@ -55,29 +38,6 @@ public class PrivilegeController {
     }
 
 
-
-
-//    }
-
-//    @PostMapping
-//    public String savePrivilege(@RequestBody Privilege privilege) {
-//
-//        // cannot be given privileges to same module and role
-//        Privilege existingPrivilege = privilegeRepository.getPrivByRoleModule(privilege.getRole_id().getId(), privilege.getModule_id().getId());
-//        if (existingPrivilege != null) {
-//            return "Save unsuccessfully : Entered Privilege for this Role and Module already exist";
-//        }
-//
-//        try {
-//            privilege.setAddeddatetime(LocalDateTime.now());
-//            privilege.setAddeduser(1);
-//            privilegeRepository.save(privilege);
-//            return "200";
-//
-//        } catch (Exception e) {
-//            return "An error occurred while saving the privilege" + e.getMessage();
-//        }
-//    }
 
     @PostMapping
     public ResponseEntity<String> savePrivilege(@RequestBody Privilege privilege) {

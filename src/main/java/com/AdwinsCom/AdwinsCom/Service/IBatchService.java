@@ -11,6 +11,9 @@ public interface IBatchService {
     ResponseEntity<?> GetAllBatches();
     ResponseEntity<?> DeleteBatch(Integer id);
     ResponseEntity<?> getRecipeCodeFromProduct(Integer id);
-    ResponseEntity<?> getBatchesForProduct(Integer id,boolean fifo);
+    ResponseEntity<?> getBatchesForProduct(Integer id);
     ResponseEntity<?> getBatchNoById(Integer id);
+    ResponseEntity<?> GetAllDoneBatches();
+
+
 }

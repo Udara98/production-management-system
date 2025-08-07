@@ -77,15 +77,7 @@ public class RecipeService implements IRecipeService{
         return ResponseEntity.ok("Recipe Added");
     }
 
-    // @Override
-    // public ResponseEntity<?> AddNewRecipe(Recipe R, String userName) throws NoSuchAlgorithmException {
-    //     // Legacy method for interface compatibility (not used by new flow)
-    //     recipe.setRecipeCode(QuotationRequest.generateUniqueId("REC-"));
-    //     recipe.setAddedUser(userName);
-    //     recipe.setAddedDate(LocalDateTime.now());
-    //     recipeRepository.save(recipe);
-    //     return ResponseEntity.ok("Recipe Added");
-    // }
+
 
     @Override
     public ResponseEntity<?> UpdateRecipe(Recipe recipe, String userName){

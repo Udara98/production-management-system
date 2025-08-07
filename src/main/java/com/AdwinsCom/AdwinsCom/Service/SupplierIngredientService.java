@@ -52,7 +52,6 @@ public class SupplierIngredientService {
         SupplierWithIngredientsDTO supplier = new SupplierWithIngredientsDTO();
         supplier.setId(s.getId());
         supplier.setRegNo(s.getRegNo());
-        supplier.setSupplierName(s.getSupplierName());
         supplier.setContactNo(s.getContactNo());
         supplier.setEmail(s.getEmail());
         supplier.setBusinessType(s.getBusinessType());

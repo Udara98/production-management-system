@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+<title>Ing Orders</title>
+</head>    
 <head th:replace = "~{fragments/head.html:: headIngOrders}"></head>
 <body>
 <div th:replace="~{fragments/topnav.html}"></div>
@@ -57,12 +60,14 @@
                 <div th:replace = "~{fragments/IngOrders/purchaseOrder.html}"></div>
                 <div th:replace = "~{fragments/IngOrders/grn.html}"></div>
                 <div th:replace = "~{fragments/IngOrders/supplierPayment.html}"></div>
-
             </div>
         </div>
 </div>
 <script src="/script/purchaseOrder.js" ></script>
 <script src="/script/supplierPayment.js" ></script>
 <script src="/script/grn.js" ></script>
+<script th:inline="javascript">
+    var loggedUserName = /*[[${loggedUserName}]]*/ '';
+</script>
 </body>
 </html>

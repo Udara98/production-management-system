@@ -33,7 +33,8 @@
         <th>NIC</th>
         <th>Mobile No</th>
         <th>Address</th>
-        <th>Customer State</th>
+        <th>Status</th>
+        <th>Remaining Credit</th>
         <th>Modify</th>
         </thead>
         <tbody></tbody>
@@ -50,20 +51,12 @@
             class="modal fade"
             data-bs-backdrop="static"
             data-bs-keyboard="false"
-            id="modalEditCustomer"
-    >
-        <div th:replace="~{fragments/Sales/Customer/CustomerEditForm.html}"  ></div>
-    </div>
-    <div
-            class="modal fade"
-            data-bs-backdrop="static"
-            data-bs-keyboard="false"
             id="customerModal"
     >
                 <div class="modal-dialog modal-lg modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h4 class="modal-title">Customer Details</h5>
+                            <h4 class="modal-title">Customer Details</h4>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body" id="customerDetails">

@@ -81,6 +81,11 @@ public ResponseEntity<?> AddNewProduct(ProductBatchDTO dto) {
                 .body("Product Add not Completed: You don't have permission!");
     }
 
+    System.out.println(dto.getProductName().trim());
+    if (productRepository.existsByProductName(dto.getProductName().trim())) {
+        return ResponseEntity.badRequest().body("Product Name Already Exists!");
+    }
+
     // Validate and fetch the batch
     if (dto.getBatch() == null || dto.getBatch().getId() == null) {
         return ResponseEntity.badRequest().body("A valid batch is required.");
@@ -99,7 +104,7 @@ public ResponseEntity<?> AddNewProduct(ProductBatchDTO dto) {
 
     double requiredQty = unitSize * dto.getQuantity();
     if (batch.getAvailableQuantity() < requiredQty) {
-        return ResponseEntity.badRequest().body("Insufficient batch quantity for batch ID " + batch.getId());
+        return ResponseEntity.badRequest().body("Insufficient Batch Quantity for batch " + batch.getBatchNo());
     }
 
     // Deduct batch quantity
@@ -112,6 +117,7 @@ public ResponseEntity<?> AddNewProduct(ProductBatchDTO dto) {
     product.setQuantity(dto.getQuantity());
     product.setUnitSize(dto.getUnitSize());
     product.setUnitType(dto.getUnitType());
+
     product.setReorderPoint(dto.getReorderPoint());
     product.setSalePrice(dto.getSalesPrice());
     product.setReorderQuantity(dto.getReorderQuantity());
@@ -136,6 +142,8 @@ public ResponseEntity<?> AddNewProduct(ProductBatchDTO dto) {
     phb.setQuantity(dto.getQuantity());
     phb.setSalesPrice(dto.getSalesPrice().doubleValue());
     phb.setExpireDate(batch.getExpireDate());
+    phb.setManufacturingDate(batch.getManufactureDate());
+    phb.setAddedDate(LocalDateTime.now()); // Use current local time as per user context
 
     List<ProductHasBatch> batchList = new ArrayList<>();
     batchList.add(phb);
@@ -221,7 +229,6 @@ public ResponseEntity<?> GetAllProducts() {
         dto.setReorderQuantity(product.getReorderQuantity());
         dto.setNote(product.getNote());
         dto.setProductPhoto(product.getProductPhoto());
-
         // Find the latest batch (by id or date)
         List<ProductHasBatch> batches = product.getBatches();
         if (batches != null && !batches.isEmpty()) {
@@ -333,7 +340,7 @@ public ResponseEntity<?> GetAllProducts() {
         // Check if the batch has sufficient quantity
         if (batch.getAvailableQuantity() < requiredQty) {
             return ResponseEntity.badRequest()
-                    .body("Insufficient batch quantity for batch ID " + batch.getId());
+                    .body("Insufficient Batch Quantity for batch " + batch.getBatchNo());
         }
 
         // Deduct the required quantity from the batch

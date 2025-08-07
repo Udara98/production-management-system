@@ -3,9 +3,15 @@ let selectedGRN;
 let purchaseOrders;
 let addAcceptedQty;
 let addRejectedQty;
-
+let getPrivilegeGrn;
 
 window.addEventListener('load', () => {
+
+     getPrivilegeGrn = ajaxGetRequest("/privilege/byloggedusermodule/GRN");
+
+    if (!getPrivilegeGrn.insert) {
+        $("#addGrnBtn").prop("disabled", true);
+    }
 
     purchaseOrders = ajaxGetRequest("/purchaseOrder/getAllPurchaseOrders").filter((po) => po.purchaseOrderStatus === 'Pending');
     addAcceptedQty = document.getElementById('addAcceptedQty');
@@ -24,6 +30,8 @@ window.addEventListener('load', () => {
     addGrnRecDate.disabled = true;
     addAcceptedQty.disabled = true;
     addRejectedQty.disabled = true;
+
+    
     
 })
 
@@ -40,8 +48,11 @@ const grnFormValidation = () => {
         addAcceptedQty.disabled = false;
         addRejectedQty.disabled = false;
 
-        const OrderDate = new Date(selectedPO.orderDate);
+        const OrderDate = new Date(selectedPO.orderedDate);
         const today = new Date();
+
+        console.log(OrderDate);
+        console.log(today);
 
         addGrnRecDate.setAttribute('min', OrderDate.toISOString().split('T')[0]);
         addGrnRecDate.setAttribute('max', today.toISOString().split('T')[0]);
@@ -162,9 +173,9 @@ const checkGrnFormError = () =>{
 
 //Declare product submit function
  const grnSubmit = () => {
-    event.preventDefault();
     console.log("GRN submit button clicked");
     console.log(grn);
+    grn.grnStatus = "Pending";
 
     //Check form errors
     const errors = checkGrnFormError();
@@ -185,9 +196,9 @@ const checkGrnFormError = () =>{
                 // Check backend response
                 if (postServiceRequestResponse.status === 200) {
                     $("#modalGRNAdd").modal('hide');
-                    grnAddForm.reset();
                     reloadGRN();
                     reloadGRNForm();
+                    grnAddForm.reset();
 
                     // Reset validation classes
                     Array.from(grnAddForm.elements).forEach((field) => {
@@ -225,9 +236,16 @@ const reloadGRNForm = () =>{
     oldGrn = null;
 
     //Get ONLY pending purchase orders
-    const purchaseOrders = ajaxGetRequest("/purchaseOrder/getAllPurchaseOrders").filter((po) => po.purchaseOrderStatus === 'Pending');
-
+//    const purchaseOrders = ajaxGetRequest("/purchaseOrder/getAllPurchaseOrders").filter((po) => po.purchaseOrderStatus === 'Pending');
+      const purchaseOrders = ajaxGetRequest("/purchaseOrder/findPendingPurchaseOrdersForGrn");
     //Function to fill data into PO select element
+    addGrnPoNo.innerHTML = '';
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    defaultOption.textContent = 'Select PO No';
+    addGrnPoNo.appendChild(defaultOption);
     purchaseOrders.forEach(po => {
         const option = document.createElement('option');
         option.value = po.purchaseOrderNo; // Only the PO number
@@ -237,7 +255,7 @@ const reloadGRNForm = () =>{
 
       //Select Status
       const selectStatus = document.getElementById('addGrnStatus');
-      selectStatus.value = 'Approved';
+      selectStatus.value = 'Pending';
       addGrnStatus.disabled = true;
 
 
@@ -247,7 +265,6 @@ const reloadGRNForm = () =>{
 //Function to Reload the GRN table
 const reloadGRN = () => {
     const grnList = ajaxGetRequest("/grn/getAllGRNs")
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER");
 
     const getPONo = (ob) => ob.purchaseOrder.purchaseOrderNo;
 
@@ -314,7 +331,7 @@ const reloadGRN = () => {
         displayProperty,
         true,
         generateGRNDropDown,
-        getPrivilege
+        getPrivilegeGrn
     )
     grnTableInstance = $("#tableGRN").DataTable({
         responsive: true,
@@ -324,7 +341,7 @@ const reloadGRN = () => {
 }
 
 //Function to generate the drop down
-const generateGRNDropDown = (element,rowIndex) => {
+const generateGRNDropDown = (element,rowIndex,getPrivilegeGrn) => {
     const dropdownMenu = document.createElement("ul");
     dropdownMenu.className = "dropdown-menu";
 
@@ -333,8 +350,9 @@ const generateGRNDropDown = (element,rowIndex) => {
             name: "Edit",
             action: grNFormRefill,
             icon: "fa-solid fa-edit me-2",
+            enabled: getPrivilegeGrn.update && element.purchaseOrder.purchaseOrderStatus === "Pending"
         },
-        {name: "Delete", action: deleteGRN, icon: "fa-solid fa-trash me-2"},
+        {name: "Delete", action: deleteGRN, icon: "fa-solid fa-trash me-2",enabled: getPrivilegeGrn.delete},
 
     ];
 
@@ -342,8 +360,18 @@ const generateGRNDropDown = (element,rowIndex) => {
         const buttonElement = document.createElement("button");
         buttonElement.className = "dropdown-item btn";
         buttonElement.innerHTML = `<i class="${button.icon}"></i>${button.name}`;
+        buttonElement.type = "button";
+        buttonElement.disabled = !button.enabled;
+
+        if(!button.enabled) {
+             buttonElement.style.cursor = "not-allowed";
+             buttonElement.classList.add("text-muted");
+            }
+
         buttonElement.onclick = function () {
-            button.action(element);
+            if (button.enabled) {
+                           button.action(element);
+              }
         };
         const liElement = document.createElement("li");
         liElement.appendChild(buttonElement);
@@ -560,4 +588,43 @@ const checkGrnUpdates = () =>{
     }
 
     return updates;
+}
+
+const prepareGrnModal = () => {
+    // Reset form fields
+    document.getElementById("addGrnRecDate").value = "";
+    document.getElementById("addGrnStatus").value = "Pending";
+    document.getElementById("addGrnPoNo").value = "";
+    document.getElementById("addOrderedQty").value = "";
+    document.getElementById("addAcceptedQty").value = "";
+    document.getElementById("addRejectedQty").value = "";
+    document.getElementById("addRejectReason").value = "";
+    document.getElementById("addGrnTot").value = "";
+
+    // Remove validation classes
+    [
+        "addGrnRecDate",
+        "addGrnStatus",
+        "addGrnPoNo",
+        "addOrderedQty",
+        "addAcceptedQty",
+        "addRejectedQty",
+        "addRejectReason",
+        "addGrnTot"
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.classList.remove("is-valid", "is-invalid");
+            el.style.border = "";
+        }
+    });
+
+    grnSubmitBtn.disabled = false;
+    grnUpdateBtn.disabled = true;
+
+    modalTitleGrn.textContent = "Add GRN";
+
+    reloadGRNForm();
+
+    $('#modalGRNAdd').modal('show');
 }

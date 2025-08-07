@@ -20,12 +20,9 @@ public class QuotationDTO {
     private String supplierRegNo;
     private Double pricePerUnit;
     private LocalDate receivedDate;
-    private LocalDate deadline;
     private Quotation.QuotationStatus quotationStatus;
     private Double quantity;
     private String unitType;
     private Double totalPrice;
-    private Double advancePercentage;
-    private Integer creditDays;
     private LocalDate proposedDeliveryDate;
 }

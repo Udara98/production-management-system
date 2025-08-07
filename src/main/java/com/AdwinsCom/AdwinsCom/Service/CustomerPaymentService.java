@@ -1,8 +1,12 @@
 package com.AdwinsCom.AdwinsCom.Service;
 
 import com.AdwinsCom.AdwinsCom.DTO.CustomerPaymentDTO;
+import com.AdwinsCom.AdwinsCom.DTO.CustomerPaymentHasOrderDTO;
 import com.AdwinsCom.AdwinsCom.Repository.CustomerPaymentRepository;
+import com.AdwinsCom.AdwinsCom.entity.CustomerOrder;
 import com.AdwinsCom.AdwinsCom.entity.CustomerPayment;
+import com.AdwinsCom.AdwinsCom.entity.CustomerPaymentHasOrder;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +29,9 @@ public class CustomerPaymentService implements ICustomerPaymentService{
 
     @Autowired
     private IPrivilegeService privilegeService;
+
+    @Autowired
+    private CustomerCreditService customerCreditService;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -76,20 +83,18 @@ public class CustomerPaymentService implements ICustomerPaymentService{
         }
         newCustomerPayment.setReceiptNo(receiptNo);
         newCustomerPayment.setPaymentDate(customerPaymentDTO.getPaymentDate());
-        newCustomerPayment.setTotalAmount(customerPaymentDTO.getTotalAmount());
         newCustomerPayment.setPaymentStatus(customerPaymentDTO.getPaymentStatus());
         newCustomerPayment.setPaymentMethod(customerPaymentDTO.getPaymentMethod());
-        newCustomerPayment.setTransferid(customerPaymentDTO.getTransferid());
         newCustomerPayment.setBalance(customerPaymentDTO.getBalance());
         newCustomerPayment.setPayAmount(new BigDecimal(customerPaymentDTO.getPaidAmount()));
 
         // Map payment details
-        java.util.List<com.AdwinsCom.AdwinsCom.entity.CustomerPaymentHasOrder> details = new java.util.ArrayList<>();
+        java.util.List<CustomerPaymentHasOrder> details = new java.util.ArrayList<>();
         if (customerPaymentDTO.getPaymentDetails() != null) {
-            for (com.AdwinsCom.AdwinsCom.DTO.CustomerPaymentHasOrderDTO dto : customerPaymentDTO.getPaymentDetails()) {
-                com.AdwinsCom.AdwinsCom.entity.CustomerPaymentHasOrder entity = new com.AdwinsCom.AdwinsCom.entity.CustomerPaymentHasOrder();
+            for (CustomerPaymentHasOrderDTO dto : customerPaymentDTO.getPaymentDetails()) {
+                CustomerPaymentHasOrder entity = new CustomerPaymentHasOrder();
                 // Fetch order entity by ID
-                com.AdwinsCom.AdwinsCom.entity.CustomerOrder order = customerOrderRepository.findById(dto.getOrderId().intValue())
+                CustomerOrder order = customerOrderRepository.findById(dto.getOrderId().intValue())
                         .orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + dto.getOrderId()));
                 entity.setOrder(order);
                 entity.setPaidAmount(dto.getPaidAmount());
@@ -97,6 +102,8 @@ public class CustomerPaymentService implements ICustomerPaymentService{
                 // Set parent payment if needed
                 entity.setCustomerPayment(newCustomerPayment);
                 details.add(entity);
+
+                customerCreditService.updateCustomerCredit(order.getCustomer().getId(), dto.getPaidAmount());
             }
         }
         newCustomerPayment.setPaymentDetails(details);
@@ -125,21 +132,6 @@ public class CustomerPaymentService implements ICustomerPaymentService{
   
         List<CustomerPayment> customerPayments = customerPaymentRepository.findAll();
         return ResponseEntity.ok(customerPayments);
-    }
-
-    @Override
-    public ResponseEntity<?>GetAllUnpaidCustomerPayments(){
-
-          // Authentication and authorization
-          Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-          HashMap<String, Boolean> loguserPrivi = privilegeService.getPrivilegeByUserModule(auth.getName(), "CUSTOMER_PAYMENT");
-          if (!loguserPrivi.get("select")) {
-              return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                      .body("Payment GetAll not Completed: You don't have permission!");
-          }
-
-        List<CustomerPayment> unpaidCustomerPayments = customerPaymentRepository.gtAllUnpaidCustomerPayments();
-        return ResponseEntity.ok(unpaidCustomerPayments);
     }
 
     @Override
@@ -172,10 +164,8 @@ public class CustomerPaymentService implements ICustomerPaymentService{
         dto.setReceiptNo(payment.getReceiptNo());
         dto.setPaymentDate(payment.getPaymentDate());
         dto.setPaidAmount(payment.getPayAmount().doubleValue());
-        dto.setTotalAmount(payment.getTotalAmount());
         dto.setPaymentStatus(payment.getPaymentStatus());
         dto.setPaymentMethod(payment.getPaymentMethod());
-        dto.setTransferid(payment.getTransferid());
         dto.setBalance(payment.getBalance());
         // Map payment details
         java.util.List<com.AdwinsCom.AdwinsCom.DTO.CustomerPaymentHasOrderDTO> detailDTOs = new java.util.ArrayList<>();

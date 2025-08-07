@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+ <head>
+<title>Sales</title>
+ </head>   
 <head th:replace="~{fragments/head.html:: headSales}"></head>
 <body>
 <div th:replace="~{fragments/topnav.html}"></div>
@@ -63,4 +66,7 @@
 <script src="/script/customerPayment.js"></script>
 <script src="/script/customer.js"></script> -->
 </body>
+ <script th:inline="javascript">
+     var loggedUserName = /*[[${loggedUserName}]]*/ '';
+ </script>
 </html>

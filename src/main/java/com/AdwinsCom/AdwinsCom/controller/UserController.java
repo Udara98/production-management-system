@@ -74,120 +74,19 @@ public class UserController {
         return userService.findallwithoutadmin();
     }
 
-//    @PostMapping
-//    public String saveUSer(@RequestBody User user) {
-//        //Authentication and authorization
-//        //Get authenticated logged user authentication  object using security contest
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//
-//        HashMap<String, Boolean> loguserPrivi =  privilegeController.getPrivilegeByUserModule (auth.getName(), "USER");
-//
-//        System.out.println(loguserPrivi);
-//
-//        if(!loguserPrivi.get("insert")){
-//            return "User Save not Completed : You haven't Permission..!";
-//        }
-//
-//        //Duplicate email, username, employee
-//        User extUserName = userRepository.getUserByUserName(user.getUsername());
-//        if (extUserName != null) {
-//            return "User Save not completed : Given  User Name Already ext....!";
-//        }
-//
-//        User extUserEmployee = userRepository.getUserByEmployee(user.getEmployee_id().getId());
-//        if (extUserEmployee != null) {
-//            return "User Save Not completed: Given employee Already Ext..!";
-//        }
-//
-//
-//        try {
-//            //Set Automatically Added Date time
-//            user.setAdded_datetime(LocalDateTime.now());
-//            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-//            userRepository.save(user);
-//            return "OK";
-//        } catch (Exception e) {
-//            return "Save Not Completed :" + e.getMessage();
-//
-//
-//        }
-//
-//
-//    }
     @PostMapping
     public ResponseEntity<String>saveUser(@RequestBody User user){
         return userService.saveUser(user);
     }
 
-//    @DeleteMapping
-//    public String deleteUser(@RequestBody User user){
-//        // Hard delete
-//
-//        // userDao.delete(userDao.getReferenceById(user.getId()));
-//
-//        // extUser -> extUser and front end objects are different
-//
-//        User extUser = userRepository.getReferenceById(user.getId());
-//        if (extUser == null) {
-//            return "user delete not completed : user not exist";
-//
-//        }
-//
-//        try {
-//            extUser.setStatus(false);
-//            userRepository.save(extUser);
-//
-//            return "OK";
-//        } catch (Exception e) {
-//            return "Delete not completed : " + e.getMessage();
-//        }
-//    }
+
 
     @DeleteMapping
     public ResponseEntity<String> deleteUser(@RequestBody User user) {
         return userService.deleteUser(user);
     }
 
-//    @PutMapping
-//    public String updateUser(@RequestBody User user) {
-//
-//        // authentication and authorization
-//
-//        // existing with duplicate
-//        User extUser = userRepository.getReferenceById(user.getId());
-//        if (extUser == null) {
-//            return "update not completed : user not existing";
-//        }
-//
-//        User extUserEmail = userRepository.getByEmail(user.getEmail());
-//        if (extUserEmail != null && extUserEmail.getId() != user.getId()) {
-//            return "Update not completed : Changed email already exists";
-//        }
-//
-//        //Check password exist
-//        if( user.getPassword() !=  null){
-//            if(bCryptPasswordEncoder.matches(user.getPassword(),extUser.getPassword())){
-//                return "Update Not Completed: Change password already existed..!";
-//            }
-//        }else {
-//            user.setPassword(extUser.getPassword());
-//        }
-//
-//        try {
-//            // auto set value
-//
-//            // operator
-//
-//            // dependencies
-//
-//            userRepository.save(user);
-//
-//            return "OK";
-//
-//        } catch (Exception e) {
-//            return "update not completed : "  + e.getMessage();
-//        }
-//    }
+
 
     // Update User Endpoint
     @PutMapping
@@ -226,6 +125,21 @@ public class UserController {
 
 @PutMapping("/profile/update")
 public ResponseEntity<String> updateUserProfile(@RequestBody UserProfileUpdateDTO dto, HttpServletRequest request) {
+
+
+    System.out.println("##############");
+    System.out.println("##############");
+    System.out.println("##############");
+
+    System.out.println("##############");
+    System.out.println("##############");
+
+    System.out.println("##############");
+    System.out.println("##############");
+
+    System.out.println("##############");
+
+    System.out.println("Received user profile update request: " + dto);
     ResponseEntity<String> response = userService.updateUserProfile(dto);
     if (response.getStatusCode().is2xxSuccessful()) {
         // Logout user: invalidate session and clear authentication
@@ -238,10 +152,7 @@ public ResponseEntity<String> updateUserProfile(@RequestBody UserProfileUpdateDT
     return response;
 }
 
-//    @PostMapping("/uploadPhoto/{userId}")
-//    public ResponseEntity<String> uploadUserPhoto(@RequestParam("file") MultipartFile file, @PathVariable int userId) {
-//        return userService.uploadUserPhoto(file, userId);
-//    }
+
 
 
 }

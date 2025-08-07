@@ -1,5 +1,14 @@
-let spTableInstance;
+let spTableInstance; 
+let getPrivilegeSup;
 window.addEventListener('DOMContentLoaded',  () => {
+
+     getPrivilegeSup = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER_PAYMENT");
+
+     if (!getPrivilegeSup.insert) {
+        $("#addSpBtn").prop("disabled", true);
+    }
+
+    
     reloadSPTable();
     refreshSupplierPaymentForm();
     let selectedPO;
@@ -7,6 +16,8 @@ window.addEventListener('DOMContentLoaded',  () => {
     // No need to call SupplierPaymentFormValidation (now replaced)
 });
 
+
+    //Subnmit Supplier payment form
    const supplierPaymentSubmit = (event) =>  {
     event.preventDefault();
     // Validate using new error function
@@ -40,6 +51,30 @@ window.addEventListener('DOMContentLoaded',  () => {
             });
         }
     });
+
+
+   const paymentMethod = document.getElementById("add-sp-paymentMethod").value;
+    let paymentDate = "";
+    let transactionId = "";
+
+    if (paymentMethod === "BANK_TRANSFER") {
+        paymentDate = document.getElementById("inputBankTransferredDateTime").value;
+        transactionId = document.getElementById("inputBankTranferId").value;
+    } else if (paymentMethod === "CHEQUE") {
+        paymentDate = document.getElementById("inputChequeDate").value;
+        transactionId = document.getElementById("inputChequeNo").value;
+    } else if (paymentMethod === "VISA_CARD" || paymentMethod === "MASTER_CARD") {
+        paymentDate = document.getElementById("inputCardDate").value;
+        transactionId = document.getElementById("inputCardRefNo").value;
+    } else if (paymentMethod === "CASH") {
+        paymentDate = document.getElementById("add-sp-payDate").value;
+    }
+
+    // Add to your supplierPayment object
+    supplierPayment.paymentDate = paymentDate;
+    supplierPayment.transactionId = transactionId; // For bank/card
+
+
     // Calculate totals
     const totalAmount = parseFloat(document.getElementById('totalPaid').value);
     const totalBalanceAmount = totalAmount - totalPaymentAmount;
@@ -56,6 +91,9 @@ window.addEventListener('DOMContentLoaded',  () => {
             icon: "success",
         });
         reloadSPTable()
+        refreshSupplierPaymentForm();
+        
+
         $("#modalSPAdd").modal("hide");
     } else {
         swal.fire({
@@ -85,14 +123,22 @@ const refreshSupplierPaymentForm = () =>{
     supplierPayment = new Object();
     oldSupplierPayment = null;
 
+    console.log(suppliers);
 
 
    //Fill Dropdown of  select Supplier
       suppliers.forEach(sup => {
-              const option = document.createElement('option');
-              option.value = sup.id;
-              option.textContent = sup.supplierName + " - " + sup.regNo;
-              supplierSelectElement.appendChild(option);
+                let text = "";
+                if (sup.businessType === "COMPANY") {
+                    text =  sup.regNo + " - " + sup.companyName;
+                } else {
+                    text = sup.regNo + " - " + sup.firstName + " " + sup.secondName;
+                }
+        
+            const option = document.createElement('option');
+            option.value = sup.id;
+            option.textContent = text;
+            supplierSelectElement.appendChild(option);
        });
 
       const grnListSection = document.getElementById('grnListSection');
@@ -540,8 +586,6 @@ if (paymentMthd === 'BANK_TRANSFER') {
 
 const reloadSPTable = function () {
     let supplierPayments = ajaxGetRequest("/supplier_payment/getAllSP");
-    let getPrivilege = ajaxGetRequest("/privilege/byloggedusermodule/SUPPLIER_PAYMENT");
-    let grnNos = ajaxGetRequest("/SupplierPaymentHasGoodReceiveNote/32/grn-numbers");
 
     const getGRNNos = (ob) => {
         const response = ajaxGetRequest(`/SupplierPaymentHasGoodReceiveNote/${ob.id}/grn-numbers`);
@@ -588,8 +632,8 @@ const reloadSPTable = function () {
         supplierPayments,
         displayProperty,
         false,
-        generateSPDropDown,
-        getPrivilege
+        null,
+        getPrivilegeSup
     );
     spTableInstance = $("#tableSP").DataTable({
         responsive: true,
@@ -604,12 +648,12 @@ const generateSPDropDown = (element, index, privilegeOb = null) => {
     dropdownMenu.className = "dropdown-menu";
 
     const buttonList = [
-        {
-            name: "Print",
-            action: printSupplierPayment,
-            icon: "fa-solid fa-print me-2",
-            enabled: privilegeOb ? !!privilegeOb.select : true,
-        },
+        // {
+        //     name: "Print",
+        //     action: printSupplierPayment,
+        //     icon: "fa-solid fa-print me-2",
+        //     enabled: privilegeOb ? !!privilegeOb.select : true,
+        // },
     ];
 
     buttonList.forEach((button) => {

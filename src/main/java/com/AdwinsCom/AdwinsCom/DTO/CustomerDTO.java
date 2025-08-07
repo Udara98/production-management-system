@@ -23,6 +23,7 @@ public class CustomerDTO {
     private String nic; // NIC (Individual)
     private String mobile;
     private String landNo;
+    private Double remainingCredit;
     private String email;
     private String address;
     private Double creditLimit;

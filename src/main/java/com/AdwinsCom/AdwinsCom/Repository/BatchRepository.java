@@ -11,14 +11,19 @@ import java.util.List;
 @Repository
 public interface BatchRepository extends JpaRepository<Batch,Integer> {
 
+    @Query("SELECT b FROM Batch b WHERE b.batchStatus = 'ProductionDone'")
+    List<Batch> findByBatchStatusProductionDone();
+
     @Query("SELECT b FROM Batch b WHERE b.batchStatus <> 'Removed' ")
     List<Batch> findByBatchStatusNotRemoved();
 
     // For FIFO (Oldest manufactureDate first)
-    List<Batch> findByRecipeCodeOrderByManufactureDateAsc(String recipeCode);
+    @Query("SELECT b FROM Batch b WHERE b.recipeCode = :recipeCode AND b.batchStatus = 'ProductionDone' ORDER BY b.manufactureDate ASC")
+    List<Batch> findProductionDoneBatchesByRecipeCodeOrderByManufactureDateAsc(@Param("recipeCode") String recipeCode);
 
     // For LIFO (Newest manufactureDate first)
-    List<Batch> findByRecipeCodeOrderByManufactureDateDesc(String recipeCode);
+    @Query("SELECT b FROM Batch b WHERE b.recipeCode = :recipeCode AND b.batchStatus = 'ProductionDone' ORDER BY b.manufactureDate DESC")
+    List<Batch> findProductionDoneBatchesByRecipeCodeOrderByManufactureDateDesc(@Param("recipeCode") String recipeCode);
 
     @Query("SELECT b.batchNo FROM Batch b WHERE b.id = :batchId")
     String findBatchNoById(@Param("batchId") Integer batchId);

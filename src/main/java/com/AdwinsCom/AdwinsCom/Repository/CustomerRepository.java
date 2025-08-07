@@ -13,5 +13,14 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
     @Query("SELECT MAX(i.regNo) FROM Customer i")
     String getMaxCustomerRegNo();
 
+    Boolean existsByNic(String nic);
+
+    Boolean existsByBrn(String brn);
+
+    Boolean existsByMobile(String mobile);
+
+    Boolean existsByEmail(String email);
+
+
 
 }

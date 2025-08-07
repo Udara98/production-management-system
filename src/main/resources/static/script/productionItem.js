@@ -50,13 +50,11 @@ window.addEventListener('load', () => {
 })
 
     //Define function for
-    const createBatch = (e) => {
-        e.preventDefault();
-        
+    const createBatch = () => {
+
         // Validate form
-        const form = this;
+        const form = document.getElementById("makeNewBatchForm");
         if (!form.checkValidity()) {
-            e.stopPropagation();
             form.classList.add('was-validated');
             return;
         }
@@ -114,7 +112,7 @@ window.addEventListener('load', () => {
             text: `Are you sure you want to create a new batch for ${recipeName}?`,
             icon: "question",
             showCancelButton: true,
-            confirmButtonColor: "#28a745",
+            confirmButtonColor: "#2e326d",
             cancelButtonColor: "#6c757d",
             confirmButtonText: "Yes, Create Batch",
             cancelButtonText: "Cancel"
@@ -365,7 +363,7 @@ const handleCheckIngredients = () => {
         viewResBtn.classList.remove('d-none');
         
         viewResBtn.addEventListener('click', () => {
-            displayResult(result.availabilityDTOS, quotationRequests, quotations, purchaseOrders, grns);
+            displayResult(result.availabilityDTOS);
         });
         
     } else {
@@ -468,12 +466,12 @@ const validateDates = () => {
     const expDate = expDateInput.value;
 
     if (mfgDate) {
-        expDateInput.classList.remove('is-invalid');
-        expDateInput.classList.add('is-valid');
+        mfgDateInput.classList.remove('is-invalid');
+        mfgDateInput.classList.add('is-valid');
         const mfg = new Date(mfgDate);
         // Min = manufacture date + 1 day
         const minExp = new Date(mfg);
-        minExp.setDate(minExp.getDate() + 1);
+        minExp.setDate(minExp.getDate() + 20);
         // Max = manufacture date + 4 months
         const maxExp = new Date(mfg);
         maxExp.setMonth(maxExp.getMonth() + 4);
@@ -482,8 +480,7 @@ const validateDates = () => {
         expDateInput.min = fmt(minExp);
         expDateInput.max = fmt(maxExp);
 
-        expDateInput.classList.remove('is-invalid');
-        expDateInput.classList.add('is-valid');
+        
     }
 
     if (mfgDate && expDate) {
@@ -491,6 +488,8 @@ const validateDates = () => {
             expDateInput.setCustomValidity('Expiry date must be after manufacture date');
         } else {
             expDateInput.setCustomValidity('');
+            expDateInput.classList.remove('is-invalid');
+            expDateInput.classList.add('is-valid');
         }
     }
 }
@@ -542,7 +541,7 @@ const displayResult = (ingredients) => {
 
     ingredients.forEach(res => {
         const rowDiv = document.createElement('div');
-        rowDiv.className = 'row mt-3';
+        rowDiv.className = 'row mt-3 ms-2 me-4';
 
         const codeDiv = document.createElement('div');
         codeDiv.className = 'col-2';
@@ -558,106 +557,37 @@ const displayResult = (ingredients) => {
         quantityDiv.className = 'col-2';
 
         const resBtn = document.createElement("p");
-        resBtn.className = res.isAvailable === true ? "btn align-middle greenLabel" : "btn align-middle redLabel";
+        resBtn.className = res.isAvailable === true ? "align-middle greenLabel" : "align-middle redLabel";
         resBtn.style.width = '100%';
         resBtn.innerText = res.isAvailable === true ? "Stock Enough" : "Stock Not Enough";
         quantityDiv.appendChild(resBtn);
         rowDiv.appendChild(quantityDiv);
 
         const infoDiv = document.createElement('div');
-        infoDiv.className = 'col-4';
+        infoDiv.className = 'col-6';
 
-        const btnDiv = document.createElement('div');
-        btnDiv.className = 'col-2';
+    
 
 
         if (!res.isAvailable === true) {
             const infoText = document.createElement('span');
-            infoText.textContent = `Insufficient stock for ${res.ingredientName} (${res.ingredientCode}). Please notify Procurement.`;
+            infoText.textContent = `Insufficient stock for ${res.ingredientName} (${res.ingredientCode}). Procurement has already been notified.`;
             infoText.style.color = 'red';
             infoDiv.appendChild(infoText);
 
             console.log(currentUser)
             console.log(res)
         
-            // Add Notify button
-            const notifyBtn = document.createElement('button');
-            notifyBtn.type = "button";
-            notifyBtn.style = "color: white;"
-            notifyBtn.className = "btn btn-update";
-            notifyBtn.innerText = "Notify Procurement";
-            notifyBtn.type = "button";
-            notifyBtn.onclick = () => {
-                ajaxRequestBody("/notification/ingredientShortage", "POST", {
-                    ingredientCode: res.ingredientCode,
-                    ingredientName: res.ingredientName,
-                    requiredQty: res.requiredQty, // Make sure this is available in your result
-                    reportedBy: currentUser, // Replace with your user variable/session
-                    recipeName:recipeName,
-                    recipeCode: recipeCode,
-                    unitType: res.unitType
-                });
-                Swal.fire({
-                    title: "Notification Sent",
-                    text: "Procurement has been notified.",
-                    icon: "success"
-                });
-            };
-            btnDiv.appendChild(notifyBtn);
+
         }
 
         rowDiv.appendChild(infoDiv);
-        rowDiv.appendChild(btnDiv);
         resultDiv.appendChild(rowDiv);
         resultDiv.appendChild(document.createElement('hr'));
     });
 };
 
 
-
-
-//Define method for ProductionItem Delete
-const deleteProductionITem= (ob, rowIndex) => {
-    console.log("delete");
-
-    Swal.fire({
-        title: "Are you sure?",
-        text: "Do you want to delete Production Item " +
-            "" + (ob.productionItemName) +"?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#E11D48",
-        cancelButtonColor: "#3f3f44",
-        confirmButtonText: "Yes, Delete"
-    }).then(async (result) => {
-        if(result.isConfirmed) {
-
-            console.log(ob.id)
-
-            // Delete Service
-            let deleteServiceRequestResponse =  ajaxRequestBody("/productionItem/deletePI/"+ ob.id, "DELETE", ob)
-
-            //Check Backend Service
-            if (deleteServiceRequestResponse.status === 200) {
-                swal.fire({
-                    title: "Deleted!",
-                    text: "Production Item has been deleted.",
-                    icon: "success"
-                });
-                piAddForm.reset();
-                reloadPITable();
-                refreshProductionItemForm();
-
-            } else {
-                swal.fire({
-                    title: "Delete Not Successfully",
-                    text: deleteServiceRequestResponse,
-                    icon: "error"
-                });
-            }
-        }
-    })
-}
 
 
 
